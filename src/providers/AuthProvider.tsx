@@ -71,8 +71,22 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 				const data = await loginApi(cpf, password);
 				setUser(data.user);
 
+				// Redireciona baseado no perfil do usuário
+				const perfil = data.user.perfil;
+				let redirectUrl = '/portal-fornecedor'; // default
+
+				if (perfil === PerfilUsuario.GESTOR_CONTRATO) {
+					redirectUrl = '/gestor/solicitacoes';
+				} else if (perfil === PerfilUsuario.OPERADOR_PMSJP) {
+					redirectUrl = '/prestacao-contas';
+				} else if (perfil === PerfilUsuario.OPERADOR_ORCAMENTARIO) {
+					redirectUrl = '/orcamentario/leis-atos';
+				} else if (perfil === PerfilUsuario.GESTOR_SUPORTE || perfil === PerfilUsuario.USUARIO_COMUM) {
+					redirectUrl = '/suporte';
+				}
+
 				// Força reload da página para garantir que o middleware pegue o cookie
-				window.location.href = '/portal-fornecedor';
+				window.location.href = redirectUrl;
 			} catch (error) {
 				console.error('Erro no login:', error);
 				throw error;

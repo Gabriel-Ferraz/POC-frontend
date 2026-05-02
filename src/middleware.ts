@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 const PUBLIC_PATHS = ['/login'];
-const AUTHENTICATED_REDIRECT = '/portal-fornecedor';
+const AUTHENTICATED_REDIRECT = '/suporte'; // Rota genérica que todos têm acesso
 
 export function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
