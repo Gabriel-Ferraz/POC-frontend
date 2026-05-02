@@ -31,7 +31,16 @@ export const API_ENDPOINTS = {
 		delete: (id: number) => `/anexos/${id}`,
 		enviarTodos: (solicitacaoId: number) => `/solicitacoes/${solicitacaoId}/anexos/enviar-todos`,
 	},
-	// Chamados
+	// Chamados / Suporte
+	suporte: {
+		chamados: '/chamados',
+		criar: '/chamados',
+		chamado: (id: number) => `/chamados/${id}`,
+		responder: (id: number) => `/chamados/${id}/responder`,
+		anexos: (id: number) => `/chamados/${id}/anexos`,
+		concluir: (id: number) => `/chamados/${id}/concluir`,
+	},
+	// Alias para compatibilidade
 	chamados: {
 		list: '/chamados',
 		create: '/chamados',

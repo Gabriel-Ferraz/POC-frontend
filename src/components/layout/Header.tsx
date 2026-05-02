@@ -25,7 +25,12 @@ const perfilLabels: Record<string, string> = {
 export function Header() {
 	const { user, logout } = useAuth();
 
-	if (!user) return null;
+	console.log('[Header] Usuário:', user);
+
+	if (!user) {
+		console.log('[Header] Sem usuário, não renderizando header');
+		return null;
+	}
 
 	return (
 		<header className="h-16 bg-white border-b flex items-center justify-between px-6">

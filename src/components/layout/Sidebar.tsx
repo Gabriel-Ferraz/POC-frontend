@@ -22,6 +22,9 @@ export function Sidebar() {
 	const { user } = useAuth();
 	const pathname = usePathname();
 
+	console.log('[Sidebar] Usuário:', user);
+	console.log('[Sidebar] Perfil:', user?.perfil);
+
 	const menuItems: MenuSection[] = [
 		{
 			title: 'Portal do Fornecedor',
@@ -94,7 +97,18 @@ export function Sidebar() {
 		},
 	];
 
-	const filteredMenu = menuItems.filter((section) => section.perfis.includes(user?.perfil as PerfilUsuario));
+	const filteredMenu = menuItems.filter((section) => {
+		const included = user?.perfil && section.perfis.includes(user.perfil as PerfilUsuario);
+		console.log(`[Sidebar] Seção "${section.title}" incluída:`, included);
+		return included;
+	});
+
+	console.log('[Sidebar] Menu filtrado:', filteredMenu);
+
+	if (!user) {
+		console.log('[Sidebar] Sem usuário, não renderizando sidebar');
+		return null;
+	}
 
 	return (
 		<aside className="w-64 bg-white border-r min-h-screen">

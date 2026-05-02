@@ -23,8 +23,15 @@ export async function login(cpf: string, password: string): Promise<LoginRespons
 }
 
 export async function me(): Promise<User> {
-	const data = await get<User>(API_ENDPOINTS.auth.me);
-	return data;
+	const response = await get<any>(API_ENDPOINTS.auth.me);
+	console.log('[auth-api] Resposta /me:', response);
+
+	// A API retorna { user: {...} } e não diretamente o user
+	if (response.user) {
+		return response.user;
+	}
+
+	return response;
 }
 
 export async function logout(): Promise<void> {

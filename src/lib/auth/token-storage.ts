@@ -1,34 +1,53 @@
 const TOKEN_KEY = 'auth_token';
-const ONE_DAY_IN_SECONDS = 60 * 60 * 24;
+const SEVEN_DAYS_IN_SECONDS = 60 * 60 * 24 * 7;
 
 export function getToken(): string | null {
-    if (typeof document === 'undefined') return null;
+	if (typeof window === 'undefined') return null;
 
-    const match = document.cookie.match(
-        new RegExp(`(?:^|; )${TOKEN_KEY}=([^;]*)`),
-    );
+	// Primeiro tenta pegar do cookie
+	const match = document.cookie.match(new RegExp(`(?:^|; )${TOKEN_KEY}=([^;]*)`));
 
-    return match ? decodeURIComponent(match[1]) : null;
+	if (match) {
+		return decodeURIComponent(match[1]);
+	}
+
+	// Fallback: tenta pegar do localStorage
+	try {
+		return localStorage.getItem(TOKEN_KEY);
+	} catch {
+		return null;
+	}
 }
 
 export function setToken(token: string) {
-    if (typeof document === 'undefined') return;
+	if (typeof window === 'undefined') return;
 
-    document.cookie = [
-        `${TOKEN_KEY}=${encodeURIComponent(token)}`,
-        'Path=/',
-        `Max-Age=${ONE_DAY_IN_SECONDS}`,
-        'SameSite=Lax',
-    ].join('; ');
+	// Salva no cookie
+	document.cookie = [
+		`${TOKEN_KEY}=${encodeURIComponent(token)}`,
+		'Path=/',
+		`Max-Age=${SEVEN_DAYS_IN_SECONDS}`,
+		'SameSite=Lax',
+	].join('; ');
+
+	// Salva também no localStorage como backup
+	try {
+		localStorage.setItem(TOKEN_KEY, token);
+	} catch (e) {
+		console.error('Erro ao salvar token no localStorage:', e);
+	}
 }
 
 export function clearToken() {
-    if (typeof document === 'undefined') return;
+	if (typeof window === 'undefined') return;
 
-    document.cookie = [
-        `${TOKEN_KEY}=`,
-        'Path=/',
-        'Max-Age=0',
-        'SameSite=Lax',
-    ].join('; ');
+	// Limpa o cookie
+	document.cookie = [`${TOKEN_KEY}=`, 'Path=/', 'Max-Age=0', 'SameSite=Lax'].join('; ');
+
+	// Limpa o localStorage
+	try {
+		localStorage.removeItem(TOKEN_KEY);
+	} catch (e) {
+		console.error('Erro ao limpar token do localStorage:', e);
+	}
 }

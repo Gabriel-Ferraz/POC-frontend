@@ -40,15 +40,20 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 		const token = getToken();
 
 		if (!token) {
+			console.log('[AuthProvider] Sem token, usuário não autenticado');
 			setUser(null);
 			setLoading(false);
 			return;
 		}
 
+		console.log('[AuthProvider] Token encontrado, buscando dados do usuário...');
+
 		try {
 			const data = await meApi();
+			console.log('[AuthProvider] Usuário carregado:', data);
 			setUser(data);
-		} catch {
+		} catch (error) {
+			console.error('[AuthProvider] Erro ao buscar usuário:', error);
 			clearToken();
 			setUser(null);
 		} finally {
@@ -62,9 +67,16 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
 	const login = React.useCallback(
 		async (cpf: string, password: string) => {
-			const data = await loginApi(cpf, password);
-			setUser(data.user);
-			router.push('/portal-fornecedor');
+			try {
+				const data = await loginApi(cpf, password);
+				setUser(data.user);
+
+				// Força reload da página para garantir que o middleware pegue o cookie
+				window.location.href = '/portal-fornecedor';
+			} catch (error) {
+				console.error('Erro no login:', error);
+				throw error;
+			}
 		},
 		[router]
 	);
@@ -72,10 +84,12 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 	const logout = React.useCallback(async () => {
 		try {
 			await logoutApi();
+		} catch (error) {
+			console.error('Erro no logout:', error);
 		} finally {
 			clearToken();
 			setUser(null);
-			router.replace('/login');
+			window.location.href = '/login';
 		}
 	}, [router]);
 

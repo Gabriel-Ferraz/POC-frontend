@@ -45,15 +45,17 @@ export async function request<T>(method: HttpMethod, path: string, options: Requ
 	const isJson = contentType.includes('application/json');
 
 	if (response.status === 401) {
+		console.error('Token inválido ou expirado. Redirecionando para login...');
 		clearToken();
 
 		// Redirect to login — token expired or invalid
 		if (typeof window !== 'undefined') {
-			window.location.href = '/login';
+			// Usa replace para não deixar voltar com o botão voltar
+			window.location.replace('/login');
 		}
 
 		const payload = isJson ? await response.json().catch(() => null) : null;
-		throw new ApiError((payload as { message?: string } | null)?.message ?? 'Sessao expirada', 401, payload);
+		throw new ApiError((payload as { message?: string } | null)?.message ?? 'Sessão expirada', 401, payload);
 	}
 
 	if (!response.ok) {

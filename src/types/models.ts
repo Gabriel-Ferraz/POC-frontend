@@ -46,11 +46,11 @@ export interface Contrato {
 export interface Empenho {
 	id: number;
 	numero: string;
-	contrato_id: number;
-	contrato?: Contrato;
-	valor: number;
-	saldo: number;
-	status: StatusEmpenho;
+	contrato_id?: number;
+	contrato?: string | Contrato; // API pode retornar string ou objeto
+	valor: string | number; // API retorna como string
+	saldo: string | number; // API retorna como string
+	status: StatusEmpenho | string;
 	data_emissao: string;
 	created_at?: string;
 	updated_at?: string;
