@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,75 +9,66 @@ import { PasswordInput } from '@/components/ui/password-input';
 import { useLoginForm } from '../hooks/useLoginForm';
 
 export function LoginForm() {
+	const { cpf, password, loading, error, setCpf, setPassword, handleSubmit } = useLoginForm();
 
-    const {
-        email,
-        password,
-        loading,
-        error,
-        setEmail,
-        setPassword,
-        handleSubmit
-    } = useLoginForm();
+	return (
+		<div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 p-4">
+			<div className="w-full max-w-md space-y-6">
+				<div className="flex flex-col items-center space-y-2">
+					<div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-900 text-2xl font-bold text-white">
+						PMSJP
+					</div>
+					<h1 className="text-xl font-semibold text-gray-800">Portal do Fornecedor</h1>
+					<p className="text-sm text-gray-600">Prefeitura Municipal de São José dos Pinhais</p>
+				</div>
 
-    return (
-        <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
-            <div className="w-full max-w-sm space-y-4">
-                {/* TODO: Replace with your logo */}
-                <div className="flex justify-center">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-xl font-bold text-primary-foreground">B</div>
-                </div>
+				<Card>
+					<CardHeader>
+						<CardTitle className="text-center text-lg">Acesso ao Sistema</CardTitle>
+					</CardHeader>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-center">Entrar</CardTitle>
-                    </CardHeader>
+					<CardContent>
+						<form className="space-y-4" onSubmit={handleSubmit}>
+							<div className="space-y-2">
+								<Label htmlFor="cpf">CPF</Label>
+								<Input
+									id="cpf"
+									type="text"
+									value={cpf}
+									onChange={(e) => setCpf(e.target.value)}
+									placeholder="000.000.000-00"
+									autoComplete="username"
+									disabled={loading}
+									maxLength={14}
+								/>
+							</div>
 
-                    <CardContent>
-                        <form className="space-y-3" onSubmit={handleSubmit}>
-                            <div className="space-y-1">
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="voce@empresa.com"
-                                    autoComplete="email"
-                                    disabled={loading}
-                                />
-                            </div>
+							<div className="space-y-2">
+								<Label htmlFor="password">Senha</Label>
+								<PasswordInput
+									id="password"
+									value={password}
+									onChange={(e) => setPassword(e.target.value)}
+									autoComplete="current-password"
+									disabled={loading}
+								/>
+							</div>
 
-                            <div className="space-y-1">
-                                <Label htmlFor="password">Senha</Label>
-                                <PasswordInput
-                                    id="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    autoComplete="current-password"
-                                    disabled={loading}
-                                />
-                            </div>
+							{error && (
+								<div className="rounded-md bg-red-50 p-3 text-center text-sm text-red-800">{error}</div>
+							)}
 
-                            {error && <div className="text-center text-sm text-red-600">{error}</div>}
+							<Button type="submit" className="w-full" disabled={loading}>
+								{loading ? 'Entrando...' : 'Entrar'}
+							</Button>
+						</form>
+					</CardContent>
+				</Card>
 
-                            <Button type="submit" className="w-full" disabled={loading}>
-                                {loading ? 'Entrando...' : 'Entrar'}
-                            </Button>
-
-                            <div className="text-center">
-                                <Link href="/esqueci-minha-senha" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                    Esqueci minha senha
-                                </Link>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
-
-                <div className="text-center text-xs text-muted-foreground">
-                    © {new Date().getFullYear()} Your Company
-                </div>
-            </div>
-        </div>
-    );
+				<div className="text-center text-xs text-gray-600">
+					© {new Date().getFullYear()} Prefeitura Municipal de São José dos Pinhais
+				</div>
+			</div>
+		</div>
+	);
 }

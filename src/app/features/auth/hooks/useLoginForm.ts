@@ -2,64 +2,46 @@
 
 import * as React from 'react';
 import { toast } from 'sonner';
-
-import { loginWithEmailAndPassword } from '../api/auth-api';
-import { getMe } from '../api/me';
-import { getFirstAccessibleRoute } from '@/lib/navigation/routes';
-
-const NO_ACCESS_ROUTE = '/sem-acesso';
+import { useAuth } from '@/providers/AuthProvider';
 
 export function useLoginForm() {
-    const [email, setEmail] = React.useState('');
-    const [password, setPassword] = React.useState('');
-    const [loading, setLoading] = React.useState(false);
-    const [error, setError] = React.useState<string | null>(null);
+	const [cpf, setCpf] = React.useState('');
+	const [password, setPassword] = React.useState('');
+	const [loading, setLoading] = React.useState(false);
+	const [error, setError] = React.useState<string | null>(null);
 
-    const handleSubmit = React.useCallback(
-        async (e: React.FormEvent<HTMLFormElement>) => {
-            e.preventDefault();
+	const { login } = useAuth();
 
-            if (loading) return;
+	const handleSubmit = React.useCallback(
+		async (e: React.FormEvent<HTMLFormElement>) => {
+			e.preventDefault();
 
-            setLoading(true);
-            setError(null);
+			if (loading) return;
 
-            const loginPromise = loginWithEmailAndPassword(email, password);
+			setLoading(true);
+			setError(null);
 
-            toast.promise(loginPromise, {
-                loading: 'Entrando...',
-                success: 'Login realizado com sucesso',
-                error: (err: any) => {
-                    const msg = err?.payload?.errors
-                        ? Object.values(err.payload.errors).flat().join('. ')
-                        : err?.message ?? 'Falha no login';
+			try {
+				await login(cpf, password);
+				toast.success('Login realizado com sucesso!');
+			} catch (err: any) {
+				const msg = err?.payload?.message || err?.message || 'CPF ou senha inválidos';
+				setError(msg);
+				toast.error(msg);
+			} finally {
+				setLoading(false);
+			}
+		},
+		[cpf, password, loading, login]
+	);
 
-                    setError(msg);
-                    return msg;
-                },
-            });
-
-            try {
-                await loginPromise;
-
-                const me = await getMe();
-                const destination = getFirstAccessibleRoute(me.user.permissions ?? [], me.user.roles ?? []);
-
-                window.location.href = destination ?? NO_ACCESS_ROUTE;
-            } catch {
-                setLoading(false);
-            }
-        },
-        [email, password, loading]
-    );
-
-    return {
-        email,
-        password,
-        loading,
-        error,
-        setEmail,
-        setPassword,
-        handleSubmit,
-    };
+	return {
+		cpf,
+		password,
+		loading,
+		error,
+		setCpf,
+		setPassword,
+		handleSubmit,
+	};
 }
