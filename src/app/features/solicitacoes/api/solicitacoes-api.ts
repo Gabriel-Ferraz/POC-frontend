@@ -4,7 +4,6 @@ import type { SolicitacaoPagamento } from '@/types/models';
 
 export interface NovaSolicitacaoData {
 	valor: number;
-	observacao?: string;
 	tipo_documento: string;
 	numero_documento: string;
 	serie?: string;
@@ -18,6 +17,7 @@ export interface NovaSolicitacaoData {
 	digito_conta?: string;
 	operacao?: string;
 	cidade_banco?: string;
+	observacao_pagamento?: string;
 }
 
 interface SolicitacoesResponse {
