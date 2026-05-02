@@ -9,7 +9,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { HelpCircle, User, LogOut } from 'lucide-react';
+import { Mail, User, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { formatCPF } from '@/lib/formatters';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
@@ -42,9 +42,9 @@ export function Header() {
 
 			<div className="flex items-center gap-4">
 				<ThemeToggle />
-				<Link href="/suporte/novo">
+				<Link href="/suporte">
 					<Button variant="outline" size="sm">
-						<HelpCircle className="w-4 h-4 mr-2" />
+						<Mail className="w-4 h-4 mr-2" />
 						Suporte
 					</Button>
 				</Link>

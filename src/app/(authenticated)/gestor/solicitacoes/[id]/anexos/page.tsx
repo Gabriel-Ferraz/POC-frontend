@@ -90,6 +90,11 @@ export default function AvaliarAnexosPage() {
 			return;
 		}
 
+		if (motivoRecusa.trim().length < 10) {
+			toast.error('O motivo deve ter no mínimo 10 caracteres');
+			return;
+		}
+
 		if (anexoSelecionado) {
 			recusar({ anexoId: anexoSelecionado, motivo: motivoRecusa });
 		}
@@ -314,14 +319,32 @@ export default function AvaliarAnexosPage() {
 
 							<div className="space-y-4">
 								<div>
-									<Label htmlFor="motivo">Motivo da Recusa *</Label>
+									<div className="flex items-center justify-between mb-2">
+										<Label htmlFor="motivo">Motivo da Recusa *</Label>
+										<span
+											className={`text-sm ${
+												motivoRecusa.length < 10
+													? 'text-red-600'
+													: motivoRecusa.length < 500
+														? 'text-green-600'
+														: 'text-orange-600'
+											}`}>
+											{motivoRecusa.length}/500 caracteres{' '}
+											{motivoRecusa.length < 10 && '(mínimo 10)'}
+										</span>
+									</div>
 									<Textarea
 										id="motivo"
-										placeholder="Descreva o motivo da recusa..."
+										placeholder="Descreva o motivo da recusa (mínimo 10 caracteres)..."
 										rows={4}
 										value={motivoRecusa}
 										onChange={(e) => setMotivoRecusa(e.target.value)}
 										disabled={isRecusando}
+										maxLength={500}
+										required
+										className={
+											motivoRecusa.length > 0 && motivoRecusa.length < 10 ? 'border-red-500' : ''
+										}
 									/>
 								</div>
 
@@ -337,7 +360,9 @@ export default function AvaliarAnexosPage() {
 										disabled={isRecusando}>
 										Cancelar
 									</Button>
-									<Button onClick={handleRecusar} disabled={isRecusando}>
+									<Button
+										onClick={handleRecusar}
+										disabled={isRecusando || motivoRecusa.trim().length < 10}>
 										{isRecusando ? 'Recusando...' : 'Confirmar Recusa'}
 									</Button>
 								</div>

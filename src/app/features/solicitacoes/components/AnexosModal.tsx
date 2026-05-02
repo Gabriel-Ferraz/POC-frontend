@@ -18,6 +18,8 @@ interface Anexo {
 	is_documento_fiscal: boolean;
 	pode_reenviar: boolean;
 	pode_remover: boolean;
+	enviado_por: string | null;
+	enviado_em: string | null;
 }
 
 interface Solicitacao {
@@ -218,6 +220,12 @@ export function AnexosModal({ open, onClose, solicitacao, onSuccess }: AnexosMod
 	// Usar flag do backend
 	const documentoFiscalRecusado = solicitacaoCompleta?.documento_fiscal_recusado ?? false;
 
+	// Verificar se pode enviar anexos baseado no status
+	const podeEnviarAnexos =
+		solicitacaoCompleta?.status?.toLowerCase() === 'pendente' ||
+		solicitacaoCompleta?.status?.toLowerCase() === 'anexos_recusados' ||
+		solicitacaoCompleta?.status?.toLowerCase() === 'anexos recusados';
+
 	return (
 		<Dialog open={open} onOpenChange={onClose}>
 			<DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
@@ -273,47 +281,77 @@ export function AnexosModal({ open, onClose, solicitacao, onSuccess }: AnexosMod
 										<div key={anexo.id} className="border rounded-lg overflow-hidden">
 											{/* CABEÇALHO DO ANEXO */}
 											<div
-												className={`flex items-center justify-between px-4 py-3 cursor-pointer ${
+												className={`px-4 py-3 cursor-pointer ${
 													isExpandido ? 'bg-blue-600 text-white' : 'bg-gray-100'
 												}`}
 												onClick={() => setAnexoExpandidoId(anexo.id)}>
-												<div className="flex items-center gap-3">
-													{!temArquivo && !isExpandido && (
-														<AlertTriangle className="w-5 h-5 text-yellow-500" />
-													)}
-													<div>
-														<h4 className="font-medium">{anexo.tipo_anexo_label}</h4>
-														{anexo.is_documento_fiscal && (
-															<span className="text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded mt-1 inline-block">
-																DOCUMENTO FISCAL
-															</span>
+												<div className="flex items-center justify-between mb-2">
+													<div className="flex items-center gap-3">
+														{!temArquivo && !isExpandido && (
+															<AlertTriangle className="w-5 h-5 text-yellow-500" />
 														)}
+														<div>
+															<h4 className="font-medium">{anexo.tipo_anexo_label}</h4>
+															{anexo.is_documento_fiscal && (
+																<span
+																	className={`text-xs px-2 py-0.5 rounded mt-1 inline-block ${
+																		isExpandido
+																			? 'bg-orange-200 text-orange-900'
+																			: 'bg-orange-100 text-orange-800'
+																	}`}>
+																	DOCUMENTO FISCAL
+																</span>
+															)}
+														</div>
 													</div>
-												</div>
-												{temArquivo && !isExpandido && (
-													<div className="flex gap-2">
-														<Button
-															size="sm"
-															variant="ghost"
-															onClick={(e) => {
-																e.stopPropagation();
-																handleVisualizar(anexo.id);
-															}}>
-															<Eye className="w-4 h-4" />
-														</Button>
-														{anexo.pode_remover && (
+													{temArquivo && !isExpandido && (
+														<div className="flex gap-2">
 															<Button
 																size="sm"
 																variant="ghost"
 																onClick={(e) => {
 																	e.stopPropagation();
-																	handleRemover(anexo.id);
+																	handleVisualizar(anexo.id);
 																}}>
-																<X className="w-4 h-4" />
+																<Eye className="w-4 h-4" />
 															</Button>
-														)}
-													</div>
-												)}
+															{anexo.pode_remover && (
+																<Button
+																	size="sm"
+																	variant="ghost"
+																	onClick={(e) => {
+																		e.stopPropagation();
+																		handleRemover(anexo.id);
+																	}}>
+																	<X className="w-4 h-4" />
+																</Button>
+															)}
+														</div>
+													)}
+												</div>
+												{/* Informações adicionais visíveis quando colapsado */}
+												{!isExpandido &&
+													temArquivo &&
+													(anexo.enviado_por || anexo.enviado_em) && (
+														<div className="text-xs text-gray-600 space-y-0.5">
+															{anexo.enviado_por && (
+																<p>
+																	Enviado por:{' '}
+																	<span className="font-medium">
+																		{anexo.enviado_por}
+																	</span>
+																</p>
+															)}
+															{anexo.enviado_em && (
+																<p>
+																	Em:{' '}
+																	<span className="font-medium">
+																		{anexo.enviado_em}
+																	</span>
+																</p>
+															)}
+														</div>
+													)}
 											</div>
 
 											{/* CONTEÚDO EXPANDIDO */}
@@ -332,29 +370,47 @@ export function AnexosModal({ open, onClose, solicitacao, onSuccess }: AnexosMod
 
 													{temArquivo ? (
 														<div className="space-y-3">
-															<div className="flex items-center justify-between p-3 bg-muted rounded border">
-																<div>
+															<div className="p-3 bg-muted rounded border">
+																<div className="flex items-center justify-between mb-2">
 																	<span className="text-sm font-medium">
 																		{anexo.arquivo_nome}
 																	</span>
-																	<p className="text-xs text-muted-foreground">
-																		Status: {anexo.status}
-																	</p>
-																</div>
-																<div className="flex gap-2">
-																	<Button
-																		size="sm"
-																		variant="ghost"
-																		onClick={() => handleVisualizar(anexo.id)}>
-																		<Eye className="w-4 h-4" />
-																	</Button>
-																	{anexo.pode_remover && (
+																	<div className="flex gap-2">
 																		<Button
 																			size="sm"
 																			variant="ghost"
-																			onClick={() => handleRemover(anexo.id)}>
-																			<X className="w-4 h-4" />
+																			onClick={() => handleVisualizar(anexo.id)}>
+																			<Eye className="w-4 h-4" />
 																		</Button>
+																		{anexo.pode_remover && (
+																			<Button
+																				size="sm"
+																				variant="ghost"
+																				onClick={() => handleRemover(anexo.id)}>
+																				<X className="w-4 h-4" />
+																			</Button>
+																		)}
+																	</div>
+																</div>
+																<div className="space-y-1">
+																	<p className="text-xs text-muted-foreground">
+																		Status: {anexo.status}
+																	</p>
+																	{anexo.enviado_por && (
+																		<p className="text-xs text-muted-foreground">
+																			Enviado por:{' '}
+																			<span className="font-medium text-foreground">
+																				{anexo.enviado_por}
+																			</span>
+																		</p>
+																	)}
+																	{anexo.enviado_em && (
+																		<p className="text-xs text-muted-foreground">
+																			Em:{' '}
+																			<span className="font-medium text-foreground">
+																				{anexo.enviado_em}
+																			</span>
+																		</p>
 																	)}
 																</div>
 															</div>
@@ -454,14 +510,20 @@ export function AnexosModal({ open, onClose, solicitacao, onSuccess }: AnexosMod
 						Fechar
 					</Button>
 
-					{todosEnviados && !documentoFiscalRecusado && (
+					{todosEnviados && !documentoFiscalRecusado && podeEnviarAnexos && (
 						<Button onClick={handleEnviarTodos}>Enviar Todos para Aprovação</Button>
 					)}
 				</div>
 
-				{!todosEnviados && !documentoFiscalRecusado && anexos.length > 0 && (
+				{!todosEnviados && !documentoFiscalRecusado && anexos.length > 0 && podeEnviarAnexos && (
 					<p className="text-xs text-muted-foreground text-center -mt-2">
 						* Envie todos os anexos para habilitar o botão de aprovação
+					</p>
+				)}
+
+				{!podeEnviarAnexos && !documentoFiscalRecusado && anexos.length > 0 && (
+					<p className="text-xs text-orange-600 dark:text-orange-400 text-center -mt-2">
+						⚠️ Anexos não podem ser enviados neste status
 					</p>
 				)}
 			</DialogContent>

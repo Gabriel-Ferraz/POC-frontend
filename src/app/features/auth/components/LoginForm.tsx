@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/ui/password-input';
+import { Building2 } from 'lucide-react';
 
 import { useLoginForm } from '../hooks/useLoginForm';
 
@@ -14,12 +15,15 @@ export function LoginForm() {
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 dark:from-background dark:to-muted p-4">
 			<div className="w-full max-w-md space-y-6">
-				<div className="flex flex-col items-center space-y-2">
-					<div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-900 text-2xl font-bold text-white">
-						PMSJP
+				<div className="flex flex-col items-center space-y-3">
+					<div className="flex h-[100px] w-[100px] items-center justify-center rounded-lg bg-blue-900 text-white shadow-lg">
+						<Building2 className="h-16 w-16" />
 					</div>
-					<h1 className="text-xl font-semibold text-gray-800 dark:text-foreground">Portal do Fornecedor</h1>
-					<p className="text-sm text-gray-600 dark:text-muted-foreground">
+					<div className="text-center">
+						<h1 className="text-2xl font-bold text-blue-900 dark:text-foreground">PMSJP</h1>
+						<p className="text-sm text-gray-500 dark:text-muted-foreground">Portal Integrado</p>
+					</div>
+					<p className="text-sm text-gray-600 dark:text-muted-foreground text-center">
 						Prefeitura Municipal de São José dos Pinhais
 					</p>
 				</div>

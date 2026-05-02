@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
 import { PerfilUsuario } from '@/types/enums';
-import { FileText, Paperclip, HelpCircle, FileBarChart, Calculator, Settings, Building2 } from 'lucide-react';
+import { FileText, Paperclip, Mail, FileBarChart, Calculator, Settings, Building2 } from 'lucide-react';
 
 interface MenuItem {
 	label: string;
@@ -40,21 +40,6 @@ export function Sidebar() {
 					href: '/gestor/solicitacoes',
 					icon: Paperclip,
 				},
-			],
-		},
-		{
-			title: 'Suporte',
-			perfis: [
-				PerfilUsuario.RESPONSAVEL_TECNICO,
-				PerfilUsuario.GESTOR_SUPORTE,
-				PerfilUsuario.USUARIO_COMUM,
-				PerfilUsuario.GESTOR_CONTRATO,
-				PerfilUsuario.OPERADOR_PMSJP,
-				PerfilUsuario.OPERADOR_ORCAMENTARIO,
-			],
-			items: [
-				{ label: 'Meus Chamados', href: '/suporte', icon: HelpCircle },
-				{ label: 'Novo Chamado', href: '/suporte/novo', icon: HelpCircle },
 			],
 		},
 		{
