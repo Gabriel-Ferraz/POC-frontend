@@ -111,7 +111,7 @@ export function Sidebar() {
 	}
 
 	return (
-		<aside className="w-64 bg-white border-r min-h-screen">
+		<aside className="w-64 bg-white dark:bg-card border-r dark:border-border min-h-screen">
 			<div className="p-4 border-b">
 				<div className="flex items-center gap-3">
 					<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-900 text-white font-bold">
@@ -119,7 +119,7 @@ export function Sidebar() {
 					</div>
 					<div>
 						<h2 className="text-lg font-bold text-blue-900">PMSJP</h2>
-						<p className="text-xs text-gray-500">Portal Integrado</p>
+						<p className="text-xs text-gray-500 dark:text-muted-foreground">Portal Integrado</p>
 					</div>
 				</div>
 			</div>
@@ -127,7 +127,9 @@ export function Sidebar() {
 			<nav className="p-4 space-y-6">
 				{filteredMenu.map((section) => (
 					<div key={section.title}>
-						<h3 className="text-xs font-semibold text-gray-500 uppercase mb-2 px-3">{section.title}</h3>
+						<h3 className="text-xs font-semibold text-gray-500 dark:text-muted-foreground uppercase mb-2 px-3">
+							{section.title}
+						</h3>
 						<ul className="space-y-1">
 							{section.items.map((item) => {
 								const Icon = item.icon;
@@ -138,8 +140,8 @@ export function Sidebar() {
 											href={item.href}
 											className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
 												isActive
-													? 'bg-blue-100 text-blue-900 font-medium'
-													: 'text-gray-700 hover:bg-gray-100'
+													? 'bg-blue-100 text-blue-900 font-medium dark:bg-sidebar-accent dark:text-sidebar-accent-foreground'
+													: 'text-gray-700 hover:bg-gray-100 dark:text-sidebar-foreground dark:hover:bg-sidebar-accent'
 											}`}>
 											<Icon className="w-4 h-4" />
 											{item.label}

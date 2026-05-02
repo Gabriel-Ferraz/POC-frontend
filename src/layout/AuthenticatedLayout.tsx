@@ -19,10 +19,10 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
 
 	if (loading) {
 		return (
-			<div className="flex items-center justify-center min-h-screen bg-gray-50">
+			<div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-background">
 				<div className="text-center">
 					<div className="w-16 h-16 border-4 border-blue-900 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-					<p className="text-gray-600">Carregando...</p>
+					<p className="text-gray-600 dark:text-muted-foreground">Carregando...</p>
 				</div>
 			</div>
 		);
@@ -33,7 +33,7 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
 	}
 
 	return (
-		<div className="flex h-screen bg-gray-50">
+		<div className="flex h-screen bg-gray-50 dark:bg-background">
 			<Sidebar />
 			<div className="flex-1 flex flex-col overflow-hidden">
 				<Header />

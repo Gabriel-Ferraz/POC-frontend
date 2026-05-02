@@ -12,6 +12,7 @@ import {
 import { HelpCircle, User, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { formatCPF } from '@/lib/formatters';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 const perfilLabels: Record<string, string> = {
 	responsavel_tecnico: 'Responsável Técnico',
@@ -33,13 +34,14 @@ export function Header() {
 	}
 
 	return (
-		<header className="h-16 bg-white border-b flex items-center justify-between px-6">
+		<header className="h-16 bg-white dark:bg-card border-b dark:border-border flex items-center justify-between px-6">
 			<div>
-				<h1 className="text-lg font-semibold text-gray-800">Portal do Fornecedor</h1>
-				<p className="text-xs text-gray-500">São José dos Pinhais</p>
+				<h1 className="text-lg font-semibold text-gray-800 dark:text-foreground">Portal do Fornecedor</h1>
+				<p className="text-xs text-gray-500 dark:text-muted-foreground">São José dos Pinhais</p>
 			</div>
 
 			<div className="flex items-center gap-4">
+				<ThemeToggle />
 				<Link href="/suporte/novo">
 					<Button variant="outline" size="sm">
 						<HelpCircle className="w-4 h-4 mr-2" />
@@ -57,10 +59,12 @@ export function Header() {
 					<DropdownMenuContent align="end" className="w-56">
 						<div className="p-2">
 							<p className="text-sm font-medium">{user.name}</p>
-							<p className="text-xs text-gray-500">CPF: {formatCPF(user.cpf)}</p>
-							<p className="text-xs text-gray-500">Perfil: {perfilLabels[user.perfil] || user.perfil}</p>
+							<p className="text-xs text-muted-foreground">CPF: {formatCPF(user.cpf)}</p>
+							<p className="text-xs text-muted-foreground">
+								Perfil: {perfilLabels[user.perfil] || user.perfil}
+							</p>
 							{user.fornecedor && (
-								<p className="text-xs text-gray-500 mt-1">Fornecedor: {user.fornecedor.nome}</p>
+								<p className="text-xs text-muted-foreground mt-1">Fornecedor: {user.fornecedor.nome}</p>
 							)}
 						</div>
 						<DropdownMenuSeparator />

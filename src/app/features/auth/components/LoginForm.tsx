@@ -12,14 +12,16 @@ export function LoginForm() {
 	const { cpf, password, loading, error, setCpf, setPassword, handleSubmit } = useLoginForm();
 
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 p-4">
+		<div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 dark:from-background dark:to-muted p-4">
 			<div className="w-full max-w-md space-y-6">
 				<div className="flex flex-col items-center space-y-2">
 					<div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-900 text-2xl font-bold text-white">
 						PMSJP
 					</div>
-					<h1 className="text-xl font-semibold text-gray-800">Portal do Fornecedor</h1>
-					<p className="text-sm text-gray-600">Prefeitura Municipal de São José dos Pinhais</p>
+					<h1 className="text-xl font-semibold text-gray-800 dark:text-foreground">Portal do Fornecedor</h1>
+					<p className="text-sm text-gray-600 dark:text-muted-foreground">
+						Prefeitura Municipal de São José dos Pinhais
+					</p>
 				</div>
 
 				<Card>
@@ -65,7 +67,7 @@ export function LoginForm() {
 					</CardContent>
 				</Card>
 
-				<div className="text-center text-xs text-gray-600">
+				<div className="text-center text-xs text-gray-600 dark:text-muted-foreground">
 					© {new Date().getFullYear()} Prefeitura Municipal de São José dos Pinhais
 				</div>
 			</div>
