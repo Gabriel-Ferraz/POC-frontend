@@ -195,15 +195,22 @@ export default function ChamadoDetalhePage() {
 										<div className="mt-2">
 											<p className="text-xs text-gray-500 mb-1">Anexos:</p>
 											<div className="flex gap-2">
-												{item.anexos.map((anexo: any, i: number) => (
-													<button
-														key={i}
-														type="button"
-														onClick={() => handleDownloadAnexo(anexo.url, anexo.nome)}
-														className="text-xs text-blue-600 hover:underline flex items-center gap-1">
-														📎 {anexo.nome} ({anexo.tamanho})
-													</button>
-												))}
+												{item.anexos.map((anexo: any, i: number) => {
+													// Backend retorna arquivo_path com o path completo já (ex: /api/chamados/anexos/1/download)
+													const arquivoPath =
+														anexo.arquivo_path ||
+														anexo.url ||
+														`/api/chamados/anexos/${anexo.id}/download`;
+													return (
+														<button
+															key={i}
+															type="button"
+															onClick={() => handleDownloadAnexo(arquivoPath, anexo.nome)}
+															className="text-xs text-blue-600 hover:underline flex items-center gap-1">
+															📎 {anexo.nome} ({anexo.tamanho})
+														</button>
+													);
+												})}
 											</div>
 										</div>
 									)}

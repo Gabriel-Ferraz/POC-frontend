@@ -87,37 +87,128 @@ export const suporteApi = {
 			});
 		}
 
-		const response = await post<any>(API_ENDPOINTS.suporte.criar, formData);
-		return response.chamado || response;
-	},
-
-	async downloadAnexo(arquivoPath: string, nome: string): Promise<void> {
-		const token = localStorage.getItem('token');
+		const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : '';
 		const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333/api';
 
-		const response = await fetch(`${apiUrl}${arquivoPath}`, {
+		// Logs de debug
+		console.log('[Criar Chamado] Token:', token ? 'Presente' : 'Ausente');
+		console.log('[Criar Chamado] URL:', `${apiUrl}/chamados`);
+		console.log('[Criar Chamado] Módulo:', data.modulo);
+		console.log('[Criar Chamado] Assunto:', data.assunto?.substring(0, 50));
+		console.log('[Criar Chamado] Anexos:', data.anexos?.length || 0);
+
+		if (!token) {
+			throw new Error('Token de autenticação não encontrado. Faça login novamente.');
+		}
+
+		const response = await fetch(`${apiUrl}/chamados`, {
+			method: 'POST',
 			headers: {
 				Authorization: `Bearer ${token}`,
 			},
+			body: formData,
 		});
 
+		console.log('[Criar Chamado] Status:', response.status);
+		console.log('[Criar Chamado] Content-Type:', response.headers.get('content-type'));
+
 		if (!response.ok) {
-			throw new Error('Erro ao baixar anexo');
+			const contentType = response.headers.get('content-type');
+
+			// Se retornou JSON, extrair mensagem de erro
+			if (contentType?.includes('application/json')) {
+				const error = await response.json().catch(() => ({}));
+				console.error('[Criar Chamado] Erro:', error);
+
+				// Tratamento específico para erro 401
+				if (response.status === 401) {
+					localStorage.removeItem('token');
+					throw new Error('Sessão expirada. Faça login novamente.');
+				}
+
+				// Tratamento para erro 422 (validação)
+				if (response.status === 422 && error.errors) {
+					const erros = Object.values(error.errors).flat().join(', ');
+					throw new Error(`Dados inválidos: ${erros}`);
+				}
+
+				throw new Error(error.message || `Erro ${response.status} ao criar chamado`);
+			}
+
+			throw new Error(`Erro ${response.status} ao criar chamado`);
+		}
+
+		const result = await response.json();
+		console.log('[Criar Chamado] Sucesso:', result);
+
+		return result.chamado || result;
+	},
+
+	async downloadAnexo(arquivoPath: string, nome: string): Promise<void> {
+		const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : '';
+
+		if (!token) {
+			throw new Error('Token de autenticação não encontrado');
+		}
+
+		const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333/api';
+
+		// Garantir que o path começa com /api
+		const fullPath = arquivoPath.startsWith('/api') ? arquivoPath : `/api${arquivoPath}`;
+		const fullUrl = `${apiUrl}${fullPath.replace('/api', '')}`;
+
+		console.log('[Download Anexo] URL:', fullUrl);
+		console.log('[Download Anexo] Token:', token ? 'Presente' : 'Ausente');
+
+		const response = await fetch(fullUrl, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				Accept: 'application/octet-stream, application/json',
+			},
+		});
+
+		console.log('[Download Anexo] Status:', response.status);
+		console.log('[Download Anexo] Content-Type:', response.headers.get('content-type'));
+
+		if (!response.ok) {
+			const contentType = response.headers.get('content-type');
+
+			// Se retornou JSON, extrair mensagem de erro
+			if (contentType?.includes('application/json')) {
+				const error = await response.json().catch(() => ({}));
+				throw new Error(error.message || `Erro ${response.status} ao baixar anexo`);
+			}
+
+			throw new Error(`Erro ${response.status} ao baixar anexo`);
 		}
 
 		// Converter para Blob
 		const blob = await response.blob();
+		console.log('[Download Anexo] Blob size:', blob.size);
 
 		// Criar URL do Blob
 		const blobUrl = URL.createObjectURL(blob);
+		console.log('[Download Anexo] Blob URL criada:', blobUrl);
 
 		// Abrir em nova aba
-		window.open(blobUrl, '_blank');
+		const newWindow = window.open(blobUrl, '_blank');
+
+		if (!newWindow) {
+			console.warn('[Download Anexo] Popup bloqueado, tentando download direto');
+			// Fallback: forçar download se popup foi bloqueado
+			const link = document.createElement('a');
+			link.href = blobUrl;
+			link.download = nome;
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+		}
 
 		// Limpar URL após um tempo (para não ocupar memória)
 		setTimeout(() => {
 			URL.revokeObjectURL(blobUrl);
-		}, 100);
+		}, 1000);
 	},
 
 	async responderChamado(chamadoId: number, mensagem: string, anexos?: File[]): Promise<any> {
@@ -131,7 +222,22 @@ export const suporteApi = {
 			});
 		}
 
-		const response = await post<any>(`/chamados/${chamadoId}/responder`, formData);
-		return response;
+		const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : '';
+		const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333/api';
+
+		const response = await fetch(`${apiUrl}/chamados/${chamadoId}/responder`, {
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+			body: formData,
+		});
+
+		if (!response.ok) {
+			const error = await response.json().catch(() => ({}));
+			throw new Error(error.message || 'Erro ao enviar resposta');
+		}
+
+		return response.json();
 	},
 };

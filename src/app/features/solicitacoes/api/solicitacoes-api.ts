@@ -49,16 +49,16 @@ export const solicitacoesApi = {
 		const formData = new FormData();
 		formData.append('arquivo', file);
 
-		const response = await fetch(
-			`${process.env.NEXT_PUBLIC_API_URL}/solicitacoes/${solicitacaoId}/anexos/${anexoId}/upload`,
-			{
-				method: 'POST',
-				headers: {
-					Authorization: `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('auth_token') : ''}`,
-				},
-				body: formData,
-			}
-		);
+		const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : '';
+		const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333/api';
+
+		const response = await fetch(`${apiUrl}/solicitacoes/${solicitacaoId}/anexos/${anexoId}/upload`, {
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+			body: formData,
+		});
 
 		if (!response.ok) {
 			const error = await response.json().catch(() => ({}));
