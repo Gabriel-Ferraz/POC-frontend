@@ -17,7 +17,7 @@ export default function DemonstracaoTecnicaPage() {
 					<CardContent>
 						<div className="mb-4">
 							<h3 className="text-sm font-semibold mb-2">Estrutura de Pastas (MVC Pattern)</h3>
-							<pre className="bg-gray-50 p-4 rounded-lg text-xs overflow-x-auto border">
+							<pre className="bg-gray-50 dark:bg-muted p-4 rounded-lg text-xs overflow-x-auto border dark:border-border dark:text-foreground">
 								{`src/
 ├── app/                      # Views (Pages)
 │   ├── features/             # Módulos organizados por domínio
@@ -51,29 +51,37 @@ export default function DemonstracaoTecnicaPage() {
 						<div className="grid md:grid-cols-2 gap-4 mt-4">
 							<div>
 								<h4 className="text-sm font-semibold mb-2">Separação de Responsabilidades:</h4>
-								<ul className="text-sm space-y-1 text-gray-700">
+								<ul className="text-sm space-y-1 text-gray-700 dark:text-muted-foreground">
 									<li>
 										• <strong>Views:</strong> Páginas em{' '}
-										<code className="text-xs bg-gray-100 px-1 rounded">app/</code>
+										<code className="text-xs bg-gray-100 dark:bg-muted dark:text-foreground px-1 rounded">
+											app/
+										</code>
 									</li>
 									<li>
 										• <strong>Controllers:</strong> APIs em{' '}
-										<code className="text-xs bg-gray-100 px-1 rounded">features/*/api/</code>
+										<code className="text-xs bg-gray-100 dark:bg-muted dark:text-foreground px-1 rounded">
+											features/*/api/
+										</code>
 									</li>
 									<li>
 										• <strong>Models:</strong> Types em{' '}
-										<code className="text-xs bg-gray-100 px-1 rounded">types/</code>
+										<code className="text-xs bg-gray-100 dark:bg-muted dark:text-foreground px-1 rounded">
+											types/
+										</code>
 									</li>
 									<li>
 										• <strong>Components:</strong> Reutilizáveis em{' '}
-										<code className="text-xs bg-gray-100 px-1 rounded">components/</code>
+										<code className="text-xs bg-gray-100 dark:bg-muted dark:text-foreground px-1 rounded">
+											components/
+										</code>
 									</li>
 								</ul>
 							</div>
 
 							<div>
 								<h4 className="text-sm font-semibold mb-2">Comunicação com API:</h4>
-								<ul className="text-sm space-y-1 text-gray-700">
+								<ul className="text-sm space-y-1 text-gray-700 dark:text-muted-foreground">
 									<li>• HTTP Client centralizado</li>
 									<li>• Bearer Token (Laravel Sanctum)</li>
 									<li>• Interceptors para auth</li>
@@ -167,30 +175,30 @@ export default function DemonstracaoTecnicaPage() {
 					</CardHeader>
 					<CardContent>
 						<div className="grid md:grid-cols-4 gap-4">
-							<div className="text-center p-4 border rounded-lg">
+							<div className="text-center p-4 border dark:border-border rounded-lg">
 								<div className="text-2xl mb-2">🟢</div>
 								<div className="font-semibold">Chrome</div>
-								<div className="text-xs text-gray-600">90+</div>
+								<div className="text-xs text-gray-600 dark:text-muted-foreground">90+</div>
 							</div>
-							<div className="text-center p-4 border rounded-lg">
+							<div className="text-center p-4 border dark:border-border rounded-lg">
 								<div className="text-2xl mb-2">🟠</div>
 								<div className="font-semibold">Firefox</div>
-								<div className="text-xs text-gray-600">88+</div>
+								<div className="text-xs text-gray-600 dark:text-muted-foreground">88+</div>
 							</div>
-							<div className="text-center p-4 border rounded-lg">
+							<div className="text-center p-4 border dark:border-border rounded-lg">
 								<div className="text-2xl mb-2">🔵</div>
 								<div className="font-semibold">Safari</div>
-								<div className="text-xs text-gray-600">14+</div>
+								<div className="text-xs text-gray-600 dark:text-muted-foreground">14+</div>
 							</div>
-							<div className="text-center p-4 border rounded-lg">
+							<div className="text-center p-4 border dark:border-border rounded-lg">
 								<div className="text-2xl mb-2">🔷</div>
 								<div className="font-semibold">Edge</div>
-								<div className="text-xs text-gray-600">90+</div>
+								<div className="text-xs text-gray-600 dark:text-muted-foreground">90+</div>
 							</div>
 						</div>
 
-						<div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-							<p className="text-sm text-blue-900">
+						<div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+							<p className="text-sm text-blue-900 dark:text-blue-300">
 								<strong>✅ Sem dependência de plugins externos</strong>
 								<br />
 								Toda a aplicação roda nativamente nos navegadores modernos sem necessidade de Flash,
@@ -208,7 +216,7 @@ export default function DemonstracaoTecnicaPage() {
 						<div className="grid md:grid-cols-3 gap-4">
 							<div>
 								<h4 className="text-sm font-semibold mb-2">Layouts</h4>
-								<ul className="text-xs space-y-1 text-gray-700">
+								<ul className="text-xs space-y-1 text-gray-700 dark:text-muted-foreground">
 									<li>• Sidebar (dinâmica por perfil)</li>
 									<li>• Header (dropdown usuário)</li>
 									<li>• AuthenticatedLayout</li>
@@ -218,7 +226,7 @@ export default function DemonstracaoTecnicaPage() {
 
 							<div>
 								<h4 className="text-sm font-semibold mb-2">UI Components</h4>
-								<ul className="text-xs space-y-1 text-gray-700">
+								<ul className="text-xs space-y-1 text-gray-700 dark:text-muted-foreground">
 									<li>• Button, Input, Select</li>
 									<li>• Card, Badge</li>
 									<li>• Table (DataTable)</li>
@@ -229,7 +237,7 @@ export default function DemonstracaoTecnicaPage() {
 
 							<div>
 								<h4 className="text-sm font-semibold mb-2">Estados</h4>
-								<ul className="text-xs space-y-1 text-gray-700">
+								<ul className="text-xs space-y-1 text-gray-700 dark:text-muted-foreground">
 									<li>• Loading (spinner)</li>
 									<li>• EmptyState</li>
 									<li>• ErrorBoundary</li>
@@ -248,7 +256,7 @@ export default function DemonstracaoTecnicaPage() {
 						<div className="grid md:grid-cols-2 gap-4">
 							<div>
 								<h4 className="text-sm font-semibold mb-2">Segurança:</h4>
-								<ul className="text-sm space-y-1 text-gray-700">
+								<ul className="text-sm space-y-1 text-gray-700 dark:text-muted-foreground">
 									<li>✅ Bearer Token Authentication</li>
 									<li>✅ Auto-redirect em 401 (sessão expirada)</li>
 									<li>✅ HTTPS ready</li>
@@ -259,7 +267,7 @@ export default function DemonstracaoTecnicaPage() {
 
 							<div>
 								<h4 className="text-sm font-semibold mb-2">Performance:</h4>
-								<ul className="text-sm space-y-1 text-gray-700">
+								<ul className="text-sm space-y-1 text-gray-700 dark:text-muted-foreground">
 									<li>✅ React Query (cache automático)</li>
 									<li>✅ Server Components (Next.js)</li>
 									<li>✅ Code splitting automático</li>
@@ -311,7 +319,7 @@ export default function DemonstracaoTecnicaPage() {
 							</div>
 						</div>
 
-						<div className="mt-4 p-3 bg-gray-50 rounded-lg border text-xs text-gray-600">
+						<div className="mt-4 p-3 bg-gray-50 dark:bg-muted rounded-lg border dark:border-border text-xs text-gray-600 dark:text-muted-foreground">
 							<strong>Legenda:</strong> ✅ Implementado | 🔄 Em desenvolvimento | APIs prontas para
 							integração
 						</div>
