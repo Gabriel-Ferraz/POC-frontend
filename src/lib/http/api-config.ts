@@ -20,6 +20,7 @@ export const API_ENDPOINTS = {
 		show: (id: number) => `/solicitacoes/${id}`,
 		cancelar: (id: number) => `/solicitacoes/${id}/cancelar`,
 		tramites: (id: number) => `/solicitacoes/${id}/tramites`,
+		removerAnexo: (solicitacaoId: number, anexoId: number) => `/solicitacoes/${solicitacaoId}/anexos/${anexoId}`,
 	},
 	// Anexos
 	anexos: {

@@ -41,7 +41,38 @@ export const solicitacoesApi = {
 		return response.solicitacao || response;
 	},
 
-	async cancelarSolicitacao(id: number, motivo: string): Promise<void> {
-		await post(API_ENDPOINTS.solicitacoes.cancelar(id), { motivo });
+	async cancelarSolicitacao(id: number, data: { data_cancelamento: string; motivo: string }): Promise<void> {
+		await post(API_ENDPOINTS.solicitacoes.cancelar(id), data);
+	},
+
+	async uploadAnexo(solicitacaoId: number, anexoId: number, file: File): Promise<any> {
+		const formData = new FormData();
+		formData.append('arquivo', file);
+
+		const response = await fetch(
+			`${process.env.NEXT_PUBLIC_API_URL}/solicitacoes/${solicitacaoId}/anexos/${anexoId}/upload`,
+			{
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('auth_token') : ''}`,
+				},
+				body: formData,
+			}
+		);
+
+		if (!response.ok) {
+			const error = await response.json().catch(() => ({}));
+			throw new Error(error.message || 'Erro ao enviar anexo');
+		}
+
+		return response.json();
+	},
+
+	async removerAnexo(solicitacaoId: number, anexoId: number): Promise<void> {
+		await post(API_ENDPOINTS.solicitacoes.removerAnexo(solicitacaoId, anexoId), {});
+	},
+
+	getAnexoUrl(solicitacaoId: number, anexoId: number): string {
+		return `${process.env.NEXT_PUBLIC_API_URL}/solicitacoes/${solicitacaoId}/anexos/${anexoId}/download`;
 	},
 };

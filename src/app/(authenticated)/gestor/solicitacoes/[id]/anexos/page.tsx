@@ -12,7 +12,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { gestorApi } from '@/app/features/gestor/api/gestor-api';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Download, CheckCircle, XCircle, FileText } from 'lucide-react';
+import { Download, CheckCircle, XCircle, FileText, AlertTriangle } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 
 export default function AvaliarAnexosPage() {
@@ -22,8 +22,34 @@ export default function AvaliarAnexosPage() {
 	const solicitacaoId = parseInt(params.id as string);
 
 	const [anexoSelecionado, setAnexoSelecionado] = useState<number | null>(null);
+	const [tipoAnexoSelecionado, setTipoAnexoSelecionado] = useState<string>('');
 	const [motivoRecusa, setMotivoRecusa] = useState('');
 	const [showRecusaModal, setShowRecusaModal] = useState(false);
+
+	const handleVisualizarAnexo = async (anexoId: number) => {
+		try {
+			const token = localStorage.getItem('auth_token');
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_URL}/solicitacoes/${solicitacaoId}/anexos/${anexoId}/download`,
+				{
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				}
+			);
+
+			if (!response.ok) {
+				throw new Error('Erro ao visualizar anexo');
+			}
+
+			const blob = await response.blob();
+			const url = window.URL.createObjectURL(blob);
+			window.open(url, '_blank');
+		} catch (error: any) {
+			console.error('Erro:', error);
+			toast.error(error.message || 'Erro ao visualizar anexo');
+		}
+	};
 
 	const { data, isLoading } = useQuery({
 		queryKey: ['solicitacao-gestor', solicitacaoId],
@@ -82,6 +108,16 @@ export default function AvaliarAnexosPage() {
 	}
 
 	const { solicitacao, anexos } = data;
+
+	// Verificar se existe Documento Fiscal recusado
+	const documentoFiscalRecusado = anexos.find(
+		(a) => a.tipo_anexo_label.toLowerCase().includes('documento fiscal') && a.status.toLowerCase() === 'recusado'
+	);
+
+	// Verificar se é Documento Fiscal
+	const isDocumentoFiscal = (tipoAnexo: string) => {
+		return tipoAnexo.toLowerCase().includes('documento fiscal');
+	};
 
 	return (
 		<div className="space-y-6">
@@ -145,6 +181,25 @@ export default function AvaliarAnexosPage() {
 				</div>
 			</Card>
 
+			{/* Alerta de Documento Fiscal Recusado */}
+			{documentoFiscalRecusado && (
+				<Card className="bg-red-50 border-red-200">
+					<div className="p-4 flex items-start gap-3">
+						<AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
+						<div className="flex-1">
+							<p className="font-medium text-red-900">
+								Documento Fiscal recusado - Solicitação deve ser cancelada
+							</p>
+							<p className="text-sm text-red-700 mt-1">
+								O Documento Fiscal foi recusado. O Responsável Técnico deverá{' '}
+								<strong>cancelar esta solicitação</strong> e criar uma nova com o documento correto.
+								Outros anexos podem ser corrigidos diretamente.
+							</p>
+						</div>
+					</div>
+				</Card>
+			)}
+
 			<Card>
 				<div className="p-6">
 					<h3 className="font-semibold text-lg mb-4">Anexos para Aprovação</h3>
@@ -165,15 +220,13 @@ export default function AvaliarAnexosPage() {
 										<div className="flex items-center gap-3 mt-3">
 											<StatusBadge status={anexo.status} />
 
-											<a
-												href={gestorApi.getDownloadUrl(anexo.id)}
-												target="_blank"
-												rel="noopener noreferrer">
-												<Button size="sm" variant="outline">
-													<Download className="w-4 h-4 mr-2" />
-													Visualizar
-												</Button>
-											</a>
+											<Button
+												size="sm"
+												variant="outline"
+												onClick={() => handleVisualizarAnexo(anexo.id)}>
+												<Download className="w-4 h-4 mr-2" />
+												Visualizar
+											</Button>
 										</div>
 
 										{anexo.motivo_recusa && (
@@ -195,7 +248,7 @@ export default function AvaliarAnexosPage() {
 										)}
 									</div>
 
-									{anexo.status === 'aguardando_aprovacao' && (
+									{anexo.status.toLowerCase() === 'aguardando aprovação' && (
 										<div className="flex gap-2">
 											<Button
 												size="sm"
@@ -212,6 +265,7 @@ export default function AvaliarAnexosPage() {
 												className="text-red-600 hover:bg-red-50"
 												onClick={() => {
 													setAnexoSelecionado(anexo.id);
+													setTipoAnexoSelecionado(anexo.tipo_anexo_label);
 													setShowRecusaModal(true);
 												}}
 												disabled={isAprovando || isRecusando}>
@@ -240,6 +294,24 @@ export default function AvaliarAnexosPage() {
 						<div className="p-6">
 							<h3 className="font-semibold text-lg mb-4">Recusar Anexo</h3>
 
+							{isDocumentoFiscal(tipoAnexoSelecionado) && (
+								<div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded">
+									<div className="flex gap-2">
+										<AlertTriangle className="w-5 h-5 text-orange-600 flex-shrink-0" />
+										<div>
+											<p className="text-sm font-medium text-orange-900">
+												Atenção: Documento Fiscal
+											</p>
+											<p className="text-sm text-orange-700 mt-1">
+												Ao recusar o Documento Fiscal, o Responsável Técnico deverá{' '}
+												<strong>cancelar a solicitação</strong> e criar uma nova. Este tipo de
+												anexo não pode ser corrigido.
+											</p>
+										</div>
+									</div>
+								</div>
+							)}
+
 							<div className="space-y-4">
 								<div>
 									<Label htmlFor="motivo">Motivo da Recusa *</Label>
@@ -259,6 +331,7 @@ export default function AvaliarAnexosPage() {
 										onClick={() => {
 											setShowRecusaModal(false);
 											setAnexoSelecionado(null);
+											setTipoAnexoSelecionado('');
 											setMotivoRecusa('');
 										}}
 										disabled={isRecusando}>

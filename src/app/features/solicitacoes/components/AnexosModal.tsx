@@ -1,0 +1,470 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Eye, X, AlertTriangle } from 'lucide-react';
+import { toast } from 'sonner';
+
+interface Anexo {
+	id: number;
+	tipo_anexo: string;
+	tipo_anexo_label: string;
+	arquivo_path: string | null;
+	arquivo_nome: string | null;
+	status: string;
+	data_envio: string | null;
+	motivo_recusa: string | null;
+	is_documento_fiscal: boolean;
+	pode_reenviar: boolean;
+	pode_remover: boolean;
+}
+
+interface Solicitacao {
+	id: number;
+	numero: string;
+	status: string;
+	documento_fiscal_recusado: boolean;
+	anexos: Anexo[];
+}
+
+interface AnexosModalProps {
+	open: boolean;
+	onClose: () => void;
+	solicitacao: any;
+	onSuccess?: () => void;
+}
+
+export function AnexosModal({ open, onClose, solicitacao, onSuccess }: AnexosModalProps) {
+	const [solicitacaoCompleta, setSolicitacaoCompleta] = useState<Solicitacao | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [uploading, setUploading] = useState<number | null>(null);
+	const [anexoExpandidoId, setAnexoExpandidoId] = useState<number | null>(null);
+
+	// Define o primeiro anexo como expandido ao carregar
+	useEffect(() => {
+		if (solicitacaoCompleta?.anexos && solicitacaoCompleta.anexos.length > 0 && anexoExpandidoId === null) {
+			setAnexoExpandidoId(solicitacaoCompleta.anexos[0].id);
+		}
+	}, [solicitacaoCompleta, anexoExpandidoId]);
+
+	// 1. LISTAR ANEXOS
+	const carregarAnexos = async () => {
+		if (!solicitacao?.id) return;
+
+		try {
+			setLoading(true);
+			const token = localStorage.getItem('auth_token');
+			const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/solicitacoes/${solicitacao.id}/anexos`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+			if (!response.ok) throw new Error('Erro ao carregar anexos');
+
+			const data = await response.json();
+			setSolicitacaoCompleta(data.solicitacao);
+		} catch (error) {
+			console.error('Erro:', error);
+			toast.error('Erro ao carregar anexos');
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		if (open) {
+			carregarAnexos();
+		}
+	}, [open, solicitacao?.id]);
+
+	// 2. UPLOAD DE ARQUIVO
+	const handleUpload = async (anexoId: number, file: File) => {
+		// Validar tamanho (10MB)
+		if (file.size > 10 * 1024 * 1024) {
+			toast.error('O arquivo não pode ser maior que 10MB');
+			return;
+		}
+
+		// Validar tipo
+		if (file.type !== 'application/pdf') {
+			toast.error('Apenas arquivos PDF são permitidos');
+			return;
+		}
+
+		setUploading(anexoId);
+
+		try {
+			const token = localStorage.getItem('auth_token');
+			const formData = new FormData();
+			formData.append('arquivo', file);
+
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_URL}/solicitacoes/${solicitacao.id}/anexos/${anexoId}/upload`,
+				{
+					method: 'POST',
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+					body: formData,
+				}
+			);
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(data.message || 'Erro ao enviar anexo');
+			}
+
+			toast.success('Anexo enviado com sucesso!');
+			carregarAnexos(); // Recarregar lista
+		} catch (error: any) {
+			console.error('Erro:', error);
+			toast.error(error.message || 'Erro ao enviar anexo');
+		} finally {
+			setUploading(null);
+		}
+	};
+
+	// 3. REMOVER ARQUIVO
+	const handleRemover = async (anexoId: number) => {
+		try {
+			const token = localStorage.getItem('auth_token');
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_URL}/solicitacoes/${solicitacao.id}/anexos/${anexoId}`,
+				{
+					method: 'DELETE',
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				}
+			);
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(data.message || 'Erro ao remover anexo');
+			}
+
+			toast.success('Anexo removido com sucesso!');
+			carregarAnexos();
+		} catch (error: any) {
+			console.error('Erro:', error);
+			toast.error(error.message || 'Erro ao remover anexo');
+		}
+	};
+
+	// 4. ENVIAR TODOS PARA APROVAÇÃO
+	const handleEnviarTodos = async () => {
+		try {
+			const token = localStorage.getItem('auth_token');
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_URL}/solicitacoes/${solicitacao.id}/anexos/enviar-todos`,
+				{
+					method: 'POST',
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				}
+			);
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(data.message || 'Erro ao enviar anexos');
+			}
+
+			toast.success('Anexos enviados para aprovação com sucesso!');
+			onSuccess?.();
+			onClose();
+		} catch (error: any) {
+			console.error('Erro:', error);
+			toast.error(error.message || 'Erro ao enviar anexos');
+		}
+	};
+
+	// 5. VISUALIZAR/DOWNLOAD ANEXO
+	const handleVisualizar = async (anexoId: number) => {
+		try {
+			const token = localStorage.getItem('auth_token');
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_URL}/solicitacoes/${solicitacao.id}/anexos/${anexoId}/download`,
+				{
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				}
+			);
+
+			if (!response.ok) {
+				throw new Error('Erro ao visualizar anexo');
+			}
+
+			const blob = await response.blob();
+			const url = window.URL.createObjectURL(blob);
+			window.open(url, '_blank');
+		} catch (error: any) {
+			console.error('Erro:', error);
+			toast.error(error.message || 'Erro ao visualizar anexo');
+		}
+	};
+
+	// Verificar se todos os anexos têm arquivo
+	const todosEnviados = solicitacaoCompleta?.anexos.every((a) => a.arquivo_path !== null) ?? false;
+
+	const anexos = solicitacaoCompleta?.anexos || [];
+
+	// Usar flag do backend
+	const documentoFiscalRecusado = solicitacaoCompleta?.documento_fiscal_recusado ?? false;
+
+	return (
+		<Dialog open={open} onOpenChange={onClose}>
+			<DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+				<DialogHeader>
+					<DialogTitle>Anexos da Solicitação {solicitacao?.numero}</DialogTitle>
+				</DialogHeader>
+
+				{loading ? (
+					<div className="py-8 text-center text-muted-foreground">Carregando anexos...</div>
+				) : (
+					<div className="space-y-3 py-4">
+						{documentoFiscalRecusado && (
+							<div className="p-4 bg-red-50 border-2 border-red-500 rounded-lg">
+								<div className="flex items-start gap-3 mb-3">
+									<AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+									<div>
+										<p className="font-bold text-red-800 text-lg">
+											⚠️ ATENÇÃO: Documento Fiscal foi recusado!
+										</p>
+										<p className="text-red-700 mt-2">
+											Não é possível corrigir o Documento Fiscal. Você deve:
+										</p>
+										<ol className="list-decimal list-inside text-red-700 mt-2 space-y-1">
+											<li>Cancelar esta solicitação</li>
+											<li>Criar uma nova solicitação com o documento correto</li>
+										</ol>
+									</div>
+								</div>
+								<Button
+									variant="destructive"
+									className="w-full bg-red-600 hover:bg-red-700"
+									onClick={() => {
+										onClose();
+										// Navegar para cancelamento
+										window.location.href = `/portal-fornecedor/empenhos/1/solicitacoes`;
+									}}>
+									Fechar e Cancelar Solicitação
+								</Button>
+							</div>
+						)}
+
+						{anexos.length === 0 ? (
+							<p className="text-center text-muted-foreground py-8">
+								Nenhum anexo cadastrado para esta solicitação
+							</p>
+						) : (
+							<>
+								{anexos.map((anexo, index) => {
+									const isExpandido = anexoExpandidoId === anexo.id;
+									const temArquivo = !!anexo.arquivo_path;
+
+									return (
+										<div key={anexo.id} className="border rounded-lg overflow-hidden">
+											{/* CABEÇALHO DO ANEXO */}
+											<div
+												className={`flex items-center justify-between px-4 py-3 cursor-pointer ${
+													isExpandido ? 'bg-blue-600 text-white' : 'bg-gray-100'
+												}`}
+												onClick={() => setAnexoExpandidoId(anexo.id)}>
+												<div className="flex items-center gap-3">
+													{!temArquivo && !isExpandido && (
+														<AlertTriangle className="w-5 h-5 text-yellow-500" />
+													)}
+													<div>
+														<h4 className="font-medium">{anexo.tipo_anexo_label}</h4>
+														{anexo.is_documento_fiscal && (
+															<span className="text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded mt-1 inline-block">
+																DOCUMENTO FISCAL
+															</span>
+														)}
+													</div>
+												</div>
+												{temArquivo && !isExpandido && (
+													<div className="flex gap-2">
+														<Button
+															size="sm"
+															variant="ghost"
+															onClick={(e) => {
+																e.stopPropagation();
+																handleVisualizar(anexo.id);
+															}}>
+															<Eye className="w-4 h-4" />
+														</Button>
+														{anexo.pode_remover && (
+															<Button
+																size="sm"
+																variant="ghost"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	handleRemover(anexo.id);
+																}}>
+																<X className="w-4 h-4" />
+															</Button>
+														)}
+													</div>
+												)}
+											</div>
+
+											{/* CONTEÚDO EXPANDIDO */}
+											{isExpandido && (
+												<div className="p-4 min-h-[200px]">
+													{anexo.motivo_recusa && (
+														<div className="mb-3 p-3 bg-red-50 border border-red-200 rounded">
+															<p className="text-sm font-medium text-red-800">
+																Motivo da recusa:
+															</p>
+															<p className="text-sm text-red-700 mt-1">
+																{anexo.motivo_recusa}
+															</p>
+														</div>
+													)}
+
+													{temArquivo ? (
+														<div className="space-y-3">
+															<div className="flex items-center justify-between p-3 bg-muted rounded border">
+																<div>
+																	<span className="text-sm font-medium">
+																		{anexo.arquivo_nome}
+																	</span>
+																	<p className="text-xs text-muted-foreground">
+																		Status: {anexo.status}
+																	</p>
+																</div>
+																<div className="flex gap-2">
+																	<Button
+																		size="sm"
+																		variant="ghost"
+																		onClick={() => handleVisualizar(anexo.id)}>
+																		<Eye className="w-4 h-4" />
+																	</Button>
+																	{anexo.pode_remover && (
+																		<Button
+																			size="sm"
+																			variant="ghost"
+																			onClick={() => handleRemover(anexo.id)}>
+																			<X className="w-4 h-4" />
+																		</Button>
+																	)}
+																</div>
+															</div>
+
+															{/* Botão de substituir/upload */}
+															{anexo.pode_reenviar && (
+																<label className="block">
+																	<Button
+																		variant="outline"
+																		className="w-full"
+																		disabled={uploading === anexo.id}
+																		asChild>
+																		<span>
+																			{uploading === anexo.id
+																				? 'Enviando...'
+																				: 'Substituir Arquivo'}
+																		</span>
+																	</Button>
+																	<input
+																		type="file"
+																		accept=".pdf"
+																		className="hidden"
+																		disabled={uploading === anexo.id}
+																		onChange={(e) => {
+																			const file = e.target.files?.[0];
+																			if (file) handleUpload(anexo.id, file);
+																		}}
+																	/>
+																</label>
+															)}
+
+															{/* Indicador de bloqueio */}
+															{!anexo.pode_reenviar && !temArquivo && (
+																<div className="p-3 bg-gray-50 border border-gray-200 rounded text-center">
+																	<p className="text-sm text-gray-600">
+																		🔒 Bloqueado
+																	</p>
+																</div>
+															)}
+
+															{/* Status aprovado */}
+															{anexo.status === 'Aprovado' && (
+																<div className="p-3 bg-green-50 border border-green-200 rounded text-center">
+																	<p className="text-sm text-green-700 font-medium">
+																		✅ Aprovado
+																	</p>
+																</div>
+															)}
+														</div>
+													) : anexo.pode_reenviar ? (
+														<div className="text-center py-8">
+															<label>
+																<Button disabled={uploading === anexo.id} asChild>
+																	<span>
+																		{uploading === anexo.id
+																			? 'Enviando...'
+																			: 'Procurar Arquivo'}
+																	</span>
+																</Button>
+																<input
+																	type="file"
+																	accept=".pdf"
+																	className="hidden"
+																	disabled={uploading === anexo.id}
+																	onChange={(e) => {
+																		const file = e.target.files?.[0];
+																		if (file) handleUpload(anexo.id, file);
+																	}}
+																/>
+															</label>
+															<p className="text-xs text-muted-foreground mt-2">
+																Apenas arquivos PDF (máximo 10MB)
+															</p>
+														</div>
+													) : (
+														<div className="text-center py-8">
+															<p className="text-sm text-gray-600 font-medium mb-2">
+																🔒 Envio bloqueado
+															</p>
+															<p className="text-xs text-gray-500">
+																Este anexo está bloqueado para envio
+															</p>
+														</div>
+													)}
+												</div>
+											)}
+										</div>
+									);
+								})}
+							</>
+						)}
+					</div>
+				)}
+
+				<div className="flex justify-between gap-3 pt-4 border-t">
+					<Button variant="outline" onClick={onClose}>
+						Fechar
+					</Button>
+
+					{todosEnviados && !documentoFiscalRecusado && (
+						<Button onClick={handleEnviarTodos}>Enviar Todos para Aprovação</Button>
+					)}
+				</div>
+
+				{!todosEnviados && !documentoFiscalRecusado && anexos.length > 0 && (
+					<p className="text-xs text-muted-foreground text-center -mt-2">
+						* Envie todos os anexos para habilitar o botão de aprovação
+					</p>
+				)}
+			</DialogContent>
+		</Dialog>
+	);
+}
