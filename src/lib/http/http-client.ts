@@ -45,11 +45,13 @@ export async function request<T>(method: HttpMethod, path: string, options: Requ
 	const isJson = contentType.includes('application/json');
 
 	if (response.status === 401) {
-		console.error('Token inválido ou expirado. Redirecionando para login...');
+		console.error('Token inválido ou expirado.');
 		clearToken();
 
 		// Redirect to login — token expired or invalid
-		if (typeof window !== 'undefined') {
+		// MAS NÃO faz redirect se já está na página de login (para não limpar o erro)
+		if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+			console.log('Redirecionando para login...');
 			// Usa replace para não deixar voltar com o botão voltar
 			window.location.replace('/login');
 		}

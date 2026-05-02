@@ -14,11 +14,22 @@ export interface LoginResponse {
 }
 
 export async function login(cpf: string, password: string): Promise<LoginResponse> {
+	console.log('[auth-api] Tentando login com CPF:', cpf);
+
 	const data = await post<LoginResponse>(API_ENDPOINTS.auth.login, {
 		cpf,
 		password,
 	});
+
+	console.log('[auth-api] Resposta do login:', data);
+
+	if (!data.token) {
+		console.error('[auth-api] Login retornou sem token!');
+		throw new Error('Credenciais inválidas');
+	}
+
 	setToken(data.token);
+	console.log('[auth-api] Token salvo com sucesso');
 	return data;
 }
 

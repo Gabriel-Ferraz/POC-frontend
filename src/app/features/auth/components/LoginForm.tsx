@@ -42,7 +42,9 @@ export function LoginForm() {
 									autoComplete="username"
 									disabled={loading}
 									maxLength={14}
+									className={error ? 'border-red-500 focus-visible:ring-red-500' : ''}
 								/>
+								{error && <p className="text-sm text-red-600 mt-1">{error}</p>}
 							</div>
 
 							<div className="space-y-2">
@@ -55,10 +57,6 @@ export function LoginForm() {
 									disabled={loading}
 								/>
 							</div>
-
-							{error && (
-								<div className="rounded-md bg-red-50 p-3 text-center text-sm text-red-800">{error}</div>
-							)}
 
 							<Button type="submit" className="w-full" disabled={loading}>
 								{loading ? 'Entrando...' : 'Entrar'}
