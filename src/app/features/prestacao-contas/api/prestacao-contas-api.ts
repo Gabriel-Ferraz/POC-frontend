@@ -5,9 +5,9 @@ import type { ExportacaoPrestacaoContas } from '@/types/models';
 export interface ExportarPrestacaoContasData {
 	ano: number;
 	modulo: string;
-	mes: number;
-	arquivos: string[];
 	tipo_geracao: string;
+	mes?: number;
+	arquivos_selecionados: string[];
 }
 
 export const prestacaoContasApi = {

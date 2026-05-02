@@ -14,7 +14,13 @@ import { Download, FileDown } from 'lucide-react';
 
 const MODULOS = ['Empenhos', 'Liquidações', 'Pagamentos', 'Contratos'];
 
-const ARQUIVOS_DISPONIVEIS = ['empenhos.csv', 'liquidacoes.csv', 'pagamentos.csv', 'fornecedores.csv', 'contratos.csv'];
+const ARQUIVOS_DISPONIVEIS = [
+	{ label: 'Plano Contábil', value: 'PlanoContabil' },
+	{ label: 'Movimento Mensal', value: 'MovimentoMensal' },
+	{ label: 'Balancete', value: 'Balancete' },
+	{ label: 'Receita', value: 'Receita' },
+	{ label: 'Despesa', value: 'Despesa' },
+];
 
 export default function PrestacaoContasPage() {
 	const queryClient = useQueryClient();
@@ -35,9 +41,9 @@ export default function PrestacaoContasPage() {
 			prestacaoContasApi.exportar({
 				ano: parseInt(ano),
 				modulo,
-				mes: parseInt(mes),
-				arquivos: arquivosSelecionados,
 				tipo_geracao: 'completo',
+				mes: mes ? parseInt(mes) : undefined,
+				arquivos_selecionados: arquivosSelecionados,
 			}),
 		onSuccess: (data) => {
 			toast.success('Exportação realizada com sucesso!');
@@ -61,8 +67,8 @@ export default function PrestacaoContasPage() {
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 
-		if (!ano || !modulo || !mes || arquivosSelecionados.length === 0) {
-			toast.error('Preencha todos os campos e selecione pelo menos um arquivo');
+		if (!ano || !modulo || arquivosSelecionados.length === 0) {
+			toast.error('Preencha ano, módulo e selecione pelo menos um arquivo');
 			return;
 		}
 
@@ -116,13 +122,12 @@ export default function PrestacaoContasPage() {
 							</div>
 
 							<div>
-								<Label htmlFor="mes">Mês *</Label>
+								<Label htmlFor="mes">Mês (Opcional)</Label>
 								<SelectNative
 									id="mes"
 									value={mes}
 									onChange={(e) => setMes(e.target.value)}
-									disabled={isPending}
-									required>
+									disabled={isPending}>
 									<option value="">Selecione...</option>
 									<option value="1">Janeiro</option>
 									<option value="2">Fevereiro</option>
@@ -144,15 +149,15 @@ export default function PrestacaoContasPage() {
 							<Label>Arquivos para Exportação *</Label>
 							<div className="mt-2 space-y-2">
 								{ARQUIVOS_DISPONIVEIS.map((arquivo) => (
-									<label key={arquivo} className="flex items-center gap-2 cursor-pointer">
+									<label key={arquivo.value} className="flex items-center gap-2 cursor-pointer">
 										<input
 											type="checkbox"
-											checked={arquivosSelecionados.includes(arquivo)}
-											onChange={() => handleArquivoToggle(arquivo)}
+											checked={arquivosSelecionados.includes(arquivo.value)}
+											onChange={() => handleArquivoToggle(arquivo.value)}
 											disabled={isPending}
 											className="w-4 h-4"
 										/>
-										<span className="text-sm">{arquivo}</span>
+										<span className="text-sm">{arquivo.label}</span>
 									</label>
 								))}
 							</div>
