@@ -111,12 +111,19 @@ export interface TramiteSolicitacao {
 
 export interface Chamado {
 	id: number;
+	protocolo?: string;
 	usuario_id: number;
-	usuario?: User;
+	usuario?: string | User;
 	modulo: string;
 	assunto: string;
-	mensagem: string;
-	status: StatusChamado;
+	mensagem?: string;
+	status: StatusChamado | string;
+	data_abertura?: string;
+	data_cadastro?: string;
+	data_ultima_resposta?: string;
+	data_conclusao?: string;
+	ultima_mensagem_por?: 'usuario' | 'gestor';
+	tem_resposta_pendente?: boolean;
 	created_at: string;
 	updated_at: string;
 	mensagens?: MensagemChamado[];

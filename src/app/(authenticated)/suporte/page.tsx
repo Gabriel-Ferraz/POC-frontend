@@ -16,6 +16,7 @@ import { suporteApi, type FiltrosChamados, type Usuario } from '@/app/features/s
 import { useAuth } from '@/providers/AuthProvider';
 import { HelpCircle, X, Lock } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { ChamadoActions } from '@/components/suporte/chamado-actions';
 
 export default function SuportePage() {
 	const router = useRouter();
@@ -440,11 +441,14 @@ export default function SuportePage() {
 										<StatusBadge status={chamado.status} />
 									</TableCell>
 									<TableCell className="text-right">
-										<Button
-											size="sm"
-											onClick={() => router.push(`/suporte/chamados/${chamado.id}`)}>
-											Ver Detalhes
-										</Button>
+										<ChamadoActions
+											chamadoId={chamado.id}
+											status={chamado.status}
+											ultimaMensagemPor={chamado.ultima_mensagem_por}
+											temRespostaPendente={chamado.tem_resposta_pendente}
+											onVerLog={(id) => router.push(`/suporte/chamados/${id}`)}
+											onVerInformacoes={(id) => router.push(`/suporte/chamados/${id}/info`)}
+										/>
 									</TableCell>
 								</TableRow>
 							))}
