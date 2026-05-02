@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { fornecedorApi } from '../features/fornecedor/api/fornecedor-api';
+import { fornecedorApi } from '@/app/features/fornecedor/api/fornecedor-api';
 import { PageHeader } from '@/components/ui/page-header';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
@@ -32,15 +32,19 @@ export default function EmpenhosPage() {
 		return (
 			<div className="p-4 bg-red-50 border border-red-200 rounded-md">
 				<p className="text-red-800">Erro ao carregar empenhos. Tente novamente.</p>
+				<pre className="text-xs mt-2 overflow-auto">{JSON.stringify(error, null, 2)}</pre>
 			</div>
 		);
 	}
+
+	// Garantir que empenhos é um array
+	const empenhosList = Array.isArray(empenhos) ? empenhos : [];
 
 	return (
 		<div>
 			<PageHeader title="Empenhos" description="Lista de empenhos vinculados ao fornecedor" />
 
-			{!empenhos || empenhos.length === 0 ? (
+			{empenhosList.length === 0 ? (
 				<Card>
 					<EmptyState
 						icon={<FileText className="w-12 h-12" />}
@@ -63,7 +67,7 @@ export default function EmpenhosPage() {
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{empenhos.map((empenho) => (
+							{empenhosList.map((empenho) => (
 								<TableRow key={empenho.id}>
 									<TableCell className="font-medium">{empenho.numero}</TableCell>
 									<TableCell>{empenho.contrato?.numero || '-'}</TableCell>

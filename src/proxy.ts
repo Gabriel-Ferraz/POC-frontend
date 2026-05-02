@@ -3,8 +3,7 @@ import { NextResponse } from 'next/server';
 
 const PUBLIC_PATHS = ['/', '/login', '/esqueci-minha-senha', '/redefinir-senha'];
 
-// TODO: Change to your app's default authenticated route
-const AUTHENTICATED_REDIRECT = '/admin/usuarios';
+const AUTHENTICATED_REDIRECT = '/portal-fornecedor';
 
 const TOKEN_KEY = 'auth_token';
 

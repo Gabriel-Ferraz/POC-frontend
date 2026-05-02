@@ -1,66 +1,22 @@
-# Next.js Auth Boilerplate
+# 🏛️ POC - Prefeitura Municipal de São José dos Pinhais
 
-Boilerplate com autenticacao, permissoes (CASL), forgot/reset password, sidebar com controle de acesso, e layout responsivo.
+Frontend desenvolvido em **Next.js 16** para demonstração na licitação.
 
-## Stack
+## 🚀 Quick Start
 
-- Next.js 16.1.1 (App Router)
-- React 19
-- TypeScript
-- Tailwind CSS 4
-- CASL (permissoes)
-- React Query
-- shadcn/ui
-- Sonner (toasts)
+Backend Laravel rodando na porta 3333, Frontend na porta 3000.
 
-## Setup
+## 📚 Documentação Completa
 
-```bash
-# 1. Instalar dependencias
-npm install
+- **[GUIA_NAVEGACAO.md](GUIA_NAVEGACAO.md)** - Como navegar na aplicação (LEIA ISSO!)
+- **[IMPLEMENTACAO.md](IMPLEMENTACAO.md)** - Guia de implementação
+- **[SETUP.md](SETUP.md)** - Configuração e troubleshooting
 
-# 2. Copiar env
-cp .env.example .env.local
+## ✅ O que está pronto
 
-# 3. Configurar NEXT_PUBLIC_API_URL no .env.local
+- Login com CPF ✅
+- Layout com menu lateral ✅
+- Listagem de Empenhos ✅
+- Demonstração Técnica ✅
 
-# 4. Rodar
-npm run dev
-```
-
-## O que vem pronto
-
-- Login, logout, esqueci minha senha, redefinir senha
-- Token em cookie (proxy.ts protege rotas server-side)
-- HTTP client com Bearer automatico e redirect no 401
-- CASL permissions (parsing automatico de strings do backend)
-- `<ProtectedPage>`, `<Authorized>`, `useAuthorized()` para controle de acesso
-- SideNav com menu filtrado por permissao
-- Layout responsivo (sidebar desktop, drawer mobile)
-- Dark mode
-- Paginas de admin como placeholder
-
-## O que configurar no seu projeto
-
-Procure por `TODO` no codigo. Os principais pontos:
-
-1. **`src/proxy.ts`** — `AUTHENTICATED_REDIRECT` (rota padrao apos login)
-2. **`src/components/app/SideNav.tsx`** — `menuCategories` (itens do menu)
-3. **`src/lib/navigation/routes.ts`** — `APP_ROUTES` (rotas para redirect pos-login)
-4. **`.env.local`** — `NEXT_PUBLIC_API_URL`
-5. **Logo** — Substituir o placeholder "B" nos forms de auth e SideNav
-6. **Brand** — Trocar "Boilerplate" por nome do projeto no SideNav e AuthenticatedLayout
-
-## Endpoints do Backend (obrigatorios)
-
-| Metodo | Rota | Retorno |
-|--------|------|---------|
-| POST | `/api/auth/login` | `{ token }` |
-| GET | `/api/auth/me` | `{ user: { id, name, email, roles[], permissions[] } }` |
-| POST | `/api/auth/logout` | `204` |
-| POST | `/api/auth/forgot-password` | `{ message }` |
-| POST | `/api/auth/reset-password` | `{ message }` |
-
-## Documentacao detalhada
-
-Ver `docs/AUTH_AND_PERMISSIONS.md` para documentacao tecnica completa.
+**POC pronta para apresentação! 🚀**
