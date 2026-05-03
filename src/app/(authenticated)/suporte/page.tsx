@@ -15,7 +15,7 @@ import { useQuery } from '@tanstack/react-query';
 import { suporteApi, type FiltrosChamados, type Usuario } from '@/app/features/suporte/api/suporte-api';
 import { useAuth } from '@/providers/AuthProvider';
 import { HelpCircle, X, Lock, Search, ChevronDown, ChevronUp } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChamadoActions } from '@/components/suporte/chamado-actions';
 
 export default function SuportePage() {
@@ -33,6 +33,8 @@ export default function SuportePage() {
 	const [buscaResponsavel, setBuscaResponsavel] = useState<string>('');
 	const [mostrarSugestoesResponsavel, setMostrarSugestoesResponsavel] = useState<boolean>(false);
 	const [filtrosAbertos, setFiltrosAbertos] = useState(true);
+	const refUsuario = useRef<HTMLDivElement>(null);
+	const refResponsavel = useRef<HTMLDivElement>(null);
 
 	// Definir se é gestor ANTES de usar nos useEffects
 	const isGestorSuporte = user?.perfil === 'gestor_suporte' || user?.perfil === 'gestor_contrato';
@@ -83,25 +85,30 @@ export default function SuportePage() {
 
 	// Buscar responsáveis com debounce (autocomplete) — disponível para todos
 	useEffect(() => {
+		const delay = buscaResponsavel ? 300 : 0;
 		const timer = setTimeout(async () => {
 			try {
-				const response = await suporteApi.getResponsaveis(buscaResponsavel);
+				const response = await suporteApi.getResponsaveis(buscaResponsavel || undefined);
 				setResponsaveis(response.usuarios);
 			} catch (error) {
 				console.error('Erro ao buscar responsáveis:', error);
 			}
-		}, 300);
+		}, delay);
 		return () => clearTimeout(timer);
 	}, [buscaResponsavel]);
 
-	// Fechar sugestões ao clicar fora
+	// Fechar sugestões ao clicar fora de cada container
 	useEffect(() => {
-		const handleClickFora = () => {
-			setMostrarSugestoes(false);
-			setMostrarSugestoesResponsavel(false);
+		const handler = (e: MouseEvent) => {
+			if (refUsuario.current && !refUsuario.current.contains(e.target as Node)) {
+				setMostrarSugestoes(false);
+			}
+			if (refResponsavel.current && !refResponsavel.current.contains(e.target as Node)) {
+				setMostrarSugestoesResponsavel(false);
+			}
 		};
-		document.addEventListener('click', handleClickFora);
-		return () => document.removeEventListener('click', handleClickFora);
+		document.addEventListener('mousedown', handler);
+		return () => document.removeEventListener('mousedown', handler);
 	}, []);
 
 	// Atualizar filtros quando status mudar
@@ -394,7 +401,7 @@ export default function SuportePage() {
 									)}
 
 									{isGestorSuporte && (
-										<div className="relative mt-1.5" onClick={(e) => e.stopPropagation()}>
+										<div ref={refUsuario} className="relative mt-1.5">
 											<div className="relative">
 												<Input
 													id="filtro-usuario"
@@ -444,7 +451,7 @@ export default function SuportePage() {
 								{/* Responsável pelo atendimento */}
 								<div>
 									<Label htmlFor="filtro-responsavel">Responsável pelo atendimento</Label>
-									<div className="relative mt-1.5" onClick={(e) => e.stopPropagation()}>
+									<div ref={refResponsavel} className="relative mt-1.5">
 										<div className="relative">
 											<Input
 												id="filtro-responsavel"
