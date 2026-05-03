@@ -5,62 +5,63 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { SelectNative } from '@/components/ui/select-native';
-import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { prestacaoContasApi } from '@/app/features/prestacao-contas/api/prestacao-contas-api';
+import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
+import { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
-import { Download, FileDown, CheckCircle, Minimize2, FileArchive } from 'lucide-react';
+import {
+	Download,
+	CheckCircle,
+	Minimize2,
+	FileArchive,
+	ArrowUp,
+	ArrowDown,
+	ListOrdered,
+	Loader2,
+	AlertCircle,
+} from 'lucide-react';
 import { useFormMinimize } from '@/hooks/useFormMinimize';
-
-const MODULOS = [
-	{ label: 'Contabilidade Geral', value: 'ContabilidadeGeral' },
-	{ label: 'Empenhos', value: 'Empenhos' },
-	{ label: 'Liquidações', value: 'Liquidacoes' },
-	{ label: 'Pagamentos', value: 'Pagamentos' },
-	{ label: 'Contratos', value: 'Contratos' },
-];
-
-const ARQUIVOS_DISPONIVEIS = [
-	{ label: 'Plano Contábil', value: 'PlanoContabil' },
-	{ label: 'Movimento Lançamento Mensal', value: 'MovimentoLancMensal' },
-	{ label: 'Despesas Balancete', value: 'DespesasBalancete' },
-	{ label: 'Movimento Balancete', value: 'MovimentoBalancete' },
-	{ label: 'Receita', value: 'Receita' },
-	{ label: 'Despesa', value: 'Despesa' },
-];
+import type {
+	TipoGeracao,
+	ModuloPrestacaoContas,
+	LayoutArquivo,
+	ExportarPrestacaoContasPayload,
+	ExportacaoGerada,
+} from '@/types/prestacao-contas.types';
+import * as prestacaoContasService from '@/services/prestacao-contas.service';
 
 interface FormData {
-	ano: string;
-	modulo: string;
-	tipoGeracao: 'mensal' | 'anual';
-	mes: string;
+	ano: number;
+	modulo: ModuloPrestacaoContas;
+	tipoGeracao: TipoGeracao;
+	mes?: number;
+	somenteAtivos: boolean;
 	arquivosSelecionados: string[];
-}
-
-interface ArquivoGerado {
-	nome: string;
-	qtdRegistros: number;
-	status: string;
-	dataGeracao: string;
-}
-
-interface ResultadoExportacao {
-	arquivoZip: string;
-	arquivos: ArquivoGerado[];
+	layouts: LayoutArquivo[];
 }
 
 export default function PrestacaoContasPage() {
-	const queryClient = useQueryClient();
 	const currentYear = new Date().getFullYear();
 
-	const [ano, setAno] = useState(currentYear.toString());
-	const [modulo, setModulo] = useState('');
-	const [tipoGeracao, setTipoGeracao] = useState<'mensal' | 'anual'>('mensal');
-	const [mes, setMes] = useState('');
+	// Estados do formulário
+	const [ano, setAno] = useState<number>(currentYear);
+	const [modulo, setModulo] = useState<ModuloPrestacaoContas>('contabilidade');
+	const [tipoGeracao, setTipoGeracao] = useState<TipoGeracao>('mensal');
+	const [mes, setMes] = useState<number | undefined>(new Date().getMonth() + 1);
+	const [somenteAtivos, setSomenteAtivos] = useState<boolean>(true);
 	const [arquivosSelecionados, setArquivosSelecionados] = useState<string[]>([]);
-	const [resultadoExportacao, setResultadoExportacao] = useState<ResultadoExportacao | null>(null);
+	const [layouts, setLayouts] = useState<LayoutArquivo[]>([]);
+	const [resultadoExportacao, setResultadoExportacao] = useState<ExportacaoGerada | null>(null);
+	const [dialogOrdenacaoAberto, setDialogOrdenacaoAberto] = useState(false);
 
+	// Sistema de minimização
 	const { minimizar, isMinimizado, temDadosRestaurados } = useFormMinimize<FormData>({
 		titulo: 'Exportador SIM-AM',
 		icone: <FileArchive className="w-4 h-4" />,
@@ -69,73 +70,139 @@ export default function PrestacaoContasPage() {
 			setModulo(dados.modulo);
 			setTipoGeracao(dados.tipoGeracao);
 			setMes(dados.mes);
+			setSomenteAtivos(dados.somenteAtivos);
 			setArquivosSelecionados(dados.arquivosSelecionados);
+			setLayouts(dados.layouts);
 			toast.success('Exportador restaurado!');
 		},
 	});
 
-	const { data: exportacoes } = useQuery({
-		queryKey: ['exportacoes'],
-		queryFn: prestacaoContasApi.getExportacoes,
+	// Query para carregar layouts
+	const { data: layoutsData, isLoading: loadingLayouts } = useQuery({
+		queryKey: ['layouts'],
+		queryFn: prestacaoContasService.listarLayouts,
+		enabled: !isMinimizado,
 	});
 
-	const { mutate: exportar, isPending } = useMutation({
-		mutationFn: () =>
-			prestacaoContasApi.exportar({
-				ano: parseInt(ano),
-				modulo,
-				tipo_geracao: tipoGeracao,
-				mes: mes ? parseInt(mes) : undefined,
-				arquivos_selecionados: arquivosSelecionados,
-			}),
-		onSuccess: (data: any) => {
-			toast.success('Exportação realizada com sucesso!');
-			queryClient.invalidateQueries({ queryKey: ['exportacoes'] });
+	// Atualizar layouts quando dados forem carregados
+	React.useEffect(() => {
+		if (layoutsData) {
+			setLayouts(layoutsData);
+		}
+	}, [layoutsData]);
 
-			// Simular resultado da exportação (ajustar conforme resposta real da API)
-			const resultado: ResultadoExportacao = {
-				arquivoZip: data.arquivo_zip || `SISGE_${modulo.toLowerCase()}_${tipoGeracao}_${ano}.zip`,
-				arquivos: arquivosSelecionados.map((arq) => ({
-					nome: arq,
-					qtdRegistros: data.registros?.[arq] || Math.floor(Math.random() * 1000),
-					status: 'Gerado',
-					dataGeracao: new Date().toLocaleString('pt-BR'),
-				})),
-			};
-			setResultadoExportacao(resultado);
+	// Mutation para exportar
+	const { mutate: exportar, isPending: exportando } = useMutation({
+		mutationFn: prestacaoContasService.exportarPrestacaoContas,
+		onSuccess: (data) => {
+			toast.success('Exportação realizada com sucesso!');
+			setResultadoExportacao(data);
 		},
 		onError: (error: any) => {
 			toast.error(error?.message || 'Erro ao exportar dados');
 		},
 	});
 
-	const handleArquivoToggle = (arquivo: string) => {
+	// Handlers
+	const handleArquivoToggle = (arquivoId: string) => {
 		setArquivosSelecionados((prev) =>
-			prev.includes(arquivo) ? prev.filter((a) => a !== arquivo) : [...prev, arquivo]
+			prev.includes(arquivoId) ? prev.filter((id) => id !== arquivoId) : [...prev, arquivoId]
 		);
+	};
+
+	const handleSelecionarTodos = () => {
+		const layoutsFiltrados = getLayoutsFiltrados();
+		setArquivosSelecionados(layoutsFiltrados.map((l) => l.id));
+	};
+
+	const handleDesmarcarTodos = () => {
+		setArquivosSelecionados([]);
+	};
+
+	const handleMoverLayoutAcima = (index: number) => {
+		if (index === 0) return;
+		const novosLayouts = [...layouts];
+		[novosLayouts[index - 1], novosLayouts[index]] = [novosLayouts[index], novosLayouts[index - 1]];
+		novosLayouts.forEach((layout, idx) => {
+			layout.ordem = idx + 1;
+		});
+		setLayouts(novosLayouts);
+	};
+
+	const handleMoverLayoutAbaixo = (index: number) => {
+		if (index === layouts.length - 1) return;
+		const novosLayouts = [...layouts];
+		[novosLayouts[index], novosLayouts[index + 1]] = [novosLayouts[index + 1], novosLayouts[index]];
+		novosLayouts.forEach((layout, idx) => {
+			layout.ordem = idx + 1;
+		});
+		setLayouts(novosLayouts);
+	};
+
+	const handleSalvarOrdenacao = async () => {
+		try {
+			await prestacaoContasService.reordenarLayouts(layouts.map((l) => l.id));
+			toast.success('Ordem dos arquivos salva com sucesso!');
+			setDialogOrdenacaoAberto(false);
+		} catch (error: any) {
+			toast.error(error?.message || 'Erro ao salvar ordenação');
+		}
 	};
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 
-		if (!ano || !modulo || arquivosSelecionados.length === 0) {
-			toast.error('Preencha ano, módulo e selecione pelo menos um arquivo');
+		if (!ano) {
+			toast.error('Ano é obrigatório');
+			return;
+		}
+
+		if (!modulo) {
+			toast.error('Módulo é obrigatório');
+			return;
+		}
+
+		if (!tipoGeracao) {
+			toast.error('Tipo de geração é obrigatório');
 			return;
 		}
 
 		if (tipoGeracao === 'mensal' && !mes) {
-			toast.error('Para geração mensal, selecione o mês');
+			toast.error('Mês é obrigatório para geração mensal');
 			return;
 		}
 
-		exportar();
+		if (arquivosSelecionados.length === 0) {
+			toast.error('Selecione pelo menos um arquivo');
+			return;
+		}
+
+		// Converter IDs dos layouts para keys que o backend espera
+		const fileKeys = arquivosSelecionados
+			.map((layoutId) => {
+				const layout = layouts.find((l) => l.id === layoutId);
+				return layout?.key;
+			})
+			.filter(Boolean) as string[];
+
+		const payload: ExportarPrestacaoContasPayload = {
+			year: ano,
+			module: modulo,
+			generationType: tipoGeracao,
+			month: tipoGeracao === 'mensal' ? mes : undefined,
+			onlyActive: somenteAtivos,
+			files: fileKeys,
+		};
+
+		exportar(payload);
 	};
 
 	const handleLimpar = () => {
-		setAno(currentYear.toString());
-		setModulo('');
+		setAno(currentYear);
+		setModulo('contabilidade');
 		setTipoGeracao('mensal');
-		setMes('');
+		setMes(new Date().getMonth() + 1);
+		setSomenteAtivos(true);
 		setArquivosSelecionados([]);
 		setResultadoExportacao(null);
 		toast.success('Formulário limpo');
@@ -147,7 +214,9 @@ export default function PrestacaoContasPage() {
 			modulo,
 			tipoGeracao,
 			mes,
+			somenteAtivos,
 			arquivosSelecionados,
+			layouts,
 		};
 		minimizar(formData);
 	};
@@ -157,7 +226,14 @@ export default function PrestacaoContasPage() {
 		handleLimpar();
 	};
 
-	// Se está minimizado, mostra tela em branco
+	const getLayoutsFiltrados = (): LayoutArquivo[] => {
+		return layouts.filter((layout) => {
+			if (somenteAtivos && !layout.ativo) return false;
+			return true;
+		});
+	};
+
+	// Se está minimizado
 	if (isMinimizado) {
 		return (
 			<div className="flex items-center justify-center h-[60vh]">
@@ -174,9 +250,7 @@ export default function PrestacaoContasPage() {
 		);
 	}
 
-	const exportacoesList = Array.isArray(exportacoes) ? exportacoes : [];
-
-	// Se tem resultado da exportação, mostra tela de resultado
+	// Se tem resultado da exportação
 	if (resultadoExportacao) {
 		return (
 			<div className="space-y-6">
@@ -188,6 +262,7 @@ export default function PrestacaoContasPage() {
 					</Button>
 				</div>
 
+				{/* Card de Sucesso */}
 				<Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
 					<div className="p-6">
 						<div className="flex items-center gap-3 mb-4">
@@ -196,19 +271,22 @@ export default function PrestacaoContasPage() {
 							</div>
 							<div>
 								<h3 className="font-semibold text-lg text-green-900 dark:text-green-100">
-									Arquivo ZIP: {resultadoExportacao.arquivoZip}
+									Arquivo ZIP: {resultadoExportacao.zipName}
 								</h3>
 								<p className="text-sm text-green-700 dark:text-green-300">Gerado com Sucesso</p>
 							</div>
 						</div>
 
-						<Button className="w-full md:w-auto">
+						<Button
+							onClick={() => prestacaoContasService.downloadZip(resultadoExportacao.id)}
+							className="w-full md:w-auto">
 							<Download className="w-4 h-4 mr-2" />
 							Baixar Arquivo ZIP Completo
 						</Button>
 					</div>
 				</Card>
 
+				{/* Tabela de Arquivos Gerados */}
 				<Card>
 					<div className="p-6">
 						<h3 className="font-semibold text-lg mb-4">Arquivos Gerados</h3>
@@ -218,22 +296,37 @@ export default function PrestacaoContasPage() {
 								<TableRow>
 									<TableHead>Arquivo</TableHead>
 									<TableHead>Status</TableHead>
-									<TableHead>Qtde Registros</TableHead>
+									<TableHead className="text-right">Qtde Registros</TableHead>
 									<TableHead className="text-right">Ações</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{resultadoExportacao.arquivos.map((arquivo, index) => (
-									<TableRow key={index}>
+								{resultadoExportacao.arquivos.map((arquivo) => (
+									<TableRow key={arquivo.id}>
 										<TableCell className="font-medium">{arquivo.nome}</TableCell>
 										<TableCell>
-											<span className="text-green-600 dark:text-green-400">
-												Gerado em {arquivo.dataGeracao}
-											</span>
+											<div className="flex flex-col">
+												<Badge
+													variant={arquivo.status === 'gerado' ? 'default' : 'destructive'}
+													className="w-fit">
+													{arquivo.status === 'gerado' ? 'Gerado com sucesso' : 'Erro'}
+												</Badge>
+												<span className="text-xs text-gray-500 mt-1">
+													Gerado em {arquivo.geradoEm}
+												</span>
+											</div>
 										</TableCell>
-										<TableCell>{arquivo.qtdRegistros}</TableCell>
+										<TableCell className="text-right">{arquivo.quantidadeRegistros}</TableCell>
 										<TableCell className="text-right">
-											<Button size="sm" variant="outline">
+											<Button
+												size="sm"
+												variant="outline"
+												onClick={() =>
+													prestacaoContasService.downloadArquivo(
+														resultadoExportacao.id,
+														arquivo.id
+													)
+												}>
 												Baixar
 											</Button>
 										</TableCell>
@@ -251,14 +344,20 @@ export default function PrestacaoContasPage() {
 		);
 	}
 
+	const layoutsFiltrados = getLayoutsFiltrados();
+
+	// Formulário de exportação
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
-				<PageHeader title="Exportador SIM-AM" description="Exportação de dados para o sistema SIM-AM da CGM" />
+				<PageHeader
+					title="Exportador SIM-AM"
+					description="Exportação de dados para o sistema SIM-AM/SIMAM do Tribunal de Contas"
+				/>
 				<Button
 					variant="outline"
 					onClick={handleMinimizar}
-					disabled={isPending}
+					disabled={exportando}
 					className="flex items-center gap-2">
 					<Minimize2 className="w-4 h-4" />
 					Minimizar
@@ -266,26 +365,28 @@ export default function PrestacaoContasPage() {
 			</div>
 
 			{temDadosRestaurados && (
-				<div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-					<p className="text-sm text-blue-900 dark:text-blue-100">
-						✓ Exportador restaurado com os dados salvos anteriormente
-					</p>
-				</div>
+				<Alert>
+					<CheckCircle className="w-4 h-4" />
+					<AlertDescription>Exportador restaurado com os dados salvos anteriormente</AlertDescription>
+				</Alert>
 			)}
 
 			<Card>
 				<div className="p-6">
 					<h3 className="font-semibold text-lg mb-4">Nova Exportação</h3>
 
-					<form onSubmit={handleSubmit} className="space-y-4">
-						<div className="grid grid-cols-2 gap-4">
+					<form onSubmit={handleSubmit} className="space-y-6">
+						{/* Linha 1: Filtros Principais */}
+						<div className="grid grid-cols-3 gap-4">
 							<div>
-								<Label htmlFor="ano">Ano *</Label>
+								<Label htmlFor="ano">
+									Ano <span className="text-red-500">*</span>
+								</Label>
 								<SelectNative
 									id="ano"
 									value={ano}
-									onChange={(e) => setAno(e.target.value)}
-									disabled={isPending}
+									onChange={(e) => setAno(parseInt(e.target.value))}
+									disabled={exportando}
 									required>
 									<option value="">Selecione...</option>
 									{Array.from({ length: 5 }, (_, i) => currentYear - i).map((year) => (
@@ -297,43 +398,29 @@ export default function PrestacaoContasPage() {
 							</div>
 
 							<div>
-								<Label htmlFor="modulo">Módulo (Contabilidade) *</Label>
+								<Label htmlFor="modulo">
+									Módulo <span className="text-red-500">*</span>
+								</Label>
 								<SelectNative
 									id="modulo"
 									value={modulo}
-									onChange={(e) => setModulo(e.target.value)}
-									disabled={isPending}
+									onChange={(e) => setModulo(e.target.value as ModuloPrestacaoContas)}
+									disabled={exportando}
 									required>
-									<option value="">Selecione...</option>
-									{MODULOS.map((mod) => (
-										<option key={mod.value} value={mod.value}>
-											{mod.label}
-										</option>
-									))}
-								</SelectNative>
-							</div>
-
-							<div>
-								<Label htmlFor="tipoGeracao">Tipo de Geração *</Label>
-								<SelectNative
-									id="tipoGeracao"
-									value={tipoGeracao}
-									onChange={(e) => setTipoGeracao(e.target.value as 'mensal' | 'anual')}
-									disabled={isPending}
-									required>
-									<option value="mensal">Mensal</option>
-									<option value="anual">Anual</option>
+									<option value="contabilidade">Contabilidade</option>
 								</SelectNative>
 							</div>
 
 							{tipoGeracao === 'mensal' && (
 								<div>
-									<Label htmlFor="mes">Mês de Geração *</Label>
+									<Label htmlFor="mes">
+										Mês <span className="text-red-500">*</span>
+									</Label>
 									<SelectNative
 										id="mes"
 										value={mes}
-										onChange={(e) => setMes(e.target.value)}
-										disabled={isPending}
+										onChange={(e) => setMes(parseInt(e.target.value))}
+										disabled={exportando}
 										required={tipoGeracao === 'mensal'}>
 										<option value="">Selecione...</option>
 										<option value="1">Janeiro</option>
@@ -353,81 +440,216 @@ export default function PrestacaoContasPage() {
 							)}
 						</div>
 
-						<div>
-							<Label>Selecionar um arquivo da lista *</Label>
-							<div className="mt-2 space-y-2">
-								{ARQUIVOS_DISPONIVEIS.map((arquivo) => (
-									<label key={arquivo.value} className="flex items-center gap-2 cursor-pointer">
-										<input
-											type="checkbox"
-											checked={arquivosSelecionados.includes(arquivo.value)}
-											onChange={() => handleArquivoToggle(arquivo.value)}
-											disabled={isPending}
-											className="w-4 h-4"
-										/>
-										<span className="text-sm">{arquivo.label}</span>
-									</label>
-								))}
+						<Separator />
+
+						{/* Linha 2: Tipo de Geração e Somente Ativos */}
+						<div className="grid grid-cols-2 gap-6">
+							<div>
+								<Label className="mb-3 block">
+									Tipo de Geração <span className="text-red-500">*</span>
+								</Label>
+								<RadioGroup
+									value={tipoGeracao}
+									onValueChange={(value) => setTipoGeracao(value as TipoGeracao)}
+									disabled={exportando}>
+									<div className="flex items-center space-x-2">
+										<RadioGroupItem value="mensal" id="mensal" />
+										<Label htmlFor="mensal" className="font-normal cursor-pointer">
+											Mensal
+										</Label>
+									</div>
+									<div className="flex items-center space-x-2">
+										<RadioGroupItem value="abertura" id="abertura" />
+										<Label htmlFor="abertura" className="font-normal cursor-pointer">
+											Abertura
+										</Label>
+									</div>
+									<div className="flex items-center space-x-2">
+										<RadioGroupItem value="diario" id="diario" />
+										<Label htmlFor="diario" className="font-normal cursor-pointer">
+											Diário
+										</Label>
+									</div>
+									<div className="flex items-center space-x-2">
+										<RadioGroupItem value="fechamento" id="fechamento" />
+										<Label htmlFor="fechamento" className="font-normal cursor-pointer">
+											Fechamento
+										</Label>
+									</div>
+								</RadioGroup>
+							</div>
+
+							<div className="flex items-center space-x-2">
+								<Checkbox
+									id="somenteAtivos"
+									checked={somenteAtivos}
+									onCheckedChange={(checked) => setSomenteAtivos(checked as boolean)}
+									disabled={exportando}
+								/>
+								<Label htmlFor="somenteAtivos" className="font-normal cursor-pointer">
+									Somente ativos
+								</Label>
 							</div>
 						</div>
 
+						<Separator />
+
+						{/* Tabela de Arquivos */}
+						<div>
+							<div className="flex items-center justify-between mb-4">
+								<Label className="text-base">
+									Arquivos Disponíveis <span className="text-red-500">*</span>
+								</Label>
+								<div className="flex gap-2">
+									<Button
+										type="button"
+										variant="outline"
+										size="sm"
+										onClick={handleSelecionarTodos}
+										disabled={exportando || layoutsFiltrados.length === 0}>
+										Selecionar Todos
+									</Button>
+									<Button
+										type="button"
+										variant="outline"
+										size="sm"
+										onClick={handleDesmarcarTodos}
+										disabled={exportando || arquivosSelecionados.length === 0}>
+										Desmarcar Todos
+									</Button>
+
+									<Dialog open={dialogOrdenacaoAberto} onOpenChange={setDialogOrdenacaoAberto}>
+										<DialogTrigger asChild>
+											<Button type="button" variant="outline" size="sm" disabled={exportando}>
+												<ListOrdered className="w-4 h-4 mr-2" />
+												Ordenar Geração
+											</Button>
+										</DialogTrigger>
+										<DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+											<DialogHeader>
+												<DialogTitle>Ordenar Geração de Arquivos</DialogTitle>
+											</DialogHeader>
+
+											<div className="space-y-2">
+												{layouts.map((layout, index) => (
+													<div
+														key={layout.id}
+														className="flex items-center justify-between p-3 border rounded-lg">
+														<div className="flex items-center gap-3">
+															<Badge variant="outline">{layout.ordem}</Badge>
+															<span className="font-medium">{layout.nome}</span>
+															{!layout.ativo && (
+																<Badge variant="secondary">Inativo</Badge>
+															)}
+														</div>
+														<div className="flex gap-2">
+															<Button
+																type="button"
+																variant="ghost"
+																size="sm"
+																onClick={() => handleMoverLayoutAcima(index)}
+																disabled={index === 0}>
+																<ArrowUp className="w-4 h-4" />
+															</Button>
+															<Button
+																type="button"
+																variant="ghost"
+																size="sm"
+																onClick={() => handleMoverLayoutAbaixo(index)}
+																disabled={index === layouts.length - 1}>
+																<ArrowDown className="w-4 h-4" />
+															</Button>
+														</div>
+													</div>
+												))}
+											</div>
+
+											<DialogFooter>
+												<Button
+													type="button"
+													variant="outline"
+													onClick={() => setDialogOrdenacaoAberto(false)}>
+													Cancelar
+												</Button>
+												<Button type="button" onClick={handleSalvarOrdenacao}>
+													Salvar Ordem
+												</Button>
+											</DialogFooter>
+										</DialogContent>
+									</Dialog>
+								</div>
+							</div>
+
+							{loadingLayouts ? (
+								<div className="flex items-center justify-center py-8">
+									<Loader2 className="w-6 h-6 animate-spin" />
+								</div>
+							) : layoutsFiltrados.length === 0 ? (
+								<Alert>
+									<AlertCircle className="w-4 h-4" />
+									<AlertDescription>
+										Nenhum arquivo disponível para os filtros selecionados
+									</AlertDescription>
+								</Alert>
+							) : (
+								<Table>
+									<TableHeader>
+										<TableRow>
+											<TableHead className="w-12">Selecionar</TableHead>
+											<TableHead>Arquivo</TableHead>
+											<TableHead>Última Geração</TableHead>
+											<TableHead className="text-center">Ordem</TableHead>
+										</TableRow>
+									</TableHeader>
+									<TableBody>
+										{layoutsFiltrados.map((layout) => (
+											<TableRow key={layout.id}>
+												<TableCell>
+													<Checkbox
+														checked={arquivosSelecionados.includes(layout.id)}
+														onCheckedChange={() => handleArquivoToggle(layout.id)}
+														disabled={exportando}
+													/>
+												</TableCell>
+												<TableCell className="font-medium">{layout.nome}</TableCell>
+												<TableCell>
+													{layout.ultimaGeracao ? (
+														<span className="text-sm text-gray-600 dark:text-gray-400">
+															{layout.ultimaGeracao}
+														</span>
+													) : (
+														<span className="text-sm text-gray-400">Nunca gerado</span>
+													)}
+												</TableCell>
+												<TableCell className="text-center">
+													<Badge variant="outline">{layout.ordem}</Badge>
+												</TableCell>
+											</TableRow>
+										))}
+									</TableBody>
+								</Table>
+							)}
+						</div>
+
+						{/* Rodapé com botões */}
 						<div className="flex gap-3 justify-end pt-4 border-t">
-							<Button type="button" variant="outline" onClick={handleLimpar} disabled={isPending}>
+							<Button type="button" variant="outline" onClick={handleLimpar} disabled={exportando}>
 								Limpar
 							</Button>
-							<Button type="submit" disabled={isPending}>
-								{isPending ? 'Exportando...' : 'Exportar'}
+							<Button type="submit" disabled={exportando}>
+								{exportando ? (
+									<>
+										<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+										Exportando...
+									</>
+								) : (
+									'Exportar'
+								)}
 							</Button>
 						</div>
 					</form>
 				</div>
 			</Card>
-
-			{exportacoesList.length > 0 && (
-				<Card>
-					<div className="p-6">
-						<h3 className="font-semibold text-lg mb-4">Exportações Recentes</h3>
-
-						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead>Data</TableHead>
-									<TableHead>Ano/Mês</TableHead>
-									<TableHead>Módulo</TableHead>
-									<TableHead>Tipo</TableHead>
-									<TableHead>Registros</TableHead>
-									<TableHead className="text-right">Ações</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{exportacoesList.map((exp) => (
-									<TableRow key={exp.id}>
-										<TableCell>{new Date(exp.created_at).toLocaleString('pt-BR')}</TableCell>
-										<TableCell>
-											{exp.ano}
-											{exp.mes && `/${exp.mes.toString().padStart(2, '0')}`}
-										</TableCell>
-										<TableCell>{exp.modulo}</TableCell>
-										<TableCell className="capitalize">{exp.tipo_geracao}</TableCell>
-										<TableCell>{exp.quantidade_registros} registros</TableCell>
-										<TableCell className="text-right">
-											<a
-												href={prestacaoContasApi.getDownloadUrl(exp.id)}
-												target="_blank"
-												rel="noopener noreferrer">
-												<Button size="sm" variant="outline">
-													<Download className="w-4 h-4 mr-2" />
-													Download
-												</Button>
-											</a>
-										</TableCell>
-									</TableRow>
-								))}
-							</TableBody>
-						</Table>
-					</div>
-				</Card>
-			)}
 		</div>
 	);
 }
