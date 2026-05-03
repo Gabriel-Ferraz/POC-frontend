@@ -12,10 +12,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { suporteApi } from '@/app/features/suporte/api/suporte-api';
 import { toast } from 'sonner';
 import { Upload, X, FileText, Eye } from 'lucide-react';
+import { useAuth } from '@/providers/AuthProvider';
 
 export default function NovoChamadoPage() {
 	const router = useRouter();
 	const queryClient = useQueryClient();
+	const { user } = useAuth();
 	const [modulo, setModulo] = useState('');
 	const [assunto, setAssunto] = useState('');
 	const [anexos, setAnexos] = useState<File[]>([]);
@@ -84,6 +86,11 @@ export default function NovoChamadoPage() {
 			<Card>
 				<div className="p-6">
 					<form className="space-y-6" onSubmit={handleSubmit}>
+						<div>
+							<Label htmlFor="de">De</Label>
+							<Input id="de" value={user?.name ?? ''} disabled />
+						</div>
+
 						<div>
 							<Label htmlFor="modulo">
 								Módulo <span className="text-red-500">*</span>
