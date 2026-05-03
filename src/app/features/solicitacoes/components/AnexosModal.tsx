@@ -5,6 +5,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Eye, X, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useMutation } from '@tanstack/react-query';
+import { solicitacoesApi } from '@/app/features/solicitacoes/api/solicitacoes-api';
+import { CancelarSolicitacaoModal } from './CancelarSolicitacaoModal';
 
 interface Anexo {
 	id: number;
@@ -42,6 +45,24 @@ export function AnexosModal({ open, onClose, solicitacao, onSuccess }: AnexosMod
 	const [loading, setLoading] = useState(true);
 	const [uploading, setUploading] = useState<number | null>(null);
 	const [anexoExpandidoId, setAnexoExpandidoId] = useState<number | null>(null);
+	const [modalCancelarAberto, setModalCancelarAberto] = useState(false);
+
+	const { mutate: cancelar, isPending: isCancelando } = useMutation({
+		mutationFn: (motivo: string) =>
+			solicitacoesApi.cancelarSolicitacao(solicitacao.id, {
+				data_cancelamento: new Date().toISOString().split('T')[0],
+				motivo,
+			}),
+		onSuccess: () => {
+			toast.success('Solicitação cancelada com sucesso!');
+			setModalCancelarAberto(false);
+			onSuccess?.();
+			onClose();
+		},
+		onError: (error: any) => {
+			toast.error(error?.message || 'Erro ao cancelar solicitação');
+		},
+	});
 
 	// Define o primeiro anexo como expandido ao carregar
 	useEffect(() => {
@@ -257,12 +278,8 @@ export function AnexosModal({ open, onClose, solicitacao, onSuccess }: AnexosMod
 								<Button
 									variant="destructive"
 									className="w-full bg-red-600 hover:bg-red-700"
-									onClick={() => {
-										onClose();
-										// Navegar para cancelamento
-										window.location.href = `/portal-fornecedor/empenhos/1/solicitacoes`;
-									}}>
-									Fechar e Cancelar Solicitação
+									onClick={() => setModalCancelarAberto(true)}>
+									Cancelar esta Solicitação
 								</Button>
 							</div>
 						)}
@@ -527,6 +544,13 @@ export function AnexosModal({ open, onClose, solicitacao, onSuccess }: AnexosMod
 					</p>
 				)}
 			</DialogContent>
+
+			<CancelarSolicitacaoModal
+				open={modalCancelarAberto}
+				onClose={() => setModalCancelarAberto(false)}
+				onConfirm={cancelar}
+				isPending={isCancelando}
+			/>
 		</Dialog>
 	);
 }

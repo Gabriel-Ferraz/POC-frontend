@@ -8,7 +8,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { StatusBadge } from '@/components/ui/status-badge';
 import { Loading } from '@/components/ui/loading';
 import { EmptyState } from '@/components/ui/empty-state';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { solicitacoesApi } from '@/app/features/solicitacoes/api/solicitacoes-api';
 import { FileText, Paperclip, XCircle, Info } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
@@ -16,7 +16,6 @@ import { StatusSolicitacao } from '@/types/enums';
 import { CancelarSolicitacaoModal } from '@/app/features/solicitacoes/components/CancelarSolicitacaoModal';
 import { AnexosModal } from '@/app/features/solicitacoes/components/AnexosModal';
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 export default function SolicitacoesEmpenhoPage() {
@@ -29,10 +28,13 @@ export default function SolicitacoesEmpenhoPage() {
 	const [modalAnexosOpen, setModalAnexosOpen] = useState(false);
 	const [solicitacaoSelecionada, setSolicitacaoSelecionada] = useState<any>(null);
 
-	const { data: solicitacoes, isLoading } = useQuery({
+	const { data, isLoading } = useQuery({
 		queryKey: ['solicitacoes', empenhoId],
 		queryFn: () => solicitacoesApi.getSolicitacoesByEmpenho(empenhoId),
 	});
+
+	const empenho = data?.empenho;
+	const solicitacoesList = data?.solicitacoes ?? [];
 
 	const { mutate: cancelarSolicitacao, isPending: isCancelando } = useMutation({
 		mutationFn: (motivo: string) => {
@@ -57,13 +59,15 @@ export default function SolicitacoesEmpenhoPage() {
 		return <Loading text="Carregando solicitações..." />;
 	}
 
-	const solicitacoesList = Array.isArray(solicitacoes) ? solicitacoes : [];
-
 	return (
 		<div>
 			<PageHeader
-				title={`Solicitações do Empenho ${empenhoId}`}
-				description="Lista de solicitações de pagamento deste empenho"
+				title={`Solicitações do Empenho ${empenho?.numero ?? empenhoId}`}
+				description={
+					empenho?.contrato
+						? `Contrato ${empenho.contrato} · Saldo disponível: ${formatCurrency(Number(empenho.saldo))}`
+						: 'Lista de solicitações de pagamento deste empenho'
+				}
 				action={
 					<Button onClick={() => router.push(`/portal-fornecedor/empenhos/${empenhoId}/solicitacoes/nova`)}>
 						Nova Solicitação
@@ -81,81 +85,105 @@ export default function SolicitacoesEmpenhoPage() {
 				</Card>
 			) : (
 				<Card>
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead>Número</TableHead>
-								<TableHead>Documento Fiscal</TableHead>
-								<TableHead>Valor</TableHead>
-								<TableHead>Status</TableHead>
-								<TableHead className="text-right">Ações</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{solicitacoesList.map((solicitacao) => {
-								const isPendente =
-									solicitacao.status?.toLowerCase() === 'pendente' ||
-									solicitacao.status === StatusSolicitacao.PENDENTE;
+					<div className="overflow-x-auto">
+						<Table>
+							<TableHeader>
+								<TableRow>
+									<TableHead className="whitespace-nowrap">Número</TableHead>
+									<TableHead className="whitespace-nowrap">Data</TableHead>
+									<TableHead className="whitespace-nowrap">Documento Fiscal</TableHead>
+									<TableHead className="whitespace-nowrap">Solicitante</TableHead>
+									<TableHead className="whitespace-nowrap text-right">Valor</TableHead>
+									<TableHead className="whitespace-nowrap">Status</TableHead>
+									<TableHead className="whitespace-nowrap text-right">Ações</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{solicitacoesList.map((solicitacao) => {
+									const isPendente =
+										solicitacao.status?.toLowerCase() === 'pendente' ||
+										solicitacao.status === StatusSolicitacao.PENDENTE;
 
-								const podeEditarAnexos =
-									isPendente ||
-									solicitacao.status?.toLowerCase() === 'anexos_recusados' ||
-									solicitacao.status?.toLowerCase() === 'anexos recusados';
+									const podeEditarAnexos =
+										isPendente ||
+										solicitacao.status?.toLowerCase() === 'anexos_recusados' ||
+										solicitacao.status?.toLowerCase() === 'anexos recusados';
 
-								return (
-									<TableRow key={solicitacao.id}>
-										<TableCell className="font-medium">{solicitacao.numero}</TableCell>
-										<TableCell>
-											{solicitacao.documento_fiscal_tipo} {solicitacao.documento_fiscal_numero}
-										</TableCell>
-										<TableCell>{formatCurrency(parseFloat(String(solicitacao.valor)))}</TableCell>
-										<TableCell>
-											<StatusBadge status={solicitacao.status} />
-										</TableCell>
-										<TableCell className="text-right">
-											<div className="flex gap-2 justify-end">
-												<Button
-													size="sm"
-													variant="outline"
-													onClick={() =>
-														router.push(
-															`/portal-fornecedor/solicitacoes/${solicitacao.id}/informacoes`
-														)
-													}>
-													<Info className="w-4 h-4 mr-1" />
-													Informações
-												</Button>
+									const podeCancelar =
+										isPendente || solicitacao.status?.toLowerCase() === 'anexos_recusados';
 
-												<Button
-													size="sm"
-													variant="outline"
-													disabled={!podeEditarAnexos}
-													onClick={() => {
-														setSolicitacaoSelecionada(solicitacao);
-														setModalAnexosOpen(true);
-													}}>
-													<Paperclip className="w-4 h-4 mr-1" />
-													Anexos
-												</Button>
+									const docFiscal = [
+										(solicitacao as any).documento_fiscal_tipo,
+										(solicitacao as any).documento_fiscal_numero,
+									]
+										.filter(Boolean)
+										.join(' ');
 
-												<Button
-													size="sm"
-													variant="outline"
-													disabled={!isPendente}
-													onClick={() => {
-														setSolicitacaoSelecionada(solicitacao);
-														setModalCancelarOpen(true);
-													}}>
-													<XCircle className="w-4 h-4 mr-1" />
-													Cancelar
-												</Button>
-											</div>
-										</TableCell>
-									</TableRow>
-								);
-							})}
-						</TableBody>
-					</Table>
+									return (
+										<TableRow key={solicitacao.id}>
+											<TableCell className="font-medium whitespace-nowrap">
+												{solicitacao.numero}
+											</TableCell>
+											<TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+												{(solicitacao as any).data ?? '—'}
+											</TableCell>
+											<TableCell className="whitespace-nowrap">
+												{docFiscal || <span className="text-muted-foreground">—</span>}
+											</TableCell>
+											<TableCell className="whitespace-nowrap text-sm">
+												{(solicitacao as any).solicitante ?? '—'}
+											</TableCell>
+											<TableCell className="whitespace-nowrap text-right tabular-nums">
+												{formatCurrency(parseFloat(String(solicitacao.valor)))}
+											</TableCell>
+											<TableCell>
+												<StatusBadge status={solicitacao.status} />
+											</TableCell>
+											<TableCell className="text-right">
+												<div className="flex gap-1.5 justify-end">
+													<Button
+														size="sm"
+														variant="outline"
+														onClick={() =>
+															router.push(
+																`/portal-fornecedor/solicitacoes/${solicitacao.id}/informacoes`
+															)
+														}>
+														<Info className="w-3.5 h-3.5 mr-1" />
+														Informações
+													</Button>
+
+													<Button
+														size="sm"
+														variant="outline"
+														disabled={!podeEditarAnexos}
+														onClick={() => {
+															setSolicitacaoSelecionada(solicitacao);
+															setModalAnexosOpen(true);
+														}}>
+														<Paperclip className="w-3.5 h-3.5 mr-1" />
+														Anexos
+													</Button>
+
+													<Button
+														size="sm"
+														variant="outline"
+														disabled={!podeCancelar}
+														onClick={() => {
+															setSolicitacaoSelecionada(solicitacao);
+															setModalCancelarOpen(true);
+														}}>
+														<XCircle className="w-3.5 h-3.5 mr-1" />
+														Cancelar
+													</Button>
+												</div>
+											</TableCell>
+										</TableRow>
+									);
+								})}
+							</TableBody>
+						</Table>
+					</div>
 				</Card>
 			)}
 

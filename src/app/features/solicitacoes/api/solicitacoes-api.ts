@@ -20,15 +20,21 @@ export interface NovaSolicitacaoData {
 	observacao_pagamento?: string;
 }
 
-interface SolicitacoesResponse {
-	empenho: any;
+export interface EmpenhoResumo {
+	id: number;
+	numero: string;
+	saldo: number;
+	contrato?: string;
+}
+
+export interface SolicitacoesResponse {
+	empenho: EmpenhoResumo;
 	solicitacoes: SolicitacaoPagamento[];
 }
 
 export const solicitacoesApi = {
-	async getSolicitacoesByEmpenho(empenhoId: number): Promise<SolicitacaoPagamento[]> {
-		const response = await get<SolicitacoesResponse>(API_ENDPOINTS.solicitacoes.byEmpenho(empenhoId));
-		return response.solicitacoes || [];
+	async getSolicitacoesByEmpenho(empenhoId: number): Promise<SolicitacoesResponse> {
+		return get<SolicitacoesResponse>(API_ENDPOINTS.solicitacoes.byEmpenho(empenhoId));
 	},
 
 	async getSolicitacao(id: number): Promise<SolicitacaoPagamento> {
