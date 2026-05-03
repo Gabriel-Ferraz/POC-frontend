@@ -78,6 +78,12 @@ export function Sidebar() {
 					href: '/demonstracao-tecnica',
 					icon: Settings,
 				},
+			],
+		},
+		{
+			title: 'Administração',
+			perfis: [PerfilUsuario.GESTOR_SUPORTE],
+			items: [
 				{
 					label: 'Painel Admin',
 					href: '/admin',

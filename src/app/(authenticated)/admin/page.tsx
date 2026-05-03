@@ -8,11 +8,55 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { useState } from 'react';
-import { UserPlus, FileText, DollarSign, RefreshCw, Database } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { UserPlus, FileText, DollarSign, RefreshCw, Database, ShieldAlert } from 'lucide-react';
+import { useAuth } from '@/providers/AuthProvider';
+import { useRouter } from 'next/navigation';
+import { Loading } from '@/components/ui/loading';
 
 export default function AdminPage() {
+	const { user, loading } = useAuth();
+	const router = useRouter();
 	const [activeTab, setActiveTab] = useState<'usuarios' | 'empenhos' | 'solicitacoes' | 'fornecedores'>('usuarios');
+
+	// Verificar permissão
+	useEffect(() => {
+		if (!loading && (!user || user.perfil !== 'gestor_suporte')) {
+			router.push('/');
+		}
+	}, [user, loading, router]);
+
+	// Mostrar loading enquanto verifica
+	if (loading) {
+		return <Loading text="Verificando permissões..." />;
+	}
+
+	// Bloquear acesso se não for gestor_suporte
+	if (!user || user.perfil !== 'gestor_suporte') {
+		return (
+			<div className="flex items-center justify-center min-h-[60vh]">
+				<Card className="max-w-md w-full">
+					<div className="p-8 text-center">
+						<div className="flex justify-center mb-4">
+							<div className="p-3 bg-red-100 dark:bg-red-900 rounded-full">
+								<ShieldAlert className="w-8 h-8 text-red-600 dark:text-red-400" />
+							</div>
+						</div>
+						<h2 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">Acesso Negado</h2>
+						<p className="text-gray-600 dark:text-gray-400 mb-4">
+							Você não tem permissão para acessar o Painel Administrativo.
+						</p>
+						<p className="text-sm text-gray-500 dark:text-gray-500 mb-6">
+							Apenas usuários com perfil <strong>Gestor de Suporte</strong> podem acessar esta área.
+						</p>
+						<Button onClick={() => router.push('/')} variant="outline">
+							Voltar para o Início
+						</Button>
+					</div>
+				</Card>
+			</div>
+		);
+	}
 
 	return (
 		<div className="space-y-6">
@@ -484,6 +528,45 @@ function SolicitacoesTab() {
 	const [solicitacaoId, setSolicitacaoId] = useState('');
 	const [novoStatus, setNovoStatus] = useState('');
 	const [motivo, setMotivo] = useState('');
+	const [statusAtual, setStatusAtual] = useState('');
+	const [loadingSolicitacao, setLoadingSolicitacao] = useState(false);
+	const [solicitacaoInfo, setSolicitacaoInfo] = useState<any>(null);
+
+	const handleCarregarSolicitacao = async () => {
+		if (!solicitacaoId) {
+			toast.error('Digite o ID da solicitação');
+			return;
+		}
+
+		setLoadingSolicitacao(true);
+		try {
+			const token = localStorage.getItem('auth_token');
+			const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333/api';
+
+			const response = await fetch(`${apiUrl}/solicitacoes/${solicitacaoId}`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+			if (!response.ok) {
+				throw new Error('Solicitação não encontrada');
+			}
+
+			const data = await response.json();
+			const solicitacao = data.solicitacao || data;
+
+			setSolicitacaoInfo(solicitacao);
+			setStatusAtual(solicitacao.status);
+			toast.success('Solicitação carregada!');
+		} catch (error: any) {
+			toast.error(error.message || 'Erro ao carregar solicitação');
+			setSolicitacaoInfo(null);
+			setStatusAtual('');
+		} finally {
+			setLoadingSolicitacao(false);
+		}
+	};
 
 	const handleAtualizarStatus = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -509,9 +592,12 @@ function SolicitacoesTab() {
 			}
 
 			toast.success('Status da solicitação atualizado com sucesso!');
-			setSolicitacaoId('');
+			setStatusAtual(novoStatus);
 			setNovoStatus('');
 			setMotivo('');
+
+			// Recarregar dados
+			handleCarregarSolicitacao();
 		} catch (error: any) {
 			toast.error(error.message);
 		}
@@ -519,47 +605,88 @@ function SolicitacoesTab() {
 
 	return (
 		<div className="space-y-6">
+			{/* Buscar Solicitação */}
+			<div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+				<h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">1. Buscar Solicitação</h3>
+				<p className="text-sm text-blue-800 dark:text-blue-200 mb-4">
+					Digite o ID da solicitação para carregar suas informações
+				</p>
+
+				<div className="flex gap-2">
+					<div className="flex-1">
+						<Input
+							type="number"
+							value={solicitacaoId}
+							onChange={(e) => setSolicitacaoId(e.target.value)}
+							placeholder="Ex: 1"
+						/>
+					</div>
+					<Button type="button" onClick={handleCarregarSolicitacao} disabled={loadingSolicitacao}>
+						{loadingSolicitacao ? 'Carregando...' : 'Buscar'}
+					</Button>
+				</div>
+
+				{/* Info da Solicitação Carregada */}
+				{solicitacaoInfo && (
+					<div className="mt-4 p-4 bg-white dark:bg-gray-800 rounded-lg border border-blue-200 dark:border-blue-700">
+						<div className="grid grid-cols-2 gap-4 text-sm">
+							<div>
+								<p className="text-gray-500 dark:text-gray-400">Número:</p>
+								<p className="font-semibold">{solicitacaoInfo.numero}</p>
+							</div>
+							<div>
+								<p className="text-gray-500 dark:text-gray-400">Valor:</p>
+								<p className="font-semibold">
+									R${' '}
+									{Number(solicitacaoInfo.valor).toLocaleString('pt-BR', {
+										minimumFractionDigits: 2,
+									})}
+								</p>
+							</div>
+							<div className="col-span-2">
+								<p className="text-gray-500 dark:text-gray-400">Status Atual:</p>
+								<p className="font-semibold text-lg text-blue-600 dark:text-blue-400">{statusAtual}</p>
+							</div>
+						</div>
+					</div>
+				)}
+			</div>
+
+			{/* Atualizar Status */}
 			<div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
 				<h3 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-2 flex items-center gap-2">
 					<RefreshCw className="w-4 h-4" />
-					Atualizar Status de Solicitação
+					2. Atualizar Status
 				</h3>
 				<p className="text-sm text-yellow-800 dark:text-yellow-200 mb-4">
-					Use este formulário para avançar manualmente o status de uma solicitação de pagamento.
+					{statusAtual ? `Mover de "${statusAtual}" para outro status` : 'Busque uma solicitação primeiro'}
 				</p>
 
 				<form onSubmit={handleAtualizarStatus} className="space-y-4">
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<div>
-							<Label htmlFor="solicitacao_id">ID da Solicitação *</Label>
-							<Input
-								id="solicitacao_id"
-								type="number"
-								value={solicitacaoId}
-								onChange={(e) => setSolicitacaoId(e.target.value)}
-								placeholder="Ex: 1"
-								required
-							/>
-						</div>
-
-						<div>
-							<Label htmlFor="novo_status">Novo Status *</Label>
-							<Select value={novoStatus} onValueChange={setNovoStatus}>
-								<SelectTrigger>
-									<SelectValue placeholder="Selecione o status" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="rascunho">Rascunho</SelectItem>
-									<SelectItem value="aguardando_aprovacao">Aguardando Aprovação</SelectItem>
-									<SelectItem value="em_analise">Em Análise</SelectItem>
-									<SelectItem value="aprovado">Aprovado</SelectItem>
-									<SelectItem value="em_pagamento">Em Pagamento</SelectItem>
-									<SelectItem value="pago">Pago</SelectItem>
-									<SelectItem value="cancelado">Cancelado</SelectItem>
-									<SelectItem value="recusado">Recusado</SelectItem>
-								</SelectContent>
-							</Select>
-						</div>
+					<div>
+						<Label htmlFor="novo_status">Novo Status *</Label>
+						<Select value={novoStatus} onValueChange={setNovoStatus} disabled={!solicitacaoInfo}>
+							<SelectTrigger>
+								<SelectValue placeholder="Selecione o status" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="rascunho">📝 Rascunho</SelectItem>
+								<SelectItem value="aguardando_aprovacao">⏳ Aguardando Aprovação</SelectItem>
+								<SelectItem value="anexos">📎 Anexos</SelectItem>
+								<SelectItem value="fiscal">📋 Fiscal</SelectItem>
+								<SelectItem value="gestor">👔 Gestor</SelectItem>
+								<SelectItem value="liquidacao">💰 Liquidação</SelectItem>
+								<SelectItem value="secretario">📜 Secretário(a)</SelectItem>
+								<SelectItem value="iss">🏛️ ISS</SelectItem>
+								<SelectItem value="ordem_pagamento">📄 Ordem de Pagamento</SelectItem>
+								<SelectItem value="autorizacao">✅ Autorização</SelectItem>
+								<SelectItem value="bordero">📊 Borderô</SelectItem>
+								<SelectItem value="remessa">📤 Remessa</SelectItem>
+								<SelectItem value="pagamento">💵 Pagamento</SelectItem>
+								<SelectItem value="pagamento_realizado">✔️ Pagamento Realizado</SelectItem>
+								<SelectItem value="cancelado">❌ Cancelado</SelectItem>
+							</SelectContent>
+						</Select>
 					</div>
 
 					<div>
@@ -570,38 +697,106 @@ function SolicitacoesTab() {
 							onChange={(e) => setMotivo(e.target.value)}
 							placeholder="Descreva o motivo da mudança de status..."
 							rows={3}
+							disabled={!solicitacaoInfo}
 						/>
 					</div>
 
-					<Button type="submit" className="w-full">
+					<Button type="submit" className="w-full" disabled={!solicitacaoInfo || !novoStatus}>
 						<RefreshCw className="w-4 h-4 mr-2" />
 						Atualizar Status
 					</Button>
 				</form>
 			</div>
 
+			{/* Fluxo de Status */}
 			<div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-				<h4 className="font-semibold mb-2">Fluxo de Status Padrão:</h4>
-				<ol className="text-sm space-y-1 list-decimal list-inside text-gray-700 dark:text-gray-300">
-					<li>
-						<strong>Rascunho</strong> → Solicitação criada
-					</li>
-					<li>
-						<strong>Aguardando Aprovação</strong> → Anexos enviados
-					</li>
-					<li>
-						<strong>Em Análise</strong> → Gestor está analisando
-					</li>
-					<li>
-						<strong>Aprovado</strong> → Todos anexos aprovados
-					</li>
-					<li>
-						<strong>Em Pagamento</strong> → Em processo de pagamento
-					</li>
-					<li>
-						<strong>Pago</strong> → Pagamento concluído
-					</li>
-				</ol>
+				<h4 className="font-semibold mb-3">📋 Fluxo Completo de Status:</h4>
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+					<div className="flex items-center gap-2">
+						<span className="text-xl">📝</span>
+						<span>
+							<strong>Rascunho</strong> → Solicitação criada
+						</span>
+					</div>
+					<div className="flex items-center gap-2">
+						<span className="text-xl">⏳</span>
+						<span>
+							<strong>Aguardando Aprovação</strong> → Anexos enviados
+						</span>
+					</div>
+					<div className="flex items-center gap-2">
+						<span className="text-xl">📎</span>
+						<span>
+							<strong>Anexos</strong> → Análise de documentos
+						</span>
+					</div>
+					<div className="flex items-center gap-2">
+						<span className="text-xl">📋</span>
+						<span>
+							<strong>Fiscal</strong> → Análise fiscal
+						</span>
+					</div>
+					<div className="flex items-center gap-2">
+						<span className="text-xl">👔</span>
+						<span>
+							<strong>Gestor</strong> → Aprovação do gestor
+						</span>
+					</div>
+					<div className="flex items-center gap-2">
+						<span className="text-xl">💰</span>
+						<span>
+							<strong>Liquidação</strong> → Processo de liquidação
+						</span>
+					</div>
+					<div className="flex items-center gap-2">
+						<span className="text-xl">📜</span>
+						<span>
+							<strong>Secretário(a)</strong> → Aprovação secretaria
+						</span>
+					</div>
+					<div className="flex items-center gap-2">
+						<span className="text-xl">🏛️</span>
+						<span>
+							<strong>ISS</strong> → Verificação de impostos
+						</span>
+					</div>
+					<div className="flex items-center gap-2">
+						<span className="text-xl">📄</span>
+						<span>
+							<strong>Ordem de Pagamento</strong> → OP gerada
+						</span>
+					</div>
+					<div className="flex items-center gap-2">
+						<span className="text-xl">✅</span>
+						<span>
+							<strong>Autorização</strong> → Pagamento autorizado
+						</span>
+					</div>
+					<div className="flex items-center gap-2">
+						<span className="text-xl">📊</span>
+						<span>
+							<strong>Borderô</strong> → Borderô criado
+						</span>
+					</div>
+					<div className="flex items-center gap-2">
+						<span className="text-xl">📤</span>
+						<span>
+							<strong>Remessa</strong> → Enviado para pagamento
+						</span>
+					</div>
+					<div className="flex items-center gap-2">
+						<span className="text-xl">💵</span>
+						<span>
+							<strong>Pagamento</strong> → Em processo de pagamento
+						</span>
+					</div>
+					<div className="flex items-center gap-2">
+						<span className="text-xl">✔️</span>
+						<span>
+							<strong>Pagamento Realizado</strong> → Concluído
+						</span>
+					</div>
+				</div>
 			</div>
 		</div>
 	);
