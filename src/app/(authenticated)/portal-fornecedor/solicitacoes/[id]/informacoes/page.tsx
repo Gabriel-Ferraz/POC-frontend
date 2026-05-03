@@ -4,15 +4,17 @@ import { useParams, useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/ui/page-header';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { StatusBadge } from '@/components/ui/status-badge';
 import { Loading } from '@/components/ui/loading';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { solicitacoesApi } from '@/app/features/solicitacoes/api/solicitacoes-api';
 import { formatCurrency } from '@/lib/formatters';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, CheckCircle2, Clock, Circle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AnexosTabContent } from '@/app/features/solicitacoes/components/AnexosTabContent';
+import { CancelarSolicitacaoModal } from '@/app/features/solicitacoes/components/CancelarSolicitacaoModal';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 // Etapas do fluxo
 const ETAPAS_FLUXO = [
@@ -42,11 +44,30 @@ interface EtapaAndamento {
 export default function InformacoesSolicitacaoPage() {
 	const params = useParams();
 	const router = useRouter();
+	const queryClient = useQueryClient();
 	const solicitacaoId = parseInt(params.id as string);
+	const [modalCancelarAberto, setModalCancelarAberto] = useState(false);
 
 	const { data: solicitacao, isLoading } = useQuery({
 		queryKey: ['solicitacao-info', solicitacaoId],
 		queryFn: () => solicitacoesApi.getSolicitacao(solicitacaoId),
+	});
+
+	const { mutate: cancelar, isPending: isCancelando } = useMutation({
+		mutationFn: (motivo: string) =>
+			solicitacoesApi.cancelarSolicitacao(solicitacaoId, {
+				data_cancelamento: new Date().toISOString().split('T')[0],
+				motivo,
+			}),
+		onSuccess: () => {
+			toast.success('Solicitação cancelada com sucesso');
+			setModalCancelarAberto(false);
+			queryClient.invalidateQueries({ queryKey: ['solicitacao-info', solicitacaoId] });
+			router.back();
+		},
+		onError: (error: any) => {
+			toast.error(error?.message || 'Erro ao cancelar solicitação');
+		},
 	});
 
 	if (isLoading) {
@@ -99,7 +120,7 @@ export default function InformacoesSolicitacaoPage() {
 											{
 												'bg-green-500 border-green-500 text-white':
 													etapa.status === 'concluido',
-												'bg-orange-500 border-orange-500 text-white':
+												'bg-yellow-400 border-yellow-400 text-white':
 													etapa.status === 'em_andamento',
 												'bg-gray-300 border-gray-300 text-gray-600':
 													etapa.status === 'pendente',
@@ -112,7 +133,7 @@ export default function InformacoesSolicitacaoPage() {
 									<p
 										className={cn('text-[10px] text-center font-medium leading-tight', {
 											'text-green-700': etapa.status === 'concluido',
-											'text-orange-700': etapa.status === 'em_andamento',
+											'text-yellow-600': etapa.status === 'em_andamento',
 											'text-gray-500': etapa.status === 'pendente',
 										})}>
 										{etapa.label}
@@ -331,7 +352,10 @@ export default function InformacoesSolicitacaoPage() {
 					{/* ABA: ANEXOS PAGAMENTO */}
 					<TabsContent value="anexos" className="p-6">
 						<h4 className="font-semibold mb-4 dark:text-foreground">Anexos Pagamento</h4>
-						<AnexosTabContent solicitacaoId={solicitacaoId} />
+						<AnexosTabContent
+							solicitacaoId={solicitacaoId}
+							onCancelar={() => setModalCancelarAberto(true)}
+						/>
 					</TabsContent>
 
 					{/* ABA: GESTOR */}
@@ -498,6 +522,13 @@ export default function InformacoesSolicitacaoPage() {
 					</TabsContent>
 				</Tabs>
 			</Card>
+
+			<CancelarSolicitacaoModal
+				open={modalCancelarAberto}
+				onClose={() => setModalCancelarAberto(false)}
+				onConfirm={cancelar}
+				isPending={isCancelando}
+			/>
 		</div>
 	);
 }

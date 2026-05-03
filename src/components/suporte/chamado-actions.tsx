@@ -6,7 +6,6 @@ interface ChamadoActionsProps {
 	chamadoId: number;
 	status: string;
 	ultimaMensagemPor?: 'usuario' | 'gestor';
-	temRespostaPendente?: boolean;
 	onVerLog: (id: number) => void;
 	onVerInformacoes: (id: number) => void;
 }
@@ -15,11 +14,9 @@ export function ChamadoActions({
 	chamadoId,
 	status,
 	ultimaMensagemPor,
-	temRespostaPendente,
 	onVerLog,
 	onVerInformacoes,
 }: ChamadoActionsProps) {
-	// Determinar a cor do ícone de Log baseado nas regras
 	const getLogIconColor = () => {
 		// Cinza: chamado concluído
 		if (status === 'concluido') {
@@ -30,20 +27,20 @@ export function ChamadoActions({
 			};
 		}
 
-		// Laranja: chamado respondido pelo gestor, pendente de resposta do usuário
-		if (temRespostaPendente || ultimaMensagemPor === 'gestor') {
+		// Laranja: última mensagem foi do atendente — usuário precisa responder
+		if (ultimaMensagemPor === 'gestor') {
 			return {
-				bg: 'bg-orange-100 hover:bg-orange-200 dark:bg-orange-900 dark:hover:bg-orange-800',
+				bg: 'bg-orange-100 hover:bg-orange-200 dark:bg-orange-900/40 dark:hover:bg-orange-900/60',
 				icon: 'text-orange-600 dark:text-orange-400',
-				tooltip: 'Resposta recebida - Requer sua atenção',
+				tooltip: 'Atendente respondeu - Aguardando sua resposta',
 			};
 		}
 
-		// Azul: chamado aberto ou última mensagem foi do usuário
+		// Azul: última mensagem foi do usuário solicitante (ou chamado recém aberto)
 		return {
-			bg: 'bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800',
+			bg: 'bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-900/60',
 			icon: 'text-blue-600 dark:text-blue-400',
-			tooltip: 'Chamado em atendimento',
+			tooltip: 'Aguardando resposta do atendente',
 		};
 	};
 

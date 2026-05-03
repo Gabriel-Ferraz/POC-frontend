@@ -35,9 +35,12 @@ export default function SolicitacoesEmpenhoPage() {
 	});
 
 	const { mutate: cancelarSolicitacao, isPending: isCancelando } = useMutation({
-		mutationFn: (data: { data_cancelamento: string; motivo: string }) => {
+		mutationFn: (motivo: string) => {
 			if (!solicitacaoSelecionada?.id) throw new Error('Nenhuma solicitação selecionada');
-			return solicitacoesApi.cancelarSolicitacao(solicitacaoSelecionada.id, data);
+			return solicitacoesApi.cancelarSolicitacao(solicitacaoSelecionada.id, {
+				data_cancelamento: new Date().toISOString().split('T')[0],
+				motivo,
+			});
 		},
 		onSuccess: () => {
 			toast.success('Solicitação cancelada com sucesso!');

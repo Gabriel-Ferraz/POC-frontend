@@ -33,9 +33,10 @@ interface Solicitacao {
 interface AnexosTabContentProps {
 	solicitacaoId: number;
 	onSuccess?: () => void;
+	onCancelar?: () => void;
 }
 
-export function AnexosTabContent({ solicitacaoId, onSuccess }: AnexosTabContentProps) {
+export function AnexosTabContent({ solicitacaoId, onSuccess, onCancelar }: AnexosTabContentProps) {
 	const [solicitacaoCompleta, setSolicitacaoCompleta] = useState<Solicitacao | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [uploading, setUploading] = useState<number | null>(null);
@@ -245,13 +246,8 @@ export function AnexosTabContent({ solicitacaoId, onSuccess }: AnexosTabContentP
 							</ol>
 						</div>
 					</div>
-					<Button
-						variant="destructive"
-						className="w-full bg-red-600 hover:bg-red-700"
-						onClick={() => {
-							window.location.href = `/portal-fornecedor/empenhos/1/solicitacoes`;
-						}}>
-						Fechar e Cancelar Solicitação
+					<Button variant="destructive" className="w-full bg-red-600 hover:bg-red-700" onClick={onCancelar}>
+						Cancelar esta Solicitação
 					</Button>
 				</div>
 			)}

@@ -445,7 +445,6 @@ export default function SuportePage() {
 											chamadoId={chamado.id}
 											status={chamado.status}
 											ultimaMensagemPor={chamado.ultima_mensagem_por}
-											temRespostaPendente={chamado.tem_resposta_pendente}
 											onVerLog={(id) => router.push(`/suporte/chamados/${id}`)}
 											onVerInformacoes={(id) => router.push(`/suporte/chamados/${id}/info`)}
 										/>
