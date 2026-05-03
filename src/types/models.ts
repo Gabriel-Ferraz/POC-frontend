@@ -152,10 +152,10 @@ export interface AnexoChamado {
 export interface LeiAto {
 	id: number;
 	numero: string;
-	tipo: string;
+	tipo: 'lei' | 'decreto' | 'resolucao' | 'ato_gestor';
 	data_ato: string;
 	data_publicacao: string;
-	descricao: string;
+	descricao?: string;
 	arquivo?: string;
 	arquivo_url?: string;
 	created_at?: string;
@@ -165,28 +165,28 @@ export interface LeiAto {
 export interface AlteracaoOrcamentaria {
 	id: number;
 	lei_ato_id: number;
-	lei_ato?: LeiAto;
-	decreto: string;
-	tipo_ato: TipoAto;
-	tipo_credito: TipoCredito;
-	tipo_recurso: TipoRecurso;
-	valor: number;
+	lei_ato?: string | LeiAto; // Pode vir como string "001/2026" ou objeto
+	decreto_autorizador: string;
+	tipo_ato: 'decreto' | 'resolucao' | 'ato_gestor';
+	tipo_credito: 'especial' | 'suplementar' | 'extraordinario';
+	tipo_recurso: 'superavit' | 'excesso_arrecadacao';
+	valor_credito: string | number;
 	data_ato: string;
 	data_publicacao: string;
-	dotacoes?: DotacaoAlterada[];
+	total_dotacoes?: number;
 	created_at?: string;
 	updated_at?: string;
 }
 
-export interface DotacaoAlterada {
+export interface DotacaoAlteracao {
 	id: number;
-	alteracao_id: number;
-	dotacao: string;
-	conta_receita: string;
-	valor_suprimido: number;
-	valor_suplementado: number;
-	saldo_atual: number;
-	novo_saldo: number;
+	alteracao_id?: number;
+	dotacao_orcamentaria: string;
+	conta_receita?: string;
+	valor_suprimido: string | number;
+	valor_suplementado: string | number;
+	saldo_atual: string | number;
+	novo_saldo: string | number;
 	created_at?: string;
 	updated_at?: string;
 }

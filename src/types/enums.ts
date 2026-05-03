@@ -50,20 +50,27 @@ export enum TipoAnexo {
 }
 
 export enum TipoAto {
-	DECRETO = 'Decreto',
-	RESOLUCAO = 'Resolução',
-	ATO_GESTOR = 'Ato Gestor',
+	DECRETO = 'decreto',
+	RESOLUCAO = 'resolucao',
+	ATO_GESTOR = 'ato_gestor',
 }
 
 export enum TipoCredito {
-	ESPECIAL = 'Especial',
-	SUPLEMENTAR = 'Suplementar',
-	EXTRAORDINARIO = 'Extraordinário',
+	ESPECIAL = 'especial',
+	SUPLEMENTAR = 'suplementar',
+	EXTRAORDINARIO = 'extraordinario',
 }
 
 export enum TipoRecurso {
-	SUPERAVIT = 'Superávit',
-	EXCESSO_ARRECADACAO = 'Excesso de arrecadação',
+	SUPERAVIT = 'superavit',
+	EXCESSO_ARRECADACAO = 'excesso_arrecadacao',
+}
+
+export enum TipoLei {
+	LEI = 'lei',
+	DECRETO = 'decreto',
+	RESOLUCAO = 'resolucao',
+	ATO_GESTOR = 'ato_gestor',
 }
 
 export enum FormaPagamento {

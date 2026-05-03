@@ -13,11 +13,11 @@ export interface NovaLeiAtoData {
 
 export interface NovaAlteracaoData {
 	lei_ato_id: number;
-	decreto: string;
+	decreto_autorizador: string;
 	tipo_ato: string;
 	tipo_credito: string;
 	tipo_recurso: string;
-	valor: number;
+	valor_credito: number;
 	data_ato: string;
 	data_publicacao: string;
 }
@@ -25,7 +25,8 @@ export interface NovaAlteracaoData {
 export const orcamentarioApi = {
 	// Leis e Atos
 	async getLeisAtos(): Promise<LeiAto[]> {
-		return await get<LeiAto[]>(API_ENDPOINTS.orcamentario.leisAtos.list);
+		const response = await get<{ leis_atos: LeiAto[] }>(API_ENDPOINTS.orcamentario.leisAtos.list);
+		return response.leis_atos;
 	},
 
 	async criarLeiAto(data: NovaLeiAtoData): Promise<LeiAto> {
@@ -42,17 +43,34 @@ export const orcamentarioApi = {
 		return await post<LeiAto>(API_ENDPOINTS.orcamentario.leisAtos.create, formData);
 	},
 
+	async atualizarLeiAto(id: number, data: NovaLeiAtoData): Promise<LeiAto> {
+		const formData = new FormData();
+		formData.append('numero', data.numero);
+		formData.append('tipo', data.tipo);
+		formData.append('data_ato', data.data_ato);
+		formData.append('data_publicacao', data.data_publicacao);
+		formData.append('descricao', data.descricao);
+		if (data.arquivo) {
+			formData.append('arquivo', data.arquivo);
+		}
+
+		return await put<LeiAto>(API_ENDPOINTS.orcamentario.leisAtos.update(id), formData);
+	},
+
 	async deletarLeiAto(id: number): Promise<void> {
 		await del(API_ENDPOINTS.orcamentario.leisAtos.delete(id));
 	},
 
 	// Alterações Orçamentárias
 	async getAlteracoes(): Promise<AlteracaoOrcamentaria[]> {
-		return await get<AlteracaoOrcamentaria[]>(API_ENDPOINTS.orcamentario.alteracoes.list);
+		const response = await get<{ alteracoes: AlteracaoOrcamentaria[] }>(API_ENDPOINTS.orcamentario.alteracoes.list);
+		return response.alteracoes;
 	},
 
-	async getAlteracao(id: number): Promise<AlteracaoOrcamentaria> {
-		return await get<AlteracaoOrcamentaria>(API_ENDPOINTS.orcamentario.alteracoes.show(id));
+	async getAlteracao(id: number): Promise<{ alteracao: AlteracaoOrcamentaria; dotacoes: any[] }> {
+		return await get<{ alteracao: AlteracaoOrcamentaria; dotacoes: any[] }>(
+			API_ENDPOINTS.orcamentario.alteracoes.show(id)
+		);
 	},
 
 	async criarAlteracao(data: NovaAlteracaoData): Promise<AlteracaoOrcamentaria> {

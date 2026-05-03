@@ -68,8 +68,10 @@ export const API_ENDPOINTS = {
 			list: '/orcamentario/alteracoes',
 			create: '/orcamentario/alteracoes',
 			show: (id: number) => `/orcamentario/alteracoes/${id}`,
-			dotacoes: (id: number) => `/orcamentario/alteracoes/${id}/dotacoes`,
 			pdf: (id: number) => `/orcamentario/alteracoes/${id}/pdf`,
+			dotacoes: {
+				create: (alteracaoId: number) => `/orcamentario/alteracoes/${alteracaoId}/dotacoes`,
+			},
 		},
 	},
 };

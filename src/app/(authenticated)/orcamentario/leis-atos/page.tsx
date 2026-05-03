@@ -14,13 +14,19 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { orcamentarioApi } from '@/app/features/orcamentario/api/orcamentario-api';
 import { toast } from 'sonner';
-import { FileText, Trash2, Plus } from 'lucide-react';
+import { FileText, Trash2, Plus, Edit2 } from 'lucide-react';
 
-const TIPOS_ATO = ['Lei', 'Decreto', 'Resolução', 'Portaria'];
+const TIPOS_ATO = [
+	{ value: 'lei', label: 'Lei' },
+	{ value: 'decreto', label: 'Decreto' },
+	{ value: 'resolucao', label: 'Resolução' },
+	{ value: 'ato_gestor', label: 'Ato do Gestor' },
+];
 
 export default function LeisAtosPage() {
 	const queryClient = useQueryClient();
 	const [showForm, setShowForm] = useState(false);
+	const [editandoId, setEditandoId] = useState<number | null>(null);
 
 	const [numero, setNumero] = useState('');
 	const [tipo, setTipo] = useState('');
@@ -47,17 +53,30 @@ export default function LeisAtosPage() {
 		onSuccess: () => {
 			toast.success('Lei/Ato cadastrado com sucesso!');
 			queryClient.invalidateQueries({ queryKey: ['leis-atos'] });
-			setShowForm(false);
-			// Reset form
-			setNumero('');
-			setTipo('');
-			setDataAto('');
-			setDataPublicacao('');
-			setDescricao('');
-			setArquivo(null);
+			resetForm();
 		},
 		onError: (error: any) => {
 			toast.error(error?.message || 'Erro ao cadastrar lei/ato');
+		},
+	});
+
+	const { mutate: atualizar, isPending: isAtualizando } = useMutation({
+		mutationFn: () =>
+			orcamentarioApi.atualizarLeiAto(editandoId!, {
+				numero,
+				tipo,
+				data_ato: dataAto,
+				data_publicacao: dataPublicacao,
+				descricao,
+				arquivo: arquivo || undefined,
+			}),
+		onSuccess: () => {
+			toast.success('Lei/Ato atualizado com sucesso!');
+			queryClient.invalidateQueries({ queryKey: ['leis-atos'] });
+			resetForm();
+		},
+		onError: (error: any) => {
+			toast.error(error?.message || 'Erro ao atualizar lei/ato');
 		},
 	});
 
@@ -68,9 +87,36 @@ export default function LeisAtosPage() {
 			queryClient.invalidateQueries({ queryKey: ['leis-atos'] });
 		},
 		onError: (error: any) => {
-			toast.error(error?.message || 'Erro ao excluir lei/ato');
+			const mensagem = error?.message || 'Erro ao excluir lei/ato';
+			if (mensagem.includes('vinculadas') || mensagem.includes('vinculada')) {
+				toast.error('Não é possível excluir esta lei/ato pois existem alterações vinculadas');
+			} else {
+				toast.error(mensagem);
+			}
 		},
 	});
+
+	const resetForm = () => {
+		setShowForm(false);
+		setEditandoId(null);
+		setNumero('');
+		setTipo('');
+		setDataAto('');
+		setDataPublicacao('');
+		setDescricao('');
+		setArquivo(null);
+	};
+
+	const handleEdit = (leiAto: any) => {
+		setEditandoId(leiAto.id);
+		setNumero(leiAto.numero);
+		setTipo(leiAto.tipo);
+		setDataAto(leiAto.data_ato);
+		setDataPublicacao(leiAto.data_publicacao);
+		setDescricao(leiAto.descricao || '');
+		setArquivo(null);
+		setShowForm(true);
+	};
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -80,7 +126,11 @@ export default function LeisAtosPage() {
 			return;
 		}
 
-		criar();
+		if (editandoId) {
+			atualizar();
+		} else {
+			criar();
+		}
 	};
 
 	if (isLoading) {
@@ -88,6 +138,12 @@ export default function LeisAtosPage() {
 	}
 
 	const leisAtosList = Array.isArray(leisAtos) ? leisAtos : [];
+	const isProcessando = isCriando || isAtualizando;
+
+	const getTipoLabel = (tipo: string) => {
+		const tipoObj = TIPOS_ATO.find((t) => t.value === tipo);
+		return tipoObj?.label || tipo;
+	};
 
 	return (
 		<div className="space-y-6">
@@ -95,7 +151,14 @@ export default function LeisAtosPage() {
 				title="Leis e Atos"
 				description="Cadastro e gerenciamento de leis e atos normativos"
 				action={
-					<Button onClick={() => setShowForm(!showForm)}>
+					<Button
+						onClick={() => {
+							if (showForm) {
+								resetForm();
+							} else {
+								setShowForm(true);
+							}
+						}}>
 						<Plus className="w-4 h-4 mr-2" />
 						{showForm ? 'Cancelar' : 'Nova Lei/Ato'}
 					</Button>
@@ -105,7 +168,7 @@ export default function LeisAtosPage() {
 			{showForm && (
 				<Card>
 					<div className="p-6">
-						<h3 className="font-semibold text-lg mb-4">Nova Lei/Ato</h3>
+						<h3 className="font-semibold text-lg mb-4">{editandoId ? 'Editar Lei/Ato' : 'Nova Lei/Ato'}</h3>
 
 						<form onSubmit={handleSubmit} className="space-y-4">
 							<div className="grid grid-cols-2 gap-4">
@@ -116,7 +179,7 @@ export default function LeisAtosPage() {
 										placeholder="Ex: 001/2026"
 										value={numero}
 										onChange={(e) => setNumero(e.target.value)}
-										disabled={isCriando}
+										disabled={isProcessando}
 										required
 									/>
 								</div>
@@ -127,12 +190,12 @@ export default function LeisAtosPage() {
 										id="tipo"
 										value={tipo}
 										onChange={(e) => setTipo(e.target.value)}
-										disabled={isCriando}
+										disabled={isProcessando}
 										required>
 										<option value="">Selecione...</option>
 										{TIPOS_ATO.map((t) => (
-											<option key={t} value={t}>
-												{t}
+											<option key={t.value} value={t.value}>
+												{t.label}
 											</option>
 										))}
 									</SelectNative>
@@ -145,7 +208,7 @@ export default function LeisAtosPage() {
 										type="date"
 										value={dataAto}
 										onChange={(e) => setDataAto(e.target.value)}
-										disabled={isCriando}
+										disabled={isProcessando}
 										required
 									/>
 								</div>
@@ -157,7 +220,7 @@ export default function LeisAtosPage() {
 										type="date"
 										value={dataPublicacao}
 										onChange={(e) => setDataPublicacao(e.target.value)}
-										disabled={isCriando}
+										disabled={isProcessando}
 										required
 									/>
 								</div>
@@ -170,7 +233,7 @@ export default function LeisAtosPage() {
 										rows={3}
 										value={descricao}
 										onChange={(e) => setDescricao(e.target.value)}
-										disabled={isCriando}
+										disabled={isProcessando}
 										required
 									/>
 								</div>
@@ -182,17 +245,17 @@ export default function LeisAtosPage() {
 										type="file"
 										accept=".pdf"
 										onChange={(e) => setArquivo(e.target.files?.[0] || null)}
-										disabled={isCriando}
+										disabled={isProcessando}
 									/>
 								</div>
 							</div>
 
 							<div className="flex justify-end gap-3 pt-4 border-t">
-								<Button type="button" variant="outline" onClick={() => setShowForm(false)}>
+								<Button type="button" variant="outline" onClick={resetForm} disabled={isProcessando}>
 									Cancelar
 								</Button>
-								<Button type="submit" disabled={isCriando}>
-									{isCriando ? 'Salvando...' : 'Salvar'}
+								<Button type="submit" disabled={isProcessando}>
+									{isProcessando ? 'Salvando...' : 'Salvar'}
 								</Button>
 							</div>
 						</form>
@@ -225,23 +288,28 @@ export default function LeisAtosPage() {
 							{leisAtosList.map((leiAto) => (
 								<TableRow key={leiAto.id}>
 									<TableCell className="font-medium">{leiAto.numero}</TableCell>
-									<TableCell>{leiAto.tipo}</TableCell>
+									<TableCell>{getTipoLabel(leiAto.tipo)}</TableCell>
 									<TableCell>{new Date(leiAto.data_ato).toLocaleDateString('pt-BR')}</TableCell>
 									<TableCell>
 										{new Date(leiAto.data_publicacao).toLocaleDateString('pt-BR')}
 									</TableCell>
 									<TableCell className="max-w-md truncate">{leiAto.descricao}</TableCell>
 									<TableCell className="text-right">
-										<Button
-											size="sm"
-											variant="outline"
-											onClick={() => {
-												if (confirm('Deseja realmente excluir esta lei/ato?')) {
-													deletar(leiAto.id);
-												}
-											}}>
-											<Trash2 className="w-4 h-4" />
-										</Button>
+										<div className="flex justify-end gap-2">
+											<Button size="sm" variant="ghost" onClick={() => handleEdit(leiAto)}>
+												<Edit2 className="w-4 h-4" />
+											</Button>
+											<Button
+												size="sm"
+												variant="ghost"
+												onClick={() => {
+													if (confirm('Deseja realmente excluir esta lei/ato?')) {
+														deletar(leiAto.id);
+													}
+												}}>
+												<Trash2 className="w-4 h-4" />
+											</Button>
+										</div>
 									</TableCell>
 								</TableRow>
 							))}
