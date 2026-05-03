@@ -4,20 +4,24 @@ import { useState } from 'react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Loading } from '@/components/ui/loading';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { FileText, Download, Eye, Plus, Minimize2, CheckCircle } from 'lucide-react';
+import { FileText, Download, Eye, Plus, Minimize2, CheckCircle, Search, X } from 'lucide-react';
 import { formatDate, formatCurrency } from '@/lib/formatters';
 import { toast } from 'sonner';
 import { useFormMinimize } from '@/hooks/useFormMinimize';
-import { listarAlteracoes, getPdfUrl } from '@/services/orcamentario.service';
+import { listarAlteracoes, getPdfUrl, type FiltrosAlteracoes } from '@/services/orcamentario.service';
 import type { AlteracaoOrcamentaria } from '@/types/models';
 import { AlteracaoForm } from './components/AlteracaoForm';
+import { TipoAto, TipoCredito, TipoRecurso } from '@/types/enums';
 
 interface FormData {
 	dialogOpen: boolean;
@@ -35,12 +39,32 @@ const TIPO_CREDITO_LABELS: Record<string, string> = {
 	extraordinario: 'Extraordinário',
 };
 
+const TIPO_RECURSO_LABELS: Record<string, string> = {
+	superavit: 'Superávit',
+	excesso_arrecadacao: 'Excesso de Arrecadação',
+	valor_credito: 'Valor do Crédito',
+};
+
+const EMPTY_FILTERS: FiltrosAlteracoes = {
+	decreto: '',
+	tipo_ato: '',
+	tipo_credito: '',
+	tipo_recurso: '',
+	data_ato_de: '',
+	data_ato_ate: '',
+	data_publicacao_de: '',
+	data_publicacao_ate: '',
+};
+
 export default function AlteracoesOrcamentariasPage() {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const [dialogOpen, setDialogOpen] = useState(false);
+	const [filtros, setFiltros] = useState<FiltrosAlteracoes>(EMPTY_FILTERS);
+	const [filtrosAtivos, setFiltrosAtivos] = useState<FiltrosAlteracoes>(EMPTY_FILTERS);
 
-	// Sistema de minimização
+	const temFiltrosAtivos = Object.values(filtrosAtivos).some(Boolean);
+
 	const { minimizar, isMinimizado, temDadosRestaurados } = useFormMinimize<FormData>({
 		titulo: 'Alterações Orçamentárias',
 		icone: <FileText className="w-4 h-4" />,
@@ -51,25 +75,30 @@ export default function AlteracoesOrcamentariasPage() {
 	});
 
 	const { data: alteracoes, isLoading } = useQuery({
-		queryKey: ['alteracoes-orcamentarias'],
-		queryFn: listarAlteracoes,
+		queryKey: ['alteracoes-orcamentarias', filtrosAtivos],
+		queryFn: () => listarAlteracoes(filtrosAtivos),
 	});
+
+	const handlePesquisar = (e: React.FormEvent) => {
+		e.preventDefault();
+		setFiltrosAtivos({ ...filtros });
+	};
+
+	const handleLimpar = () => {
+		setFiltros(EMPTY_FILTERS);
+		setFiltrosAtivos(EMPTY_FILTERS);
+	};
 
 	const handleCloseDialog = () => {
 		setDialogOpen(false);
 	};
 
 	const handleMinimizar = () => {
-		const formData: FormData = {
-			dialogOpen,
-		};
-		minimizar(formData);
+		minimizar({ dialogOpen });
 	};
 
 	const getLeiAtoDisplay = (leiAto: any) => {
-		if (typeof leiAto === 'string') {
-			return leiAto;
-		}
+		if (typeof leiAto === 'string') return leiAto;
 		if (leiAto && typeof leiAto === 'object') {
 			return `${leiAto.numero} - ${TIPO_ATO_LABELS[leiAto.tipo] || leiAto.tipo}`;
 		}
@@ -80,9 +109,6 @@ export default function AlteracoesOrcamentariasPage() {
 		return <Loading text="Carregando alterações orçamentárias..." />;
 	}
 
-	const alteracoesList = alteracoes || [];
-
-	// Se está minimizado
 	if (isMinimizado) {
 		return (
 			<div className="flex items-center justify-center h-[60vh]">
@@ -96,6 +122,8 @@ export default function AlteracoesOrcamentariasPage() {
 			</div>
 		);
 	}
+
+	const alteracoesList = alteracoes || [];
 
 	return (
 		<div>
@@ -123,12 +151,139 @@ export default function AlteracoesOrcamentariasPage() {
 				</Alert>
 			)}
 
+			{/* Filtros de Pesquisa */}
+			<Card className="mb-4">
+				<form onSubmit={handlePesquisar} className="p-4 space-y-4">
+					<h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Pesquisar</h3>
+
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+						<div>
+							<Label htmlFor="f_decreto">Decreto/Número</Label>
+							<Input
+								id="f_decreto"
+								placeholder="Ex: 001/2024"
+								value={filtros.decreto}
+								onChange={(e) => setFiltros({ ...filtros, decreto: e.target.value })}
+							/>
+						</div>
+
+						<div>
+							<Label htmlFor="f_tipo_ato">Tipo de Ato</Label>
+							<Select
+								value={filtros.tipo_ato || 'todos'}
+								onValueChange={(v) => setFiltros({ ...filtros, tipo_ato: v === 'todos' ? '' : v })}>
+								<SelectTrigger id="f_tipo_ato">
+									<SelectValue placeholder="Todos" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="todos">Todos</SelectItem>
+									<SelectItem value={TipoAto.DECRETO}>Decreto</SelectItem>
+									<SelectItem value={TipoAto.RESOLUCAO}>Resolução</SelectItem>
+									<SelectItem value={TipoAto.ATO_GESTOR}>Ato do Gestor</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+
+						<div>
+							<Label htmlFor="f_tipo_credito">Tipo de Crédito</Label>
+							<Select
+								value={filtros.tipo_credito || 'todos'}
+								onValueChange={(v) => setFiltros({ ...filtros, tipo_credito: v === 'todos' ? '' : v })}>
+								<SelectTrigger id="f_tipo_credito">
+									<SelectValue placeholder="Todos" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="todos">Todos</SelectItem>
+									<SelectItem value={TipoCredito.ESPECIAL}>Especial</SelectItem>
+									<SelectItem value={TipoCredito.SUPLEMENTAR}>Suplementar</SelectItem>
+									<SelectItem value={TipoCredito.EXTRAORDINARIO}>Extraordinário</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+
+						<div>
+							<Label htmlFor="f_tipo_recurso">Tipo de Recurso</Label>
+							<Select
+								value={filtros.tipo_recurso || 'todos'}
+								onValueChange={(v) => setFiltros({ ...filtros, tipo_recurso: v === 'todos' ? '' : v })}>
+								<SelectTrigger id="f_tipo_recurso">
+									<SelectValue placeholder="Todos" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="todos">Todos</SelectItem>
+									<SelectItem value={TipoRecurso.SUPERAVIT}>Superávit</SelectItem>
+									<SelectItem value={TipoRecurso.EXCESSO_ARRECADACAO}>
+										Excesso de Arrecadação
+									</SelectItem>
+									<SelectItem value={TipoRecurso.VALOR_CREDITO}>Valor do Crédito</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+
+						<div className="col-span-1 md:col-span-2">
+							<Label>Data do Ato</Label>
+							<div className="flex items-center gap-2 mt-1">
+								<Input
+									type="date"
+									value={filtros.data_ato_de}
+									onChange={(e) => setFiltros({ ...filtros, data_ato_de: e.target.value })}
+									className="flex-1"
+								/>
+								<span className="text-sm text-muted-foreground">até</span>
+								<Input
+									type="date"
+									value={filtros.data_ato_ate}
+									onChange={(e) => setFiltros({ ...filtros, data_ato_ate: e.target.value })}
+									className="flex-1"
+								/>
+							</div>
+						</div>
+
+						<div className="col-span-1 md:col-span-2">
+							<Label>Data da Publicação</Label>
+							<div className="flex items-center gap-2 mt-1">
+								<Input
+									type="date"
+									value={filtros.data_publicacao_de}
+									onChange={(e) => setFiltros({ ...filtros, data_publicacao_de: e.target.value })}
+									className="flex-1"
+								/>
+								<span className="text-sm text-muted-foreground">até</span>
+								<Input
+									type="date"
+									value={filtros.data_publicacao_ate}
+									onChange={(e) => setFiltros({ ...filtros, data_publicacao_ate: e.target.value })}
+									className="flex-1"
+								/>
+							</div>
+						</div>
+					</div>
+
+					<div className="flex gap-2">
+						<Button type="submit" size="sm">
+							<Search className="w-4 h-4 mr-2" />
+							Pesquisar
+						</Button>
+						{temFiltrosAtivos && (
+							<Button type="button" variant="outline" size="sm" onClick={handleLimpar}>
+								<X className="w-4 h-4 mr-2" />
+								Limpar Filtros
+							</Button>
+						)}
+					</div>
+				</form>
+			</Card>
+
 			{alteracoesList.length === 0 ? (
 				<Card>
 					<EmptyState
 						icon={<FileText className="w-12 h-12" />}
-						title="Nenhuma alteração cadastrada"
-						description="Clique em 'Nova Alteração' para começar"
+						title={temFiltrosAtivos ? 'Nenhuma alteração encontrada' : 'Nenhuma alteração cadastrada'}
+						description={
+							temFiltrosAtivos
+								? 'Tente ajustar os filtros de pesquisa'
+								: "Clique em 'Nova Alteração' para começar"
+						}
 					/>
 				</Card>
 			) : (
@@ -140,6 +295,7 @@ export default function AlteracoesOrcamentariasPage() {
 								<TableHead>Lei/Ato</TableHead>
 								<TableHead>Tipo de Ato</TableHead>
 								<TableHead>Tipo de Crédito</TableHead>
+								<TableHead>Tipo de Recurso</TableHead>
 								<TableHead>Valor do Crédito</TableHead>
 								<TableHead>Data do Ato</TableHead>
 								<TableHead className="text-right">Ações</TableHead>
@@ -153,6 +309,9 @@ export default function AlteracoesOrcamentariasPage() {
 									<TableCell>{TIPO_ATO_LABELS[alteracao.tipo_ato] || alteracao.tipo_ato}</TableCell>
 									<TableCell>
 										{TIPO_CREDITO_LABELS[alteracao.tipo_credito] || alteracao.tipo_credito}
+									</TableCell>
+									<TableCell>
+										{TIPO_RECURSO_LABELS[alteracao.tipo_recurso] || alteracao.tipo_recurso}
 									</TableCell>
 									<TableCell>{formatCurrency(Number(alteracao.valor_credito || 0))}</TableCell>
 									<TableCell>{formatDate(alteracao.data_ato)}</TableCell>

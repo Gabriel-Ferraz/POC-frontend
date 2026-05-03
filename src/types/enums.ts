@@ -64,6 +64,7 @@ export enum TipoCredito {
 export enum TipoRecurso {
 	SUPERAVIT = 'superavit',
 	EXCESSO_ARRECADACAO = 'excesso_arrecadacao',
+	VALOR_CREDITO = 'valor_credito',
 }
 
 export enum TipoLei {

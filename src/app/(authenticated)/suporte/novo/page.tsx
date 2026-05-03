@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -157,13 +158,19 @@ export default function NovoChamadoPage() {
 							<Label htmlFor="modulo">
 								Módulo <span className="text-red-500">*</span>
 							</Label>
-							<Input
-								id="modulo"
-								placeholder="Ex: Portal do Fornecedor"
-								value={modulo}
-								onChange={(e) => setModulo(e.target.value)}
-								disabled={isPending}
-							/>
+							<Select value={modulo} onValueChange={setModulo} disabled={isPending}>
+								<SelectTrigger id="modulo">
+									<SelectValue placeholder="Selecione o módulo" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="Portal do Fornecedor">Portal do Fornecedor</SelectItem>
+									<SelectItem value="Painel do Gestor">Painel do Gestor</SelectItem>
+									<SelectItem value="Suporte ao Usuário">Suporte ao Usuário</SelectItem>
+									<SelectItem value="Prestação de Contas">Prestação de Contas</SelectItem>
+									<SelectItem value="Orçamentário">Orçamentário</SelectItem>
+									<SelectItem value="Administrativo">Administrativo</SelectItem>
+								</SelectContent>
+							</Select>
 						</div>
 
 						<div>

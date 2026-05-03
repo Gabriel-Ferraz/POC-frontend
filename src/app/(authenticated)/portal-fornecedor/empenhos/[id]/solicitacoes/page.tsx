@@ -37,10 +37,10 @@ export default function SolicitacoesEmpenhoPage() {
 	const solicitacoesList = data?.solicitacoes ?? [];
 
 	const { mutate: cancelarSolicitacao, isPending: isCancelando } = useMutation({
-		mutationFn: (motivo: string) => {
+		mutationFn: ({ motivo, dataCancelamento }: { motivo: string; dataCancelamento: string }) => {
 			if (!solicitacaoSelecionada?.id) throw new Error('Nenhuma solicitação selecionada');
 			return solicitacoesApi.cancelarSolicitacao(solicitacaoSelecionada.id, {
-				data_cancelamento: new Date().toISOString().split('T')[0],
+				data_cancelamento: dataCancelamento,
 				motivo,
 			});
 		},
@@ -193,7 +193,7 @@ export default function SolicitacoesEmpenhoPage() {
 					setModalCancelarOpen(false);
 					setSolicitacaoSelecionada(null);
 				}}
-				onConfirm={cancelarSolicitacao}
+				onConfirm={(motivo, dataCancelamento) => cancelarSolicitacao({ motivo, dataCancelamento })}
 				isPending={isCancelando}
 			/>
 

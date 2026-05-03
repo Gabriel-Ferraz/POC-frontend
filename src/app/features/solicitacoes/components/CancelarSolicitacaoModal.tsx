@@ -4,26 +4,31 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
 interface CancelarSolicitacaoModalProps {
 	open: boolean;
 	onClose: () => void;
-	onConfirm: (motivo: string) => void;
+	onConfirm: (motivo: string, dataCancelamento: string) => void;
 	isPending?: boolean;
 }
 
 export function CancelarSolicitacaoModal({ open, onClose, onConfirm, isPending }: CancelarSolicitacaoModalProps) {
+	const today = new Date().toISOString().split('T')[0];
 	const [motivo, setMotivo] = useState('');
+	const [dataCancelamento, setDataCancelamento] = useState(today);
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		if (motivo.trim().length < 10) return;
-		onConfirm(motivo.trim());
+		if (!dataCancelamento) return;
+		onConfirm(motivo.trim(), dataCancelamento);
 	};
 
 	const handleClose = () => {
 		setMotivo('');
+		setDataCancelamento(today);
 		onClose();
 	};
 
@@ -35,6 +40,18 @@ export function CancelarSolicitacaoModal({ open, onClose, onConfirm, isPending }
 				</DialogHeader>
 
 				<form onSubmit={handleSubmit} className="space-y-4">
+					<div>
+						<Label htmlFor="data_cancelamento">Data de Cancelamento *</Label>
+						<Input
+							id="data_cancelamento"
+							type="date"
+							value={dataCancelamento}
+							onChange={(e) => setDataCancelamento(e.target.value)}
+							disabled={isPending}
+							required
+						/>
+					</div>
+
 					<div>
 						<div className="flex items-center justify-between mb-2">
 							<Label htmlFor="motivo">Motivo *</Label>
@@ -66,7 +83,10 @@ export function CancelarSolicitacaoModal({ open, onClose, onConfirm, isPending }
 						<Button type="button" variant="outline" onClick={handleClose} disabled={isPending}>
 							Voltar
 						</Button>
-						<Button variant="destructive" type="submit" disabled={isPending || motivo.trim().length < 10}>
+						<Button
+							variant="destructive"
+							type="submit"
+							disabled={isPending || motivo.trim().length < 10 || !dataCancelamento}>
 							{isPending ? 'Cancelando...' : 'Confirmar Cancelamento'}
 						</Button>
 					</div>

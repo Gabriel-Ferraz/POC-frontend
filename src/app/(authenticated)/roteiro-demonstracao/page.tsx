@@ -3,20 +3,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import { Badge } from '@/components/ui/badge';
-import {
-	Monitor,
-	Server,
-	FileText,
-	Paperclip,
-	XCircle,
-	CheckCircle,
-	Info,
-	HeadphonesIcon,
-	Plus,
-	Search,
-	Bell,
-	Download,
-} from 'lucide-react';
+import { Monitor, Server, FileText, CheckCircle, Info, HeadphonesIcon, Bell, Download } from 'lucide-react';
 
 interface Passo {
 	titulo: string;
@@ -43,7 +30,7 @@ const secoes: Secao[] = [
 			{
 				titulo: 'Infraestrutura em execução',
 				acoes: [
-					'Confirmar que os containers Docker estão ativos (app, db, redis)',
+					'Confirmar que os containers Docker estão ativos (app, db, redis, tomcat, adminer)',
 					'Verificar acesso ao sistema pelo navegador (Chrome ou Firefox)',
 					'Confirmar que o banco está populado com dados de demonstração',
 				],
@@ -68,12 +55,25 @@ const secoes: Secao[] = [
 		cor: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800',
 		passos: [
 			{
-				titulo: 'Apresentar a stack técnica',
+				titulo: 'Validar serviços via Demonstração Técnica',
+				descricao: 'Navegar até "Demonstração Técnica" no menu lateral',
 				acoes: [
-					'Navegar até "Demonstração Técnica" no menu lateral',
-					'Apresentar os cards de Stack (PHP 8.2, Laravel 12, PostgreSQL 15, Redis 7, Nginx, Docker)',
-					'Apresentar o frontend: Next.js 16, React 19, TypeScript 5, Tailwind CSS 4',
-					'Apresentar a conformidade com os requisitos do edital (card "Conformidade com o Ambiente")',
+					'Verificar o card "Serviços em Execução" — todos devem aparecer como "online" (bolinhas verdes)',
+					'Clicar no link do Backend PHP para abrir /api/version no navegador',
+					'Clicar no link do Tomcat (localhost:8180) para demonstrar o servidor de relatórios em execução',
+					'Clicar no link do Adminer (localhost:8181) para demonstrar acesso visual ao PostgreSQL 15',
+					'Clicar no link do Traefik Dashboard (localhost:8080) para mostrar o proxy reverso ativo',
+				],
+				destaque:
+					'Os links abrem diretamente no navegador — sem necessidade de terminal ou acesso ao servidor.',
+			},
+			{
+				titulo: 'Apresentar a stack técnica e conformidade',
+				acoes: [
+					'No card "Stack Técnica": PHP 8.2, Laravel 12, Octane/Swoole, PostgreSQL 15, Redis 7, Nginx, Tomcat, Docker',
+					'No card "Stack Técnica": Next.js 16, React 19, TypeScript 5, Tailwind CSS 4',
+					'No card "Conformidade com o Ambiente": mapear cada requisito do edital',
+					'No card "Módulos Implementados": todos marcados como ✅',
 				],
 			},
 			{
@@ -82,6 +82,7 @@ const secoes: Secao[] = [
 					'Alternar entre tema claro e escuro pelo botão no cabeçalho',
 					'Mostrar que a interface é responsiva (redimensionar janela)',
 					'Demonstrar o controle de perfil: logar com diferentes usuários e mostrar menus distintos',
+					'Acessar o sistema no Firefox e no Chrome para demonstrar independência de browser',
 				],
 			},
 		],
@@ -99,8 +100,8 @@ const secoes: Secao[] = [
 					'Acessar "Portal do Fornecedor" → "Empenhos"',
 					'Selecionar um empenho com saldo disponível',
 					'Clicar em "Solicitações" e depois em "Nova Solicitação"',
-					'Preencher: valor, tipo e número do documento fiscal, data de emissão',
-					'Preencher dados de pagamento (conta bancária ou documento)',
+					'Preencher: valor, tipo e número do documento fiscal, série, data de emissão',
+					'Selecionar Forma de Pagamento "Conta Bancária" e preencher: banco, agência, dígito, conta, dígito, operação da conta, cidade',
 					'Submeter a solicitação e confirmar o toast de sucesso',
 					'Verificar que o saldo do empenho foi atualizado',
 				],
@@ -108,7 +109,6 @@ const secoes: Secao[] = [
 			},
 			{
 				titulo: 'Envio de Anexos',
-				icone: <Paperclip className="w-4 h-4" />,
 				acoes: [
 					'Na listagem de solicitações, clicar em "Anexos" na solicitação criada',
 					'Visualizar os 5 tipos de anexo exigidos (Documento Fiscal, Certidões, FGTS, etc.)',
@@ -116,12 +116,15 @@ const secoes: Secao[] = [
 					'Fazer upload dos demais anexos disponíveis',
 					'Fechar o modal e verificar o status atualizado na listagem',
 				],
+				destaque:
+					'Após o upload de todos os anexos, a solicitação avança automaticamente para "Aguardando Aprovação".',
 			},
 			{
 				titulo: 'Cancelamento de Solicitação de Pagamento',
 				descricao: 'Demonstrar o fluxo de cancelamento em status Pendente',
 				acoes: [
 					'Na listagem, clicar em "Cancelar" em uma solicitação com status Pendente',
+					'Verificar o campo de data de cancelamento (pré-preenchido com a data atual)',
 					'Preencher o motivo do cancelamento (mínimo 10 caracteres)',
 					'Confirmar e verificar que o status mudou para Cancelada',
 					'Verificar que o saldo do empenho foi restaurado',
@@ -158,14 +161,15 @@ const secoes: Secao[] = [
 		cor: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800',
 		passos: [
 			{
-				titulo: 'Visualizar detalhes completos',
+				titulo: 'Visualizar detalhes e andamento completo',
 				descricao: 'Pode ser acessado por qualquer perfil com acesso à solicitação',
 				acoes: [
 					'Na listagem de solicitações, clicar em "Informações"',
-					'Apresentar os dados do documento fiscal e forma de pagamento',
-					'Mostrar a aba "Anexos" com status individual de cada documento',
-					'Mostrar a aba "Trâmites" com o histórico completo de movimentações',
-					'Demonstrar o status visual (badge colorido por estado)',
+					'Mostrar o quadro "Andamento" no topo — bolinhas coloridas representando cada etapa do fluxo até Pagamento Realizado',
+					'Mostrar a aba "Geral" com dados do documento fiscal e forma de pagamento (incluindo Operação da Conta)',
+					'Mostrar a aba "Trâmites" com histórico completo (data, origem, destino, motivo, usuário)',
+					'Mostrar a aba "Anexos Pagamento" com status individual de cada documento',
+					'Mostrar a aba "Forma de Pagamento" com dados bancários preenchidos',
 				],
 				destaque: 'O trâmite registra automaticamente cada transição de status com data, hora e responsável.',
 			},
@@ -183,7 +187,7 @@ const secoes: Secao[] = [
 				acoes: [
 					'Acessar "Suporte" no menu lateral',
 					'Clicar em "Novo Chamado"',
-					'Verificar que o campo "De" está preenchido automaticamente com o usuário logado',
+					'Verificar que o campo "De" está preenchido automaticamente com o usuário logado (não editável)',
 					'Preencher o módulo (ex: "Portal do Fornecedor") e o assunto detalhado',
 					'Opcionalmente anexar um arquivo',
 					'Submeter e confirmar o protocolo gerado',
@@ -193,14 +197,14 @@ const secoes: Secao[] = [
 				titulo: 'Consultar e Acompanhar Chamado',
 				acoes: [
 					'Voltar à listagem de chamados',
-					'Localizar o chamado pelo protocolo ou usar os filtros de pesquisa',
-					'Mostrar os filtros disponíveis: período, status, usuário solicitante, responsável pelo atendimento',
-					'Clicar no ícone de log para ver o histórico de mensagens',
+					'Demonstrar os filtros disponíveis: protocolo, período de cadastro, período de resposta, módulo, assunto, status, usuário solicitante, responsável pelo atendimento',
+					'Clicar no ícone de log para ver o histórico de mensagens e anexos',
 					'Logar como Gestor de Suporte e responder ao chamado',
 					'Verificar que o botão de ação muda de cor (azul → laranja) ao receber resposta do gestor',
+					'Gestor de Suporte: demonstrar que o campo "Usuário Origem" permite filtrar por qualquer usuário do sistema',
 				],
 				destaque:
-					'A cor do botão indica quem fez a última interação: azul = aguardando gestor, laranja = gestor respondeu.',
+					'Azul = aguardando gestor, Laranja = gestor respondeu (ação pendente do solicitante), Cinza = concluído.',
 			},
 		],
 	},
@@ -231,13 +235,14 @@ const secoes: Secao[] = [
 		passos: [
 			{
 				titulo: 'Configurar e exportar layouts SIM-AM',
-				descricao: 'Logar como Operador Orçamentário ou Gestor de Contrato',
+				descricao: 'Logar como Operador PMSJP',
 				acoes: [
 					'Acessar "Prestação de Contas" no menu lateral',
+					'Selecionar: Ano, Módulo (Contabilidade), Tipo de Geração (Mensal) e Mês',
 					'Verificar os layouts disponíveis (PlanoContabil, MovimentoContabilMensal, etc.)',
-					'Reordenar layouts arrastando para demonstrar a flexibilidade',
-					'Selecionar competência (mês/ano) e clicar em "Exportar"',
-					'Aguardar o processamento e verificar o arquivo gerado na lista de exportações',
+					'Reordenar layouts arrastando para demonstrar a flexibilidade de configuração',
+					'Selecionar os layouts desejados e clicar em "Exportar"',
+					'Aguardar o processamento e verificar os arquivos gerados com status e quantidade de registros',
 					'Fazer download do arquivo ZIP e demonstrar o conteúdo',
 				],
 				destaque: 'Os layouts seguem o padrão SIM-AM exigido pela administração municipal.',

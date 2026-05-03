@@ -31,6 +31,7 @@ const TIPO_CREDITO_LABELS = {
 const TIPO_RECURSO_LABELS = {
 	[TipoRecurso.SUPERAVIT]: 'Superávit',
 	[TipoRecurso.EXCESSO_ARRECADACAO]: 'Excesso de Arrecadação',
+	[TipoRecurso.VALOR_CREDITO]: 'Valor do Crédito',
 };
 
 export function AlteracaoForm({ alteracao, onClose }: AlteracaoFormProps) {
@@ -170,6 +171,9 @@ export function AlteracaoForm({ alteracao, onClose }: AlteracaoFormProps) {
 						</SelectItem>
 						<SelectItem value={TipoRecurso.EXCESSO_ARRECADACAO}>
 							{TIPO_RECURSO_LABELS[TipoRecurso.EXCESSO_ARRECADACAO]}
+						</SelectItem>
+						<SelectItem value={TipoRecurso.VALOR_CREDITO}>
+							{TIPO_RECURSO_LABELS[TipoRecurso.VALOR_CREDITO]}
 						</SelectItem>
 					</SelectContent>
 				</Select>

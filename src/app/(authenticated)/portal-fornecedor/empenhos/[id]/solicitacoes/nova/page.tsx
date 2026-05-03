@@ -31,6 +31,7 @@ interface FormData {
 	agenciaDigito: string;
 	conta: string;
 	contaDigito: string;
+	operacao: string;
 	cidadeBanco: string;
 	observacaoPagamento: string;
 }
@@ -53,6 +54,7 @@ export default function NovaSolicitacaoPage() {
 	const [agenciaDigito, setAgenciaDigito] = useState('');
 	const [conta, setConta] = useState('');
 	const [contaDigito, setContaDigito] = useState('');
+	const [operacao, setOperacao] = useState('');
 	const [cidadeBanco, setCidadeBanco] = useState('');
 	const [observacaoPagamento, setObservacaoPagamento] = useState('');
 
@@ -72,6 +74,7 @@ export default function NovaSolicitacaoPage() {
 			setAgenciaDigito(dados.agenciaDigito);
 			setConta(dados.conta);
 			setContaDigito(dados.contaDigito);
+			setOperacao(dados.operacao);
 			setCidadeBanco(dados.cidadeBanco);
 			setObservacaoPagamento(dados.observacaoPagamento);
 			toast.success('Formulário restaurado com sucesso!');
@@ -93,6 +96,7 @@ export default function NovaSolicitacaoPage() {
 				digito_agencia: agenciaDigito || undefined,
 				conta: conta || undefined,
 				digito_conta: contaDigito || undefined,
+				operacao: operacao || undefined,
 				cidade_banco: cidadeBanco || undefined,
 				observacao_pagamento: observacaoPagamento || undefined,
 			}),
@@ -132,6 +136,7 @@ export default function NovaSolicitacaoPage() {
 			agenciaDigito,
 			conta,
 			contaDigito,
+			operacao,
 			cidadeBanco,
 			observacaoPagamento,
 		};
@@ -350,6 +355,18 @@ export default function NovaSolicitacaoPage() {
 											maxLength={2}
 											value={contaDigito}
 											onChange={(e) => setContaDigito(e.target.value)}
+											disabled={isPending}
+										/>
+									</div>
+
+									<div>
+										<Label htmlFor="operacao">Operação da Conta</Label>
+										<Input
+											id="operacao"
+											placeholder="Ex: 013"
+											maxLength={10}
+											value={operacao}
+											onChange={(e) => setOperacao(e.target.value)}
 											disabled={isPending}
 										/>
 									</div>

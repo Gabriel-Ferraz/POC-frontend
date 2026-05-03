@@ -9,6 +9,7 @@ import { Loading } from '@/components/ui/loading';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -264,12 +265,24 @@ export default function SuportePage() {
 
 								<div>
 									<Label htmlFor="filtro-modulo">Módulo</Label>
-									<Input
-										id="filtro-modulo"
-										placeholder="Ex: Portal do Fornecedor"
-										value={filtros.modulo || ''}
-										onChange={(e) => setFiltros({ ...filtros, modulo: e.target.value })}
-									/>
+									<Select
+										value={filtros.modulo || 'todos'}
+										onValueChange={(v) =>
+											setFiltros({ ...filtros, modulo: v === 'todos' ? '' : v })
+										}>
+										<SelectTrigger id="filtro-modulo">
+											<SelectValue placeholder="Todos" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="todos">Todos</SelectItem>
+											<SelectItem value="Portal do Fornecedor">Portal do Fornecedor</SelectItem>
+											<SelectItem value="Painel do Gestor">Painel do Gestor</SelectItem>
+											<SelectItem value="Suporte ao Usuário">Suporte ao Usuário</SelectItem>
+											<SelectItem value="Prestação de Contas">Prestação de Contas</SelectItem>
+											<SelectItem value="Orçamentário">Orçamentário</SelectItem>
+											<SelectItem value="Administrativo">Administrativo</SelectItem>
+										</SelectContent>
+									</Select>
 								</div>
 
 								<div className="sm:col-span-2 lg:col-span-1">

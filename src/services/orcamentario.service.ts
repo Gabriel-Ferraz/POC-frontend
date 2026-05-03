@@ -45,8 +45,27 @@ export async function excluirLeiAto(id: number): Promise<void> {
 // ALTERAÇÕES ORÇAMENTÁRIAS
 // ============================
 
-export async function listarAlteracoes(): Promise<AlteracaoOrcamentaria[]> {
-	const response = await get<{ alteracoes: AlteracaoOrcamentaria[] }>(API_ENDPOINTS.orcamentario.alteracoes.list);
+export interface FiltrosAlteracoes {
+	decreto?: string;
+	tipo_ato?: string;
+	tipo_credito?: string;
+	tipo_recurso?: string;
+	data_ato_de?: string;
+	data_ato_ate?: string;
+	data_publicacao_de?: string;
+	data_publicacao_ate?: string;
+}
+
+export async function listarAlteracoes(filtros?: FiltrosAlteracoes): Promise<AlteracaoOrcamentaria[]> {
+	const params = new URLSearchParams();
+	if (filtros) {
+		Object.entries(filtros).forEach(([k, v]) => {
+			if (v) params.append(k, v);
+		});
+	}
+	const qs = params.toString();
+	const url = API_ENDPOINTS.orcamentario.alteracoes.list + (qs ? `?${qs}` : '');
+	const response = await get<{ alteracoes: AlteracaoOrcamentaria[] }>(url);
 	return response.alteracoes;
 }
 
