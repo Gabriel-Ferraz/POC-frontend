@@ -448,7 +448,7 @@ function EmpenhosTab() {
 		valor: '',
 		saldo: '',
 		data_emissao: '',
-		status: 'ativo',
+		status: 'disponivel',
 	});
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -557,7 +557,8 @@ function EmpenhosTab() {
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="ativo">Ativo</SelectItem>
+							<SelectItem value="disponivel">Disponível</SelectItem>
+							<SelectItem value="sem_saldo">Sem Saldo</SelectItem>
 							<SelectItem value="bloqueado">Bloqueado</SelectItem>
 							<SelectItem value="encerrado">Encerrado</SelectItem>
 						</SelectContent>
