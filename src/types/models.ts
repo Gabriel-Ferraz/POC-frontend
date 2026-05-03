@@ -114,6 +114,8 @@ export interface Chamado {
 	protocolo?: string;
 	usuario_id: number;
 	usuario?: string | User;
+	responsavel?: string | null;
+	responsavel_id?: number | null;
 	modulo: string;
 	assunto: string;
 	mensagem?: string;

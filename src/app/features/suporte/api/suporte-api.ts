@@ -16,6 +16,7 @@ export interface FiltrosChamados {
 	data_resposta_fim?: string;
 	modulo?: string;
 	usuario_id?: number;
+	responsavel_id?: number;
 	assunto?: string;
 	status?: string;
 }
@@ -47,6 +48,7 @@ export const suporteApi = {
 		if (filtros?.data_resposta_fim) params.append('data_resposta_fim', filtros.data_resposta_fim);
 		if (filtros?.modulo) params.append('modulo', filtros.modulo);
 		if (filtros?.usuario_id) params.append('usuario_id', filtros.usuario_id.toString());
+		if (filtros?.responsavel_id) params.append('responsavel_id', filtros.responsavel_id.toString());
 		if (filtros?.assunto) params.append('assunto', filtros.assunto);
 		if (filtros?.status) params.append('status', filtros.status);
 
@@ -67,6 +69,13 @@ export const suporteApi = {
 		const url = params.toString() ? `/chamados/usuarios?${params.toString()}` : '/chamados/usuarios';
 		const response = await get<ResponseUsuarios>(url);
 		return response;
+	},
+
+	async getResponsaveis(busca?: string): Promise<{ usuarios: Usuario[] }> {
+		const params = new URLSearchParams();
+		if (busca) params.append('busca', busca);
+		const url = params.toString() ? `/chamados/responsaveis?${params.toString()}` : '/chamados/responsaveis';
+		return get<{ usuarios: Usuario[] }>(url);
 	},
 
 	async getChamado(id: number): Promise<any> {
