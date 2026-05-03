@@ -4,7 +4,17 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
 import { PerfilUsuario } from '@/types/enums';
-import { FileText, Paperclip, Mail, FileBarChart, Calculator, Settings, Building2, Shield } from 'lucide-react';
+import {
+	FileText,
+	Paperclip,
+	Mail,
+	FileBarChart,
+	Calculator,
+	Settings,
+	Building2,
+	Shield,
+	BookOpen,
+} from 'lucide-react';
 
 interface MenuItem {
 	label: string;
@@ -77,6 +87,11 @@ export function Sidebar() {
 					label: 'Demonstração Técnica',
 					href: '/demonstracao-tecnica',
 					icon: Settings,
+				},
+				{
+					label: 'Roteiro de Demonstração',
+					href: '/roteiro-demonstracao',
+					icon: BookOpen,
 				},
 			],
 		},
