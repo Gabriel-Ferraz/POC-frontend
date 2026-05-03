@@ -235,7 +235,7 @@ export function AnexosTabContent({ solicitacaoId, onSuccess, onCancelar }: Anexo
 						<AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-500 flex-shrink-0 mt-0.5" />
 						<div>
 							<p className="font-bold text-red-800 dark:text-red-400 text-lg">
-								⚠️ ATENÇÃO: Documento Fiscal foi recusado!
+								ATENÇÃO: Documento Fiscal foi recusado!
 							</p>
 							<p className="text-red-700 dark:text-red-400 mt-2">
 								Não é possível corrigir o Documento Fiscal. Você deve:

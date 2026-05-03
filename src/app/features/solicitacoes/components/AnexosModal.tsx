@@ -243,7 +243,7 @@ export function AnexosModal({ open, onClose, solicitacao, onSuccess }: AnexosMod
 									<AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
 									<div>
 										<p className="font-bold text-red-800 text-lg">
-											⚠️ ATENÇÃO: Documento Fiscal foi recusado!
+											ATENÇÃO: Documento Fiscal foi recusado!
 										</p>
 										<p className="text-red-700 mt-2">
 											Não é possível corrigir o Documento Fiscal. Você deve:
