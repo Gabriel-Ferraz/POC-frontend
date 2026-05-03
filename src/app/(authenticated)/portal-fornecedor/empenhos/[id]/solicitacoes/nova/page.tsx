@@ -8,13 +8,32 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SelectNative } from '@/components/ui/select-native';
 import { Textarea } from '@/components/ui/textarea';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { solicitacoesApi } from '@/app/features/solicitacoes/api/solicitacoes-api';
 import { FormaPagamento } from '@/types/enums';
 import { toast } from 'sonner';
+import { useFormMinimize } from '@/hooks/useFormMinimize';
+import { FileText, Minimize2 } from 'lucide-react';
 
 const TIPOS_DOCUMENTO = ['Nota Fiscal', 'Nota Fiscal Eletrônica', 'Recibo', 'Fatura', 'Cupom Fiscal', 'Outro'];
+
+interface FormData {
+	valor: string;
+	tipoDocumento: string;
+	numeroDocumento: string;
+	serieDocumento: string;
+	dataEmissaoDocumento: string;
+	observacaoDocumento: string;
+	formaPagamento: string;
+	banco: string;
+	agencia: string;
+	agenciaDigito: string;
+	conta: string;
+	contaDigito: string;
+	cidadeBanco: string;
+	observacaoPagamento: string;
+}
 
 export default function NovaSolicitacaoPage() {
 	const params = useParams();
@@ -36,6 +55,28 @@ export default function NovaSolicitacaoPage() {
 	const [contaDigito, setContaDigito] = useState('');
 	const [cidadeBanco, setCidadeBanco] = useState('');
 	const [observacaoPagamento, setObservacaoPagamento] = useState('');
+
+	const { minimizar, isMinimizado, dadosRestaurados, temDadosRestaurados } = useFormMinimize<FormData>({
+		titulo: `Nova Solicitação - Empenho ${empenhoId}`,
+		icone: <FileText className="w-4 h-4" />,
+		onRestore: (dados) => {
+			setValor(dados.valor);
+			setTipoDocumento(dados.tipoDocumento);
+			setNumeroDocumento(dados.numeroDocumento);
+			setSerieDocumento(dados.serieDocumento);
+			setDataEmissaoDocumento(dados.dataEmissaoDocumento);
+			setObservacaoDocumento(dados.observacaoDocumento);
+			setFormaPagamento(dados.formaPagamento);
+			setBanco(dados.banco);
+			setAgencia(dados.agencia);
+			setAgenciaDigito(dados.agenciaDigito);
+			setConta(dados.conta);
+			setContaDigito(dados.contaDigito);
+			setCidadeBanco(dados.cidadeBanco);
+			setObservacaoPagamento(dados.observacaoPagamento);
+			toast.success('Formulário restaurado com sucesso!');
+		},
+	});
 
 	const { mutate: criarSolicitacao, isPending } = useMutation({
 		mutationFn: () =>
@@ -77,12 +118,67 @@ export default function NovaSolicitacaoPage() {
 		criarSolicitacao();
 	};
 
+	const handleMinimizar = () => {
+		const formData: FormData = {
+			valor,
+			tipoDocumento,
+			numeroDocumento,
+			serieDocumento,
+			dataEmissaoDocumento,
+			observacaoDocumento,
+			formaPagamento,
+			banco,
+			agencia,
+			agenciaDigito,
+			conta,
+			contaDigito,
+			cidadeBanco,
+			observacaoPagamento,
+		};
+		minimizar(formData);
+	};
+
+	// Se está minimizado, mostra tela em branco
+	if (isMinimizado) {
+		return (
+			<div className="flex items-center justify-center h-[60vh]">
+				<div className="text-center space-y-3">
+					<div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto">
+						<Minimize2 className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+					</div>
+					<h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Formulário Minimizado</h3>
+					<p className="text-sm text-gray-500 dark:text-gray-400">
+						Clique na miniatura na barra inferior para restaurar
+					</p>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div className="space-y-6">
-			<PageHeader
-				title="Nova Solicitação de Pagamento"
-				description={`Criar solicitação para o empenho ${empenhoId}`}
-			/>
+			<div className="flex items-center justify-between">
+				<PageHeader
+					title="Nova Solicitação de Pagamento"
+					description={`Criar solicitação para o empenho ${empenhoId}`}
+				/>
+				<Button
+					variant="outline"
+					onClick={handleMinimizar}
+					disabled={isPending}
+					className="flex items-center gap-2">
+					<Minimize2 className="w-4 h-4" />
+					Minimizar
+				</Button>
+			</div>
+
+			{temDadosRestaurados && (
+				<div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+					<p className="text-sm text-blue-900 dark:text-blue-100">
+						✓ Formulário restaurado com os dados salvos anteriormente
+					</p>
+				</div>
+			)}
 
 			<form className="space-y-6" onSubmit={handleSubmit}>
 				{/* BLOCO 1: Valor */}

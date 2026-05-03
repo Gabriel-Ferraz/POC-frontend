@@ -1,8 +1,10 @@
 'use client';
 
 import { useAuth } from '@/providers/AuthProvider';
+import { MinimizedWindowsProvider } from '@/providers/MinimizedWindowsProvider';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
+import { MinimizedWindowsBar } from '@/components/layout/MinimizedWindowsBar';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -33,12 +35,15 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
 	}
 
 	return (
-		<div className="flex h-screen bg-gray-50 dark:bg-background">
-			<Sidebar />
-			<div className="flex-1 flex flex-col overflow-hidden">
-				<Header />
-				<main className="flex-1 overflow-y-auto p-6">{children}</main>
+		<MinimizedWindowsProvider>
+			<div className="flex h-screen bg-gray-50 dark:bg-background">
+				<Sidebar />
+				<div className="flex-1 flex flex-col overflow-hidden">
+					<Header />
+					<main className="flex-1 overflow-y-auto p-6 pb-24">{children}</main>
+				</div>
 			</div>
-		</div>
+			<MinimizedWindowsBar />
+		</MinimizedWindowsProvider>
 	);
 }

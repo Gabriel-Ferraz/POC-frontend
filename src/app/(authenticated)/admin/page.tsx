@@ -9,15 +9,29 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
-import { UserPlus, FileText, DollarSign, RefreshCw, Database, ShieldAlert } from 'lucide-react';
+import { UserPlus, FileText, DollarSign, RefreshCw, Database, ShieldAlert, Minimize2, Shield } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { Loading } from '@/components/ui/loading';
+import { useFormMinimize } from '@/hooks/useFormMinimize';
+
+interface FormData {
+	activeTab: 'usuarios' | 'empenhos' | 'solicitacoes' | 'fornecedores';
+}
 
 export default function AdminPage() {
 	const { user, loading } = useAuth();
 	const router = useRouter();
 	const [activeTab, setActiveTab] = useState<'usuarios' | 'empenhos' | 'solicitacoes' | 'fornecedores'>('usuarios');
+
+	const { minimizar, isMinimizado, temDadosRestaurados } = useFormMinimize<FormData>({
+		titulo: 'Painel Administrativo',
+		icone: <Shield className="w-4 h-4" />,
+		onRestore: (dados) => {
+			setActiveTab(dados.activeTab);
+			toast.success('Painel administrativo restaurado!');
+		},
+	});
 
 	// Verificar permissão
 	useEffect(() => {
@@ -25,6 +39,30 @@ export default function AdminPage() {
 			router.push('/');
 		}
 	}, [user, loading, router]);
+
+	const handleMinimizar = () => {
+		const formData: FormData = {
+			activeTab,
+		};
+		minimizar(formData);
+	};
+
+	// Se está minimizado, mostra tela em branco
+	if (isMinimizado) {
+		return (
+			<div className="flex items-center justify-center h-[60vh]">
+				<div className="text-center space-y-3">
+					<div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto">
+						<Minimize2 className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+					</div>
+					<h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Painel Minimizado</h3>
+					<p className="text-sm text-gray-500 dark:text-gray-400">
+						Clique na miniatura na barra inferior para restaurar
+					</p>
+				</div>
+			</div>
+		);
+	}
 
 	// Mostrar loading enquanto verifica
 	if (loading) {
@@ -60,10 +98,24 @@ export default function AdminPage() {
 
 	return (
 		<div className="space-y-6">
-			<PageHeader
-				title="Painel Administrativo"
-				description="Gerenciar dados do sistema - Usuários, Empenhos, Solicitações e Fornecedores"
-			/>
+			<div className="flex items-center justify-between">
+				<PageHeader
+					title="Painel Administrativo"
+					description="Gerenciar dados do sistema - Usuários, Empenhos, Solicitações e Fornecedores"
+				/>
+				<Button variant="outline" onClick={handleMinimizar} className="flex items-center gap-2">
+					<Minimize2 className="w-4 h-4" />
+					Minimizar
+				</Button>
+			</div>
+
+			{temDadosRestaurados && (
+				<div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+					<p className="text-sm text-blue-900 dark:text-blue-100">
+						✓ Painel administrativo restaurado com os dados salvos
+					</p>
+				</div>
+			)}
 
 			{/* Tabs */}
 			<Card>

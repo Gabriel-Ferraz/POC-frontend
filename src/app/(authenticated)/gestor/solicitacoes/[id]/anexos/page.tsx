@@ -12,8 +12,16 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { gestorApi } from '@/app/features/gestor/api/gestor-api';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Download, CheckCircle, XCircle, FileText, AlertTriangle } from 'lucide-react';
+import { Download, CheckCircle, XCircle, FileText, AlertTriangle, Minimize2, ClipboardCheck } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
+import { useFormMinimize } from '@/hooks/useFormMinimize';
+
+interface FormData {
+	anexoSelecionado: number | null;
+	tipoAnexoSelecionado: string;
+	motivoRecusa: string;
+	showRecusaModal: boolean;
+}
 
 export default function AvaliarAnexosPage() {
 	const params = useParams();
@@ -25,6 +33,18 @@ export default function AvaliarAnexosPage() {
 	const [tipoAnexoSelecionado, setTipoAnexoSelecionado] = useState<string>('');
 	const [motivoRecusa, setMotivoRecusa] = useState('');
 	const [showRecusaModal, setShowRecusaModal] = useState(false);
+
+	const { minimizar, isMinimizado, temDadosRestaurados } = useFormMinimize<FormData>({
+		titulo: `Avaliar Anexos - Sol. ${solicitacaoId}`,
+		icone: <ClipboardCheck className="w-4 h-4" />,
+		onRestore: (dados) => {
+			setAnexoSelecionado(dados.anexoSelecionado);
+			setTipoAnexoSelecionado(dados.tipoAnexoSelecionado);
+			setMotivoRecusa(dados.motivoRecusa);
+			setShowRecusaModal(dados.showRecusaModal);
+			toast.success('Avaliação de anexos restaurada!');
+		},
+	});
 
 	const handleVisualizarAnexo = async (anexoId: number) => {
 		try {
@@ -100,6 +120,33 @@ export default function AvaliarAnexosPage() {
 		}
 	};
 
+	const handleMinimizar = () => {
+		const formData: FormData = {
+			anexoSelecionado,
+			tipoAnexoSelecionado,
+			motivoRecusa,
+			showRecusaModal,
+		};
+		minimizar(formData);
+	};
+
+	// Se está minimizado, mostra tela em branco
+	if (isMinimizado) {
+		return (
+			<div className="flex items-center justify-center h-[60vh]">
+				<div className="text-center space-y-3">
+					<div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto">
+						<Minimize2 className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+					</div>
+					<h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Avaliação Minimizada</h3>
+					<p className="text-sm text-gray-500 dark:text-gray-400">
+						Clique na miniatura na barra inferior para restaurar
+					</p>
+				</div>
+			</div>
+		);
+	}
+
 	if (isLoading) {
 		return <Loading text="Carregando solicitação..." />;
 	}
@@ -126,10 +173,28 @@ export default function AvaliarAnexosPage() {
 
 	return (
 		<div className="space-y-6">
-			<PageHeader
-				title={`Avaliar Anexos - ${solicitacao.numero}`}
-				description={`${solicitacao.fornecedor} - ${solicitacao.solicitante}`}
-			/>
+			<div className="flex items-center justify-between">
+				<PageHeader
+					title={`Avaliar Anexos - ${solicitacao.numero}`}
+					description={`${solicitacao.fornecedor} - ${solicitacao.solicitante}`}
+				/>
+				<Button
+					variant="outline"
+					onClick={handleMinimizar}
+					disabled={isAprovando || isRecusando}
+					className="flex items-center gap-2">
+					<Minimize2 className="w-4 h-4" />
+					Minimizar
+				</Button>
+			</div>
+
+			{temDadosRestaurados && (
+				<div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+					<p className="text-sm text-blue-900 dark:text-blue-100">
+						✓ Avaliação restaurada com os dados salvos anteriormente
+					</p>
+				</div>
+			)}
 
 			<Card>
 				<div className="p-6 space-y-4">

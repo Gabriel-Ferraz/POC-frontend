@@ -11,8 +11,15 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { suporteApi } from '@/app/features/suporte/api/suporte-api';
 import { toast } from 'sonner';
-import { Upload, X, FileText, Eye } from 'lucide-react';
+import { Upload, X, FileText, Eye, Minimize2, Headset } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
+import { useFormMinimize } from '@/hooks/useFormMinimize';
+
+interface FormData {
+	modulo: string;
+	assunto: string;
+	anexosInfo: Array<{ name: string; size: number; type: string }>;
+}
 
 export default function NovoChamadoPage() {
 	const router = useRouter();
@@ -21,6 +28,17 @@ export default function NovoChamadoPage() {
 	const [modulo, setModulo] = useState('');
 	const [assunto, setAssunto] = useState('');
 	const [anexos, setAnexos] = useState<File[]>([]);
+
+	const { minimizar, isMinimizado, temDadosRestaurados } = useFormMinimize<FormData>({
+		titulo: 'Novo Chamado de Suporte',
+		icone: <Headset className="w-4 h-4" />,
+		onRestore: (dados) => {
+			setModulo(dados.modulo);
+			setAssunto(dados.assunto);
+			// Nota: Arquivos não podem ser restaurados (File API limitation)
+			toast.success('Formulário restaurado! Anexos precisam ser adicionados novamente.');
+		},
+	});
 
 	const { mutate: criarChamado, isPending } = useMutation({
 		mutationFn: suporteApi.criarChamado,
@@ -79,9 +97,53 @@ export default function NovoChamadoPage() {
 		window.open(url, '_blank');
 	};
 
+	const handleMinimizar = () => {
+		const formData: FormData = {
+			modulo,
+			assunto,
+			anexosInfo: anexos.map((f) => ({ name: f.name, size: f.size, type: f.type })),
+		};
+		minimizar(formData);
+	};
+
+	// Se está minimizado, mostra tela em branco
+	if (isMinimizado) {
+		return (
+			<div className="flex items-center justify-center h-[60vh]">
+				<div className="text-center space-y-3">
+					<div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto">
+						<Minimize2 className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+					</div>
+					<h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Formulário Minimizado</h3>
+					<p className="text-sm text-gray-500 dark:text-gray-400">
+						Clique na miniatura na barra inferior para restaurar
+					</p>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div>
-			<PageHeader title="Novo Chamado" description="Abrir um novo chamado de suporte" />
+			<div className="flex items-center justify-between mb-6">
+				<PageHeader title="Novo Chamado" description="Abrir um novo chamado de suporte" />
+				<Button
+					variant="outline"
+					onClick={handleMinimizar}
+					disabled={isPending}
+					className="flex items-center gap-2">
+					<Minimize2 className="w-4 h-4" />
+					Minimizar
+				</Button>
+			</div>
+
+			{temDadosRestaurados && (
+				<div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+					<p className="text-sm text-blue-900 dark:text-blue-100">
+						✓ Formulário restaurado com os dados salvos anteriormente
+					</p>
+				</div>
+			)}
 
 			<Card>
 				<div className="p-6">

@@ -9,12 +9,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { solicitacoesApi } from '@/app/features/solicitacoes/api/solicitacoes-api';
 import { formatCurrency } from '@/lib/formatters';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, CheckCircle2, Clock, Circle } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Clock, Circle, Minimize2, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AnexosTabContent } from '@/app/features/solicitacoes/components/AnexosTabContent';
 import { CancelarSolicitacaoModal } from '@/app/features/solicitacoes/components/CancelarSolicitacaoModal';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useFormMinimize } from '@/hooks/useFormMinimize';
 
 // Etapas do fluxo
 const ETAPAS_FLUXO = [
@@ -41,12 +42,28 @@ interface EtapaAndamento {
 	status: StatusEtapa;
 }
 
+interface FormData {
+	modalCancelarAberto: boolean;
+	abaAtiva: string;
+}
+
 export default function InformacoesSolicitacaoPage() {
 	const params = useParams();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const solicitacaoId = parseInt(params.id as string);
 	const [modalCancelarAberto, setModalCancelarAberto] = useState(false);
+	const [abaAtiva, setAbaAtiva] = useState('geral');
+
+	const { minimizar, isMinimizado, temDadosRestaurados } = useFormMinimize<FormData>({
+		titulo: `Informações - Sol. ${solicitacaoId}`,
+		icone: <Info className="w-4 h-4" />,
+		onRestore: (dados) => {
+			setModalCancelarAberto(dados.modalCancelarAberto);
+			setAbaAtiva(dados.abaAtiva);
+			toast.success('Informações da solicitação restauradas!');
+		},
+	});
 
 	const { data: solicitacao, isLoading } = useQuery({
 		queryKey: ['solicitacao-info', solicitacaoId],
@@ -69,6 +86,31 @@ export default function InformacoesSolicitacaoPage() {
 			toast.error(error?.message || 'Erro ao cancelar solicitação');
 		},
 	});
+
+	const handleMinimizar = () => {
+		const formData: FormData = {
+			modalCancelarAberto,
+			abaAtiva,
+		};
+		minimizar(formData);
+	};
+
+	// Se está minimizado, mostra tela em branco
+	if (isMinimizado) {
+		return (
+			<div className="flex items-center justify-center h-[60vh]">
+				<div className="text-center space-y-3">
+					<div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto">
+						<Minimize2 className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+					</div>
+					<h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Informações Minimizadas</h3>
+					<p className="text-sm text-gray-500 dark:text-gray-400">
+						Clique na miniatura na barra inferior para restaurar
+					</p>
+				</div>
+			</div>
+		);
+	}
 
 	if (isLoading) {
 		return <Loading text="Carregando informações..." />;
@@ -94,15 +136,29 @@ export default function InformacoesSolicitacaoPage() {
 
 	return (
 		<div className="space-y-6">
-			<div className="flex items-center gap-4">
-				<Button variant="ghost" size="sm" onClick={() => router.back()}>
-					<ArrowLeft className="w-4 h-4" />
+			<div className="flex items-center justify-between">
+				<div className="flex items-center gap-4">
+					<Button variant="ghost" size="sm" onClick={() => router.back()}>
+						<ArrowLeft className="w-4 h-4" />
+					</Button>
+					<PageHeader
+						title={`Informações - Solicitação ${solicitacao.numero}`}
+						description="Acompanhamento completo da tramitação"
+					/>
+				</div>
+				<Button variant="outline" onClick={handleMinimizar} className="flex items-center gap-2">
+					<Minimize2 className="w-4 h-4" />
+					Minimizar
 				</Button>
-				<PageHeader
-					title={`Informações - Solicitação ${solicitacao.numero}`}
-					description="Acompanhamento completo da tramitação"
-				/>
 			</div>
+
+			{temDadosRestaurados && (
+				<div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+					<p className="text-sm text-blue-900 dark:text-blue-100">
+						✓ Informações restauradas com os dados salvos anteriormente
+					</p>
+				</div>
+			)}
 
 			{/* BLOCO 1: ANDAMENTO - COMPACTO */}
 			<Card>
@@ -157,7 +213,7 @@ export default function InformacoesSolicitacaoPage() {
 
 			{/* BLOCO 2: ABAS */}
 			<Card className="flex-1">
-				<Tabs defaultValue="geral" className="w-full h-full flex flex-col">
+				<Tabs value={abaAtiva} onValueChange={setAbaAtiva} className="w-full h-full flex flex-col">
 					{/* TabsList com scroll horizontal - MAIS FINO */}
 					<div className="relative border-b">
 						<TabsList className="w-full justify-start overflow-x-auto flex-nowrap h-auto bg-transparent p-0">
