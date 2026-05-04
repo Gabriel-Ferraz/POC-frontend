@@ -33,10 +33,10 @@ const SERVICES: ServiceCheck[] = [
 	},
 	{
 		label: 'CloudBeaver (Oracle Database)',
-		url: '/:8978',
+		url: ':8978',
 		description: 'Oracle Database 23 Free — interface de administração (DBeaver Web)',
 		linkLabel: 'localhost:8978',
-		linkHref: '/:8978',
+		linkHref: ':8978',
 	},
 ];
 
@@ -105,7 +105,10 @@ function DbCredentials() {
 	const [visible, setVisible] = useState(false);
 
 	const creds = [
-		{ label: 'Interface', value: 'CloudBeaver — /cloudbeaver' },
+		{ label: 'Interface', value: '/cloudbeaver — porta 8978' },
+		{ label: 'Login painel', value: 'CloudBeaver1521' },
+		{ label: 'Senha painel', value: 'CloudBeaver1521' },
+		{ label: 'Service Type', value: 'Service' },
 		{ label: 'Driver', value: 'Oracle' },
 		{ label: 'Host', value: 'oracle' },
 		{ label: 'Porta', value: '1521' },
