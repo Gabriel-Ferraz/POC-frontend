@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from 'sonner';
 
@@ -5,6 +6,14 @@ import { ThemeProvider } from '@/components/theme/theme-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import AuthProvider from '@/providers/AuthProvider';
 import ReactQueryProvider from '@/providers/ReactQueryProvider';
+
+export const metadata: Metadata = {
+	title: 'PMSJP — Portal Integrado',
+	description: 'Portal Integrado da Prefeitura Municipal de São José dos Pinhais',
+	icons: {
+		icon: '/favicon.svg',
+	},
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (

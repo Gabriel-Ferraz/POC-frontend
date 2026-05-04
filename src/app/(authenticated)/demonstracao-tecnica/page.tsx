@@ -14,6 +14,7 @@ interface ServiceCheck {
 	description: string;
 	linkLabel: string;
 	linkHref: string;
+	port?: number;
 }
 
 const SERVICES: ServiceCheck[] = [
@@ -37,6 +38,7 @@ const SERVICES: ServiceCheck[] = [
 		description: 'Oracle Database 23 Free — interface de administração (DBeaver Web)',
 		linkLabel: ':8978',
 		linkHref: ':8978',
+		port: 8978,
 	},
 ];
 
@@ -45,10 +47,18 @@ type Status = 'checking' | 'online' | 'offline';
 function ServiceCard({ svc }: { svc: ServiceCheck }) {
 	const [status, setStatus] = useState<Status>('checking');
 
+	const resolvedHref = svc.port
+		? `${typeof window !== 'undefined' ? window.location.protocol : 'http:'}//${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}:${svc.port}`
+		: svc.linkHref;
+
+	const resolvedUrl = svc.port
+		? `${typeof window !== 'undefined' ? window.location.protocol : 'http:'}//${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}:${svc.port}`
+		: svc.url;
+
 	const check = async () => {
 		setStatus('checking');
 		try {
-			await fetch(svc.url, { signal: AbortSignal.timeout(4000), mode: 'no-cors' });
+			await fetch(resolvedUrl, { signal: AbortSignal.timeout(4000), mode: 'no-cors' });
 			setStatus('online');
 		} catch {
 			setStatus('offline');
@@ -87,7 +97,7 @@ function ServiceCard({ svc }: { svc: ServiceCheck }) {
 					<RefreshCw className="w-3.5 h-3.5" />
 				</button>
 				<a
-					href={svc.linkHref}
+					href={resolvedHref}
 					target="_blank"
 					rel="noopener noreferrer"
 					className="flex items-center gap-1 text-[10px] sm:text-xs text-blue-600 dark:text-blue-400 hover:underline break-all">
