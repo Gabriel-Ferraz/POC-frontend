@@ -9,7 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { TipoAto, TipoCredito, TipoRecurso } from '@/types/enums';
 import type { AlteracaoOrcamentaria } from '@/types/models';
-import { listarLeisAtos, criarAlteracao, type CriarAlteracaoPayload } from '@/services/orcamentario.service';
+import {
+	listarLeisAtos,
+	criarAlteracao,
+	atualizarAlteracao,
+	type CriarAlteracaoPayload,
+} from '@/services/orcamentario.service';
 
 interface AlteracaoFormProps {
 	alteracao?: AlteracaoOrcamentaria | null;
@@ -36,6 +41,7 @@ const TIPO_RECURSO_LABELS = {
 
 export function AlteracaoForm({ alteracao, onClose }: AlteracaoFormProps) {
 	const queryClient = useQueryClient();
+	const isEditing = !!alteracao;
 
 	const [leiAtoId, setLeiAtoId] = useState(alteracao?.lei_ato_id ? String(alteracao.lei_ato_id) : '');
 	const [decretoAutorizador, setDecretoAutorizador] = useState(alteracao?.decreto_autorizador || '');
@@ -60,6 +66,18 @@ export function AlteracaoForm({ alteracao, onClose }: AlteracaoFormProps) {
 		},
 		onError: (error: any) => {
 			toast.error(error?.message || 'Erro ao criar alteração orçamentária');
+		},
+	});
+
+	const updateMutation = useMutation({
+		mutationFn: (payload: CriarAlteracaoPayload) => atualizarAlteracao(alteracao!.id, payload),
+		onSuccess: () => {
+			toast.success('Alteração orçamentária atualizada com sucesso');
+			queryClient.invalidateQueries({ queryKey: ['alteracoes-orcamentarias'] });
+			onClose();
+		},
+		onError: (error: any) => {
+			toast.error(error?.message || 'Erro ao atualizar alteração orçamentária');
 		},
 	});
 
@@ -91,10 +109,14 @@ export function AlteracaoForm({ alteracao, onClose }: AlteracaoFormProps) {
 			data_publicacao: dataPublicacao,
 		};
 
-		createMutation.mutate(payload);
+		if (isEditing) {
+			updateMutation.mutate(payload);
+		} else {
+			createMutation.mutate(payload);
+		}
 	};
 
-	const isLoading = createMutation.isPending;
+	const isLoading = createMutation.isPending || updateMutation.isPending;
 
 	return (
 		<form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 max-h-[70vh] overflow-y-auto pr-2">
@@ -247,7 +269,7 @@ export function AlteracaoForm({ alteracao, onClose }: AlteracaoFormProps) {
 					Cancelar
 				</Button>
 				<Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
-					{isLoading ? 'Salvando...' : 'Salvar'}
+					{isLoading ? 'Salvando...' : isEditing ? 'Atualizar' : 'Salvar'}
 				</Button>
 			</div>
 		</form>

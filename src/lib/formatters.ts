@@ -9,6 +9,13 @@ export function formatCurrency(value: number): string {
 
 export function formatDate(date: string | Date | null | undefined): string {
 	if (!date) return '';
+	if (typeof date === 'string') {
+		// ISO date-only string (YYYY-MM-DD) — parse as local to avoid UTC day-shift
+		const match = date.match(/^(\d{4})-(\d{2})-(\d{2})/);
+		if (match) {
+			return `${match[3]}/${match[2]}/${match[1]}`;
+		}
+	}
 	const dateObj = typeof date === 'string' ? new Date(date) : date;
 	return dateObj.toLocaleDateString('pt-BR');
 }

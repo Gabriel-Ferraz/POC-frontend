@@ -79,8 +79,23 @@ export async function obterAlteracao(
 }
 
 export async function criarAlteracao(payload: CriarAlteracaoPayload): Promise<AlteracaoOrcamentaria> {
-	const response = await post<AlteracaoOrcamentaria>(API_ENDPOINTS.orcamentario.alteracoes.create, payload);
-	return response;
+	const response = await post<{ alteracao: AlteracaoOrcamentaria }>(
+		API_ENDPOINTS.orcamentario.alteracoes.create,
+		payload
+	);
+	return (response as any).alteracao ?? response;
+}
+
+export async function atualizarAlteracao(id: number, payload: CriarAlteracaoPayload): Promise<AlteracaoOrcamentaria> {
+	const response = await put<{ alteracao: AlteracaoOrcamentaria }>(
+		API_ENDPOINTS.orcamentario.alteracoes.update(id),
+		payload
+	);
+	return (response as any).alteracao ?? response;
+}
+
+export async function excluirAlteracao(id: number): Promise<void> {
+	await del(API_ENDPOINTS.orcamentario.alteracoes.delete(id));
 }
 
 // ============================
@@ -93,6 +108,10 @@ export async function criarDotacao(alteracaoId: number, payload: CriarDotacaoPay
 		payload
 	);
 	return response;
+}
+
+export async function excluirDotacao(alteracaoId: number, dotacaoId: number): Promise<void> {
+	await del(API_ENDPOINTS.orcamentario.alteracoes.dotacoes.delete(alteracaoId, dotacaoId));
 }
 
 // ============================

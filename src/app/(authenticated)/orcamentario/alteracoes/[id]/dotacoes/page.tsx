@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PageHeader } from '@/components/ui/page-header';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,12 +10,22 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Loading } from '@/components/ui/loading';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, Plus, CheckCircle, FileText, Minimize2 } from 'lucide-react';
+import { ArrowLeft, Plus, CheckCircle, FileText, Minimize2, Trash2, Download } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { toast } from 'sonner';
 import { useFormMinimize } from '@/hooks/useFormMinimize';
-import { obterAlteracao } from '@/services/orcamentario.service';
+import { obterAlteracao, excluirDotacao, getPdfUrl } from '@/services/orcamentario.service';
 import type { DotacaoAlteracao } from '@/types/models';
 import { DotacaoForm } from './components/DotacaoForm';
 
@@ -38,6 +48,7 @@ const TIPO_CREDITO_LABELS: Record<string, string> = {
 const TIPO_RECURSO_LABELS: Record<string, string> = {
 	superavit: 'Superávit',
 	excesso_arrecadacao: 'Excesso de Arrecadação',
+	valor_credito: 'Valor do Crédito',
 };
 
 export default function DotacoesPage() {
@@ -47,8 +58,8 @@ export default function DotacoesPage() {
 	const alteracaoId = Number(params.id);
 
 	const [dialogOpen, setDialogOpen] = useState(false);
+	const [excluindoDotacao, setExcluindoDotacao] = useState<DotacaoAlteracao | null>(null);
 
-	// Sistema de minimização
 	const { minimizar, isMinimizado, temDadosRestaurados } = useFormMinimize<FormData>({
 		titulo: 'Dotações Orçamentárias',
 		icone: <FileText className="w-4 h-4" />,
@@ -64,21 +75,34 @@ export default function DotacoesPage() {
 		enabled: !!alteracaoId,
 	});
 
+	const deleteDotacaoMutation = useMutation({
+		mutationFn: (dotacaoId: number) => excluirDotacao(alteracaoId, dotacaoId),
+		onSuccess: () => {
+			toast.success('Dotação excluída com sucesso');
+			queryClient.invalidateQueries({ queryKey: ['alteracao', alteracaoId] });
+			setExcluindoDotacao(null);
+		},
+		onError: (error: any) => {
+			toast.error(error?.message || 'Erro ao excluir dotação');
+			setExcluindoDotacao(null);
+		},
+	});
+
 	const handleCloseDialog = () => {
 		setDialogOpen(false);
 	};
 
 	const handleMinimizar = () => {
-		const formData: FormData = {
-			dialogOpen,
-		};
-		minimizar(formData);
+		minimizar({ dialogOpen });
+	};
+
+	const handleDownloadPdf = () => {
+		const url = getPdfUrl(alteracaoId);
+		window.open(url, '_blank');
 	};
 
 	const getLeiAtoDisplay = (leiAto: any) => {
-		if (typeof leiAto === 'string') {
-			return leiAto;
-		}
+		if (typeof leiAto === 'string') return leiAto;
 		if (leiAto && typeof leiAto === 'object') {
 			return `${leiAto.numero} - ${TIPO_ATO_LABELS[leiAto.tipo] || leiAto.tipo}`;
 		}
@@ -107,7 +131,6 @@ export default function DotacoesPage() {
 	const totalSuplementado = dotacoesList.reduce((acc, d) => acc + Number(d.valor_suplementado || 0), 0);
 	const diferenca = totalSuplementado - totalSuprimido;
 
-	// Se está minimizado
 	if (isMinimizado) {
 		return (
 			<div className="flex items-center justify-center h-[60vh]">
@@ -139,6 +162,11 @@ export default function DotacoesPage() {
 							<Button variant="outline" onClick={handleMinimizar} className="w-full sm:w-auto">
 								<Minimize2 className="w-4 h-4 sm:mr-2" />
 								<span className="hidden sm:inline">Minimizar</span>
+							</Button>
+							<Button variant="outline" onClick={handleDownloadPdf} className="w-full sm:w-auto">
+								<Download className="w-4 h-4 sm:mr-2" />
+								<span className="hidden sm:inline">Imprimir PDF</span>
+								<span className="sm:hidden">PDF</span>
 							</Button>
 							<Button onClick={() => setDialogOpen(true)} className="w-full sm:w-auto">
 								<Plus className="w-4 h-4 sm:mr-2" />
@@ -207,6 +235,7 @@ export default function DotacoesPage() {
 										<TableHead>Valor Suprimido</TableHead>
 										<TableHead>Valor Suplementado</TableHead>
 										<TableHead>Novo Saldo</TableHead>
+										<TableHead className="text-right">Ações</TableHead>
 									</TableRow>
 								</TableHeader>
 								<TableBody>
@@ -228,6 +257,15 @@ export default function DotacoesPage() {
 											<TableCell className="font-semibold">
 												{formatCurrency(Number(dotacao.novo_saldo))}
 											</TableCell>
+											<TableCell className="text-right">
+												<Button
+													size="sm"
+													variant="outline"
+													className="text-red-600 hover:text-red-700 hover:bg-red-50"
+													onClick={() => setExcluindoDotacao(dotacao)}>
+													<Trash2 className="w-4 h-4" />
+												</Button>
+											</TableCell>
 										</TableRow>
 									))}
 								</TableBody>
@@ -240,11 +278,20 @@ export default function DotacoesPage() {
 						{dotacoesList.map((dotacao) => (
 							<Card key={dotacao.id} className="p-4">
 								<div className="space-y-3">
-									<div>
-										<p className="text-xs text-muted-foreground">Dotação Orçamentária</p>
-										<p className="font-medium text-sm break-words">
-											{dotacao.dotacao_orcamentaria}
-										</p>
+									<div className="flex items-start justify-between">
+										<div className="flex-1">
+											<p className="text-xs text-muted-foreground">Dotação Orçamentária</p>
+											<p className="font-medium text-sm break-words">
+												{dotacao.dotacao_orcamentaria}
+											</p>
+										</div>
+										<Button
+											size="sm"
+											variant="outline"
+											className="ml-2 text-red-600 hover:text-red-700 hover:bg-red-50 shrink-0"
+											onClick={() => setExcluindoDotacao(dotacao)}>
+											<Trash2 className="w-4 h-4" />
+										</Button>
 									</div>
 
 									{dotacao.conta_receita && (
@@ -290,6 +337,7 @@ export default function DotacoesPage() {
 				</>
 			)}
 
+			{/* Dialog nova dotação */}
 			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 				<DialogContent className="w-[calc(100%-2rem)] sm:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
 					<DialogHeader>
@@ -305,6 +353,27 @@ export default function DotacoesPage() {
 					</div>
 				</DialogContent>
 			</Dialog>
+
+			{/* Confirmação exclusão dotação */}
+			<AlertDialog open={!!excluindoDotacao} onOpenChange={(open) => !open && setExcluindoDotacao(null)}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+						<AlertDialogDescription>
+							Deseja excluir a dotação <strong>{excluindoDotacao?.dotacao_orcamentaria}</strong>? Esta
+							ação não pode ser desfeita.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Cancelar</AlertDialogCancel>
+						<AlertDialogAction
+							className="bg-red-600 hover:bg-red-700"
+							onClick={() => excluindoDotacao && deleteDotacaoMutation.mutate(excluindoDotacao.id)}>
+							Excluir
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 	);
 }

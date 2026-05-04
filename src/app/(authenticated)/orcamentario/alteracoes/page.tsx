@@ -10,17 +10,29 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Loading } from '@/components/ui/loading';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { FileText, Download, Eye, Plus, Minimize2, CheckCircle, Search, X } from 'lucide-react';
+import { FileText, Download, Eye, Plus, Minimize2, CheckCircle, Search, X, Pencil, Trash2, Info } from 'lucide-react';
+
 import { formatDate, formatCurrency } from '@/lib/formatters';
 import { toast } from 'sonner';
 import { useFormMinimize } from '@/hooks/useFormMinimize';
-import { listarAlteracoes, getPdfUrl, type FiltrosAlteracoes } from '@/services/orcamentario.service';
+import { listarAlteracoes, excluirAlteracao, getPdfUrl, type FiltrosAlteracoes } from '@/services/orcamentario.service';
 import type { AlteracaoOrcamentaria } from '@/types/models';
 import { AlteracaoForm } from './components/AlteracaoForm';
+import { AlteracaoInfoModal } from './components/AlteracaoInfoModal';
 import { TipoAto, TipoCredito, TipoRecurso } from '@/types/enums';
 
 interface FormData {
@@ -60,6 +72,9 @@ export default function AlteracoesOrcamentariasPage() {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const [dialogOpen, setDialogOpen] = useState(false);
+	const [editando, setEditando] = useState<AlteracaoOrcamentaria | null>(null);
+	const [excluindo, setExcluindo] = useState<AlteracaoOrcamentaria | null>(null);
+	const [visualizando, setVisualizando] = useState<AlteracaoOrcamentaria | null>(null);
 	const [filtros, setFiltros] = useState<FiltrosAlteracoes>(EMPTY_FILTERS);
 	const [filtrosAtivos, setFiltrosAtivos] = useState<FiltrosAlteracoes>(EMPTY_FILTERS);
 
@@ -79,6 +94,19 @@ export default function AlteracoesOrcamentariasPage() {
 		queryFn: () => listarAlteracoes(filtrosAtivos),
 	});
 
+	const deleteMutation = useMutation({
+		mutationFn: (id: number) => excluirAlteracao(id),
+		onSuccess: () => {
+			toast.success('Alteração excluída com sucesso');
+			queryClient.invalidateQueries({ queryKey: ['alteracoes-orcamentarias'] });
+			setExcluindo(null);
+		},
+		onError: (error: any) => {
+			toast.error(error?.message || 'Erro ao excluir alteração');
+			setExcluindo(null);
+		},
+	});
+
 	const handlePesquisar = (e: React.FormEvent) => {
 		e.preventDefault();
 		setFiltrosAtivos({ ...filtros });
@@ -89,12 +117,28 @@ export default function AlteracoesOrcamentariasPage() {
 		setFiltrosAtivos(EMPTY_FILTERS);
 	};
 
+	const handleNovaAlteracao = () => {
+		setEditando(null);
+		setDialogOpen(true);
+	};
+
+	const handleEditar = (alteracao: AlteracaoOrcamentaria) => {
+		setEditando(alteracao);
+		setDialogOpen(true);
+	};
+
 	const handleCloseDialog = () => {
 		setDialogOpen(false);
+		setEditando(null);
 	};
 
 	const handleMinimizar = () => {
 		minimizar({ dialogOpen });
+	};
+
+	const handleDownloadPdf = (alteracao: AlteracaoOrcamentaria) => {
+		const url = getPdfUrl(alteracao.id);
+		window.open(url, '_blank');
 	};
 
 	const getLeiAtoDisplay = (leiAto: any) => {
@@ -136,7 +180,7 @@ export default function AlteracoesOrcamentariasPage() {
 							<Minimize2 className="w-4 h-4 sm:mr-2" />
 							<span className="hidden sm:inline">Minimizar</span>
 						</Button>
-						<Button onClick={() => setDialogOpen(true)} className="w-full sm:w-auto">
+						<Button onClick={handleNovaAlteracao} className="w-full sm:w-auto">
 							<Plus className="w-4 h-4 sm:mr-2" />
 							<span className="sm:hidden">Nova</span>
 							<span className="hidden sm:inline">Nova Alteração</span>
@@ -289,7 +333,7 @@ export default function AlteracoesOrcamentariasPage() {
 				</Card>
 			) : (
 				<>
-					{/* Tabela para desktop */}
+					{/* Tabela desktop */}
 					<Card className="hidden lg:block">
 						<div className="overflow-x-auto">
 							<Table>
@@ -302,6 +346,7 @@ export default function AlteracoesOrcamentariasPage() {
 										<TableHead>Tipo de Recurso</TableHead>
 										<TableHead>Valor do Crédito</TableHead>
 										<TableHead>Data do Ato</TableHead>
+										<TableHead>Data da Publicação</TableHead>
 										<TableHead className="text-right">Ações</TableHead>
 									</TableRow>
 								</TableHeader>
@@ -325,8 +370,16 @@ export default function AlteracoesOrcamentariasPage() {
 												{formatCurrency(Number(alteracao.valor_credito || 0))}
 											</TableCell>
 											<TableCell>{formatDate(alteracao.data_ato)}</TableCell>
+											<TableCell>{formatDate(alteracao.data_publicacao)}</TableCell>
 											<TableCell className="text-right">
-												<div className="flex justify-end gap-2">
+												<div className="flex justify-end gap-1">
+													<Button
+														size="sm"
+														variant="outline"
+														onClick={() => setVisualizando(alteracao)}>
+														<Info className="w-4 h-4 mr-1" />
+														Informações
+													</Button>
 													<Button
 														size="sm"
 														variant="outline"
@@ -338,15 +391,27 @@ export default function AlteracoesOrcamentariasPage() {
 														<Eye className="w-4 h-4 mr-1" />
 														Dotações
 													</Button>
-													<a
-														href={getPdfUrl(alteracao.id)}
-														target="_blank"
-														rel="noopener noreferrer">
-														<Button size="sm" variant="outline">
-															<Download className="w-4 h-4 mr-1" />
-															PDF
-														</Button>
-													</a>
+													<Button
+														size="sm"
+														variant="outline"
+														onClick={() => handleEditar(alteracao)}>
+														<Pencil className="w-4 h-4 mr-1" />
+														Alterar
+													</Button>
+													<Button
+														size="sm"
+														variant="outline"
+														onClick={() => handleDownloadPdf(alteracao)}>
+														<Download className="w-4 h-4 mr-1" />
+														PDF
+													</Button>
+													<Button
+														size="sm"
+														variant="outline"
+														className="text-red-600 hover:text-red-700 hover:bg-red-50"
+														onClick={() => setExcluindo(alteracao)}>
+														<Trash2 className="w-4 h-4" />
+													</Button>
 												</div>
 											</TableCell>
 										</TableRow>
@@ -356,7 +421,7 @@ export default function AlteracoesOrcamentariasPage() {
 						</div>
 					</Card>
 
-					{/* Cards para mobile e tablet */}
+					{/* Cards mobile */}
 					<div className="lg:hidden space-y-3">
 						{alteracoesList.map((alteracao) => (
 							<Card key={alteracao.id} className="p-4">
@@ -405,23 +470,39 @@ export default function AlteracoesOrcamentariasPage() {
 										</div>
 									</div>
 
-									<div className="flex gap-2 pt-2 border-t">
+									<div className="grid grid-cols-2 gap-2 pt-2 border-t">
+										<Button size="sm" variant="outline" onClick={() => setVisualizando(alteracao)}>
+											<Info className="w-4 h-4 mr-1" />
+											Informações
+										</Button>
 										<Button
 											size="sm"
 											variant="outline"
-											className="flex-1"
 											onClick={() =>
 												router.push(`/orcamentario/alteracoes/${alteracao.id}/dotacoes`)
 											}>
-											<Eye className="w-4 h-4 mr-2" />
+											<Eye className="w-4 h-4 mr-1" />
 											Dotações
 										</Button>
-										<a href={getPdfUrl(alteracao.id)} target="_blank" rel="noopener noreferrer">
-											<Button size="sm" variant="outline" className="flex-1">
-												<Download className="w-4 h-4 mr-2" />
-												PDF
-											</Button>
-										</a>
+										<Button size="sm" variant="outline" onClick={() => handleEditar(alteracao)}>
+											<Pencil className="w-4 h-4 mr-1" />
+											Alterar
+										</Button>
+										<Button
+											size="sm"
+											variant="outline"
+											onClick={() => handleDownloadPdf(alteracao)}>
+											<Download className="w-4 h-4 mr-1" />
+											PDF
+										</Button>
+										<Button
+											size="sm"
+											variant="outline"
+											className="text-red-600 hover:text-red-700 hover:bg-red-50 col-span-2"
+											onClick={() => setExcluindo(alteracao)}>
+											<Trash2 className="w-4 h-4 mr-1" />
+											Excluir
+										</Button>
 									</div>
 								</div>
 							</Card>
@@ -430,16 +511,43 @@ export default function AlteracoesOrcamentariasPage() {
 				</>
 			)}
 
+			{/* Dialog criar/editar */}
 			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 				<DialogContent className="w-[calc(100%-2rem)] sm:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
 					<DialogHeader>
-						<DialogTitle className="text-base sm:text-lg">Nova Alteração Orçamentária</DialogTitle>
+						<DialogTitle className="text-base sm:text-lg">
+							{editando ? 'Editar Alteração Orçamentária' : 'Nova Alteração Orçamentária'}
+						</DialogTitle>
 					</DialogHeader>
 					<div className="overflow-y-auto flex-1">
-						<AlteracaoForm alteracao={null} onClose={handleCloseDialog} />
+						<AlteracaoForm alteracao={editando} onClose={handleCloseDialog} />
 					</div>
 				</DialogContent>
 			</Dialog>
+
+			{/* Modal de informações */}
+			<AlteracaoInfoModal alteracao={visualizando} onClose={() => setVisualizando(null)} />
+
+			{/* Confirmação de exclusão */}
+			<AlertDialog open={!!excluindo} onOpenChange={(open) => !open && setExcluindo(null)}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+						<AlertDialogDescription>
+							Deseja excluir a alteração <strong>{excluindo?.decreto_autorizador}</strong>? Esta ação não
+							pode ser desfeita e todas as dotações vinculadas serão removidas.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Cancelar</AlertDialogCancel>
+						<AlertDialogAction
+							className="bg-red-600 hover:bg-red-700"
+							onClick={() => excluindo && deleteMutation.mutate(excluindo.id)}>
+							Excluir
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 	);
 }
