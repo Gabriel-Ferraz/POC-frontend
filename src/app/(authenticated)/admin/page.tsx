@@ -535,6 +535,9 @@ function EmpenhosTab() {
 
 // ── TAB: SOLICITAÇÕES ────────────────────────────────────────────────────────
 
+const MOTIVO_MIN = 10;
+const MOTIVO_MAX = 500;
+
 function SolicitacoesTab() {
 	const [solicitacaoId, setSolicitacaoId] = useState('');
 	const [novoStatus, setNovoStatus] = useState('');
@@ -542,6 +545,9 @@ function SolicitacoesTab() {
 	const [statusAtual, setStatusAtual] = useState('');
 	const [loadingSolicitacao, setLoadingSolicitacao] = useState(false);
 	const [solicitacaoInfo, setSolicitacaoInfo] = useState<any>(null);
+
+	const motivoValido = motivo.trim().length >= MOTIVO_MIN && motivo.trim().length <= MOTIVO_MAX;
+	const podeEnviar = !!solicitacaoInfo && !!novoStatus && motivoValido;
 
 	const handleCarregar = async () => {
 		if (!solicitacaoId) {
@@ -566,10 +572,14 @@ function SolicitacoesTab() {
 
 	const handleAtualizarStatus = async (e: React.FormEvent) => {
 		e.preventDefault();
+		if (!motivoValido) {
+			toast.error(`Motivo deve ter entre ${MOTIVO_MIN} e ${MOTIVO_MAX} caracteres`);
+			return;
+		}
 		try {
 			await apiFetch(`/admin/solicitacoes/${solicitacaoId}/status`, {
 				method: 'POST',
-				body: JSON.stringify({ status: novoStatus, motivo: motivo || undefined }),
+				body: JSON.stringify({ status: novoStatus, motivo: motivo.trim() }),
 			});
 			toast.success('Status atualizado com sucesso!');
 			setStatusAtual(novoStatus);
@@ -661,17 +671,45 @@ function SolicitacoesTab() {
 					</div>
 
 					<div>
-						<Label>Motivo/Observação (Opcional)</Label>
+						<div className="flex items-center justify-between mb-1">
+							<Label>
+								Motivo *{' '}
+								<span className="text-muted-foreground font-normal text-xs">
+									(mín. {MOTIVO_MIN} caracteres)
+								</span>
+							</Label>
+							<span
+								className={`text-xs ${
+									motivo.length > MOTIVO_MAX
+										? 'text-red-500'
+										: motivo.trim().length >= MOTIVO_MIN
+											? 'text-green-600'
+											: 'text-muted-foreground'
+								}`}>
+								{motivo.length}/{MOTIVO_MAX}
+							</span>
+						</div>
 						<Textarea
 							value={motivo}
 							onChange={(e) => setMotivo(e.target.value)}
 							placeholder="Descreva o motivo da mudança de status..."
 							rows={3}
 							disabled={!solicitacaoInfo}
+							className={
+								motivo.length > 0 && !motivoValido ? 'border-red-400 focus-visible:ring-red-400' : ''
+							}
 						/>
+						{motivo.length > 0 && motivo.trim().length < MOTIVO_MIN && (
+							<p className="text-xs text-red-500 mt-1">
+								Mínimo de {MOTIVO_MIN} caracteres ({MOTIVO_MIN - motivo.trim().length} restantes)
+							</p>
+						)}
+						{motivo.length > MOTIVO_MAX && (
+							<p className="text-xs text-red-500 mt-1">Máximo de {MOTIVO_MAX} caracteres atingido</p>
+						)}
 					</div>
 
-					<Button type="submit" className="w-full" disabled={!solicitacaoInfo || !novoStatus}>
+					<Button type="submit" className="w-full" disabled={!podeEnviar}>
 						<RefreshCw className="w-4 h-4 mr-2" />
 						Atualizar Status
 					</Button>

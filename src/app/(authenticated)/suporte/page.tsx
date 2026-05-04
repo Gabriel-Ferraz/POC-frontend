@@ -563,7 +563,11 @@ export default function SuportePage() {
 								<TableRow key={chamado.id}>
 									<TableCell className="font-medium whitespace-nowrap">{chamado.protocolo}</TableCell>
 									<TableCell>{chamado.modulo}</TableCell>
-									<TableCell>{chamado.assunto}</TableCell>
+									<TableCell className="max-w-[220px]">
+										<span className="block truncate" title={chamado.assunto}>
+											{chamado.assunto}
+										</span>
+									</TableCell>
 									{isGestorSuporte && (
 										<TableCell className="whitespace-nowrap">
 											{typeof chamado.usuario === 'string'

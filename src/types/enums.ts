@@ -10,35 +10,41 @@ export enum PerfilUsuario {
 }
 
 export enum StatusEmpenho {
-	DISPONIVEL = 'Disponível',
-	BLOQUEADO = 'Bloqueado',
-	SEM_SALDO = 'Sem Saldo',
+	DISPONIVEL = 'disponivel',
+	BLOQUEADO = 'bloqueado',
+	SEM_SALDO = 'sem_saldo',
 }
 
 export enum StatusSolicitacao {
-	PENDENTE = 'Pendente',
-	AGUARDANDO_APROVACAO = 'Aguardando Aprovação dos Anexos',
-	ANEXOS_RECUSADOS = 'Anexos Recusados',
-	AGUARDANDO_GESTOR = 'Aguardando Autorização do Gestor',
-	EM_LIQUIDACAO = 'Em Liquidação',
-	EM_ORDEM_PAGAMENTO = 'Em Ordem de Pagamento',
-	PAGAMENTO_REMESSA = 'Pagamento em Remessa',
-	PAGAMENTO_REALIZADO = 'Pagamento Realizado',
-	CANCELADA = 'Cancelada',
+	RASCUNHO = 'rascunho',
+	AGUARDANDO_APROVACAO = 'aguardando_aprovacao',
+	ANEXOS = 'anexos',
+	FISCAL = 'fiscal',
+	GESTOR = 'gestor',
+	LIQUIDACAO = 'liquidacao',
+	SECRETARIO = 'secretario',
+	ISS = 'iss',
+	ORDEM_PAGAMENTO = 'ordem_pagamento',
+	AUTORIZACAO = 'autorizacao',
+	BORDERO = 'bordero',
+	REMESSA = 'remessa',
+	PAGAMENTO = 'pagamento',
+	PAGAMENTO_REALIZADO = 'pagamento_realizado',
+	CANCELADO = 'cancelado',
 }
 
 export enum StatusAnexo {
-	PENDENTE = 'Pendente',
-	ANEXO_CADASTRADO = 'Anexo Cadastrado',
-	AGUARDANDO_APROVACAO = 'Aguardando Aprovação',
-	APROVADO = 'Aprovado',
-	RECUSADO = 'Recusado',
+	PENDENTE = 'pendente',
+	ANEXO_CADASTRADO = 'anexo_cadastrado',
+	AGUARDANDO_APROVACAO = 'aguardando_aprovacao',
+	APROVADO = 'aprovado',
+	RECUSADO = 'recusado',
 }
 
 export enum StatusChamado {
-	ABERTO = 'Aberto',
-	EM_ATENDIMENTO = 'Em Atendimento',
-	CONCLUIDO = 'Concluído',
+	ABERTO = 'aberto',
+	EM_ATENDIMENTO = 'em_atendimento',
+	CONCLUIDO = 'concluido',
 }
 
 export enum TipoAnexo {

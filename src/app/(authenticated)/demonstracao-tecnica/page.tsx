@@ -4,41 +4,46 @@ import { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
-import { ExternalLink, RefreshCw } from 'lucide-react';
+import { ExternalLink, RefreshCw, Eye, EyeOff, ChevronDown, ChevronRight } from 'lucide-react';
 
-// ── Serviços verificáveis via HTTP ──────────────────────────────────────────
+// ── Serviços verificáveis ────────────────────────────────────────────────────
 
 interface ServiceCheck {
 	label: string;
 	url: string;
 	description: string;
 	linkLabel: string;
+	linkHref: string;
 }
 
 const SERVICES: ServiceCheck[] = [
 	{
-		label: 'Backend PHP (Laravel Octane)',
+		label: 'Backend PHP (Laravel + Swoole)',
 		url: '/api/version',
-		description: 'PHP 8.2 + Laravel 12 + Swoole — roteado via Traefik',
+		description: 'PHP 8.2 + Laravel 12 + Octane/Swoole',
 		linkLabel: 'GET /api/version',
+		linkHref: '/api/version',
 	},
 	{
 		label: 'Tomcat (Servidor de Relatórios)',
-		url: 'http://localhost:8180',
-		description: 'Apache Tomcat 10 — exigido pelo edital',
-		linkLabel: 'localhost:8180',
+		url: 'http://localhost:8008/tomcat',
+		description: 'Apache Tomcat 9 — exigido pelo edital',
+		linkLabel: '/tomcat',
+		linkHref: 'http://localhost:8008/tomcat',
 	},
 	{
 		label: 'Adminer (Oracle Database)',
-		url: 'http://localhost:8181',
-		description: 'Oracle Database 23 Free via Adminer — acesso direto ao banco',
-		linkLabel: 'localhost:8181',
+		url: 'http://localhost:8008/adminer',
+		description: 'Oracle Database 23 Free — interface de administração',
+		linkLabel: '/adminer',
+		linkHref: 'http://localhost:8008/adminer',
 	},
 	{
 		label: 'Traefik Dashboard',
 		url: 'http://localhost:8080',
 		description: 'Proxy reverso / roteamento de containers',
 		linkLabel: 'localhost:8080',
+		linkHref: 'http://localhost:8080',
 	},
 ];
 
@@ -89,7 +94,7 @@ function ServiceCard({ svc }: { svc: ServiceCheck }) {
 					<RefreshCw className="w-3.5 h-3.5" />
 				</button>
 				<a
-					href={svc.url}
+					href={svc.linkHref}
 					target="_blank"
 					rel="noopener noreferrer"
 					className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline">
@@ -101,12 +106,51 @@ function ServiceCard({ svc }: { svc: ServiceCheck }) {
 	);
 }
 
+// ── Credenciais do banco ─────────────────────────────────────────────────────
+
+function DbCredentials() {
+	const [visible, setVisible] = useState(false);
+
+	const creds = [
+		{ label: 'Sistema', value: 'Oracle Database 23 Free' },
+		{ label: 'Host', value: 'oracle (interno) / localhost:8008/adminer (web)' },
+		{ label: 'Banco', value: 'FREEPDB1' },
+		{ label: 'Usuário', value: 'poc_user' },
+		{ label: 'Senha', value: 'poc_pass' },
+		{ label: 'Senha SYS', value: 'oraclepass' },
+	];
+
+	return (
+		<div className="mt-4 border rounded-lg overflow-hidden">
+			<button
+				onClick={() => setVisible((v) => !v)}
+				className="w-full flex items-center justify-between px-4 py-3 bg-muted/50 hover:bg-muted transition-colors text-sm font-medium">
+				<span className="flex items-center gap-2">
+					{visible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+					Credenciais do Banco de Dados
+				</span>
+				<span className="text-xs text-muted-foreground">{visible ? 'ocultar' : 'clique para exibir'}</span>
+			</button>
+			{visible && (
+				<div className="px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+					{creds.map(({ label, value }) => (
+						<div key={label} className="flex gap-2">
+							<span className="text-muted-foreground shrink-0 w-24">{label}:</span>
+							<code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">{value}</code>
+						</div>
+					))}
+				</div>
+			)}
+		</div>
+	);
+}
+
 // ── Stack técnica ────────────────────────────────────────────────────────────
 
 const stack = {
 	frontend: [
-		{ label: 'Next.js 16.1.1', detail: 'App Router, Server Components' },
-		{ label: 'React 19 + TypeScript 5', detail: 'Base da aplicação' },
+		{ label: 'Next.js 15 + React 19', detail: 'App Router, Server Components' },
+		{ label: 'TypeScript 5', detail: 'Tipagem estática em todo o projeto' },
 		{ label: 'Tailwind CSS 4 + shadcn/ui', detail: 'Design system' },
 		{ label: 'TanStack Query v5', detail: 'Cache e data fetching' },
 		{ label: 'Zod v4', detail: 'Validação de schemas' },
@@ -119,8 +163,8 @@ const stack = {
 		{ label: 'Laravel Sanctum', detail: 'Bearer Token auth' },
 		{ label: 'Oracle Database 23 Free', detail: 'Banco de dados relacional' },
 		{ label: 'Redis 7', detail: 'Cache e filas' },
-		{ label: 'Nginx', detail: 'Servidor web + proxy reverso' },
-		{ label: 'Apache Tomcat 10', detail: 'Servidor de relatórios (edital)' },
+		{ label: 'Apache Tomcat 9', detail: 'Servidor de relatórios (edital)' },
+		{ label: 'Traefik v3', detail: 'Proxy reverso + roteamento' },
 		{ label: 'Docker + Alpine Linux', detail: 'Containerização' },
 	],
 };
@@ -141,8 +185,8 @@ const modulos = [
 const editalItems = [
 	{ req: 'SO Linux', impl: 'Docker Alpine/Slim Linux em todos os containers' },
 	{ req: 'PHP instalado e configurado', impl: 'PHP 8.2 + Octane/Swoole — porta 3333' },
-	{ req: 'Tomcat instalado e configurado', impl: 'Apache Tomcat 10 — porta 8180' },
-	{ req: 'Servidor web', impl: 'Nginx + Traefik (proxy reverso) — porta 8008' },
+	{ req: 'Tomcat instalado e configurado', impl: 'Apache Tomcat 9 — acessível em /tomcat' },
+	{ req: 'Servidor web', impl: 'Traefik v3 (proxy reverso) — porta 8008' },
 	{ req: 'GIT instalado', impl: 'Git disponível no container de desenvolvimento' },
 	{ req: 'Chrome e/ou Firefox', impl: 'Sem plugins adicionais — qualquer browser moderno' },
 	{ req: 'Visualizador de PDF', impl: 'Nativo no navegador para relatórios exportados' },
@@ -150,16 +194,213 @@ const editalItems = [
 	{ req: 'Impressora', impl: 'Via impressão do navegador a partir dos PDFs gerados' },
 ];
 
+// ── Arquitetura MVC ──────────────────────────────────────────────────────────
+
+interface MvcLayer {
+	title: string;
+	subtitle: string;
+	color: string;
+	path: string;
+	description: string;
+	snippet: string;
+}
+
+const MVC_LAYERS: MvcLayer[] = [
+	{
+		title: 'Model',
+		subtitle: 'Entidades e regras de negócio',
+		color: 'border-blue-400 bg-blue-50 dark:bg-blue-950/40',
+		path: 'app/Models/User.php',
+		description: 'Eloquent ORM com tipagem, casts, relacionamentos e Sanctum para tokens de autenticação.',
+		snippet: `// app/Models/User.php
+class User extends Authenticatable
+{
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+
+    protected $fillable = [
+        'name', 'email', 'cpf', 'password',
+        'perfil', 'is_active', 'fornecedor_id',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'password'   => 'hashed',
+            'is_active'  => 'boolean',
+            'last_login_at' => 'datetime',
+        ];
+    }
+
+    public function fornecedor(): BelongsTo
+    {
+        return $this->belongsTo(Fornecedor::class);
+    }
+}`,
+	},
+	{
+		title: 'Controller',
+		subtitle: 'Lógica de apresentação e orquestração',
+		color: 'border-purple-400 bg-purple-50 dark:bg-purple-950/40',
+		path: 'app/Http/Controllers/Auth/AuthController.php',
+		description: 'Controllers finos que delegam para Models. Traits Auditable e Logger injetam rastreabilidade.',
+		snippet: `// app/Http/Controllers/Auth/AuthController.php
+class AuthController extends Controller
+{
+    use Auditable, Logger;
+
+    public function login(LoginRequest $request): JsonResponse
+    {
+        $user = User::where('email', $request->email ?? $request->cpf)
+            ->orWhere('cpf', $request->cpf ?? $request->email)
+            ->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json(['message' => 'Credenciais inválidas'], 401);
+        }
+
+        $token = $user->createToken('auth-token')->plainTextToken;
+        $this->audit('login', 'User', $user->id, null, $user->id);
+
+        return response()->json([
+            'token' => $token,
+            'user'  => new UserResource($user->load('fornecedor')),
+        ]);
+    }
+}`,
+	},
+	{
+		title: 'Route / API',
+		subtitle: 'Definição de endpoints REST',
+		color: 'border-green-400 bg-green-50 dark:bg-green-950/40',
+		path: 'routes/api.php',
+		description: 'Rotas agrupadas por domínio, protegidas por Sanctum. Prefixos semânticos por módulo.',
+		snippet: `// routes/api.php
+Route::prefix('auth')->group(function () {
+    Route::post('/login',    [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::prefix('fornecedor')->group(function () {
+        Route::get('/empenhos',      [FornecedorController::class, 'empenhos']);
+        Route::get('/empenhos/{id}', [FornecedorController::class, 'showEmpenho']);
+    });
+
+    Route::prefix('chamados')->group(function () {
+        Route::get('/',            [ChamadoController::class, 'index']);
+        Route::post('/',           [ChamadoController::class, 'store']);
+        Route::get('/{id}',        [ChamadoController::class, 'show']);
+        Route::post('/{id}/responder', [ChamadoController::class, 'responder']);
+    });
+});`,
+	},
+	{
+		title: 'View / Resource',
+		subtitle: 'Serialização de resposta JSON',
+		color: 'border-orange-400 bg-orange-50 dark:bg-orange-950/40',
+		path: 'app/Http/Resources/Auth/UserResource.php',
+		description: 'API Resources formatam o JSON de saída, garantindo controle sobre campos expostos por perfil.',
+		snippet: `// app/Http/Resources/Auth/UserResource.php
+class UserResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id'           => $this->id,
+            'name'         => $this->name,
+            'email'        => $this->email,
+            'cpf'          => $this->cpf,
+            'perfil'       => $this->perfil,
+            'is_active'    => $this->is_active,
+            'last_login_at' => $this->last_login_at?->toISOString(),
+            'fornecedor'   => $this->whenLoaded('fornecedor', fn () => [
+                'id'   => $this->fornecedor->id,
+                'nome' => $this->fornecedor->nome,
+                'cnpj' => $this->fornecedor->cnpj,
+            ]),
+        ];
+    }
+}`,
+	},
+	{
+		title: 'Frontend — Provider',
+		subtitle: 'Estado global de autenticação (React Context)',
+		color: 'border-cyan-400 bg-cyan-50 dark:bg-cyan-950/40',
+		path: 'src/providers/AuthProvider.tsx',
+		description:
+			'Context API gerencia o usuário autenticado, expõe login/logout e guarda o perfil para controle de acesso em toda a UI.',
+		snippet: `// src/providers/AuthProvider.tsx
+type AuthCtx = {
+    user: User | null;
+    loading: boolean;
+    login: (cpf: string, password: string) => Promise<void>;
+    logout: () => Promise<void>;
+    isPerfil: (perfil: PerfilUsuario) => boolean;
+};
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+    const [user, setUser] = useState<User | null>(null);
+    const router = useRouter();
+
+    const login = async (cpf: string, password: string) => {
+        const { token, user } = await loginApi(cpf, password);
+        saveToken(token);
+        setUser(user);
+        router.push('/');
+    };
+
+    return (
+        <AuthContext.Provider value={{ user, loading, login, logout, isPerfil }}>
+            {children}
+        </AuthContext.Provider>
+    );
+}`,
+	},
+];
+
+function MvcCard({ layer }: { layer: MvcLayer }) {
+	const [open, setOpen] = useState(false);
+
+	return (
+		<div className={`rounded-lg border-l-4 ${layer.color} border border-border overflow-hidden`}>
+			<button
+				onClick={() => setOpen((v) => !v)}
+				className="w-full flex items-start justify-between gap-3 p-4 text-left hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+				<div className="min-w-0">
+					<div className="flex items-center gap-2 flex-wrap">
+						<span className="font-semibold text-sm">{layer.title}</span>
+						<span className="text-xs text-muted-foreground">— {layer.subtitle}</span>
+					</div>
+					<p className="text-xs text-muted-foreground mt-1">{layer.description}</p>
+					<code className="text-xs text-blue-600 dark:text-blue-400 font-mono mt-1 block">{layer.path}</code>
+				</div>
+				{open ? (
+					<ChevronDown className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+				) : (
+					<ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+				)}
+			</button>
+			{open && (
+				<pre className="text-xs font-mono bg-gray-900 dark:bg-gray-950 text-gray-100 p-4 overflow-x-auto leading-5 border-t border-border">
+					{layer.snippet}
+				</pre>
+			)}
+		</div>
+	);
+}
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+
 export default function DemonstracaoTecnicaPage() {
 	return (
 		<div>
 			<PageHeader
 				title="Demonstração Técnica"
-				description="Status dos serviços, stack e conformidade com o edital"
+				description="Status dos serviços, stack, conformidade com o edital e arquitetura MVC"
 			/>
 
 			<div className="grid gap-6">
-				{/* Verificação de Serviços ao Vivo */}
+				{/* Verificação de Serviços */}
 				<Card>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
@@ -173,6 +414,7 @@ export default function DemonstracaoTecnicaPage() {
 						{SERVICES.map((svc) => (
 							<ServiceCard key={svc.url} svc={svc} />
 						))}
+						<DbCredentials />
 					</CardContent>
 				</Card>
 
@@ -194,7 +436,7 @@ export default function DemonstracaoTecnicaPage() {
 												<span className="text-sm font-medium">{item.label}</span>
 												<p className="text-xs text-muted-foreground">{item.detail}</p>
 											</div>
-											<Badge className="shrink-0">✅</Badge>
+											<span className="shrink-0 text-green-600">✅</span>
 										</div>
 									))}
 								</div>
@@ -210,7 +452,7 @@ export default function DemonstracaoTecnicaPage() {
 												<span className="text-sm font-medium">{item.label}</span>
 												<p className="text-xs text-muted-foreground">{item.detail}</p>
 											</div>
-											<Badge className="shrink-0">✅</Badge>
+											<span className="shrink-0 text-green-600">✅</span>
 										</div>
 									))}
 								</div>
@@ -242,82 +484,43 @@ export default function DemonstracaoTecnicaPage() {
 					</CardContent>
 				</Card>
 
-				{/* Módulos + Arquitetura */}
-				<div className="grid md:grid-cols-2 gap-6">
-					<Card>
-						<CardHeader>
-							<CardTitle>Módulos Implementados</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<div className="space-y-2.5">
-								{modulos.map(({ label, detalhe }) => (
-									<div key={label} className="flex items-start gap-2">
-										<Badge variant="default" className="shrink-0 mt-0.5">
-											✅
-										</Badge>
-										<div>
-											<span className="text-sm font-medium">{label}</span>
-											<p className="text-xs text-muted-foreground">{detalhe}</p>
-										</div>
+				{/* Módulos */}
+				<Card>
+					<CardHeader>
+						<CardTitle>Módulos Implementados</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="grid sm:grid-cols-2 gap-x-8 gap-y-2.5">
+							{modulos.map(({ label, detalhe }) => (
+								<div key={label} className="flex items-start gap-2">
+									<span className="text-green-600 dark:text-green-400 shrink-0 mt-0.5">✅</span>
+									<div>
+										<span className="text-sm font-medium">{label}</span>
+										<p className="text-xs text-muted-foreground">{detalhe}</p>
 									</div>
-								))}
-							</div>
-						</CardContent>
-					</Card>
+								</div>
+							))}
+						</div>
+					</CardContent>
+				</Card>
 
-					<Card>
-						<CardHeader>
-							<CardTitle>Arquitetura Frontend</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<pre className="bg-muted/50 p-3 rounded-lg text-xs overflow-x-auto border border-border text-foreground mb-4 leading-5">
-								{`src/
-├── app/
-│   ├── features/          # Lógica por domínio
-│   │   ├── auth/
-│   │   ├── fornecedor/
-│   │   ├── solicitacoes/
-│   │   ├── suporte/
-│   │   ├── prestacao-contas/
-│   │   └── orcamentario/
-│   └── (authenticated)/   # Páginas por rota
-│       ├── portal-fornecedor/
-│       ├── gestor/
-│       ├── suporte/
-│       ├── admin/
-│       └── ...
-├── components/
-│   ├── ui/        # Design System
-│   ├── layout/    # Sidebar, Header
-│   ├── suporte/
-│   └── theme/
-├── lib/http/      # HTTP Client
-├── types/         # Models + Enums
-└── providers/     # AuthProvider`}
-							</pre>
-							<div className="grid grid-cols-2 gap-3 text-xs text-muted-foreground">
-								<div>
-									<p className="font-semibold text-foreground mb-1">Padrões (MVC)</p>
-									<ul className="space-y-1">
-										<li>• Separação por domínio</li>
-										<li>• Bearer Token auth</li>
-										<li>• Cache com TanStack Query</li>
-										<li>• Validação Zod</li>
-									</ul>
-								</div>
-								<div>
-									<p className="font-semibold text-foreground mb-1">Segurança</p>
-									<ul className="space-y-1">
-										<li>• Auto-redirect em 401</li>
-										<li>• Controle por perfil</li>
-										<li>• Validação client + server</li>
-										<li>• HTTPS ready</li>
-									</ul>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-				</div>
+				{/* Arquitetura MVC */}
+				<Card>
+					<CardHeader>
+						<CardTitle>Arquitetura MVC — Código Real da Aplicação</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<p className="text-sm text-muted-foreground mb-4">
+							Clique em cada camada para ver o trecho real do código fonte. O path indica onde encontrar o
+							arquivo no projeto.
+						</p>
+						<div className="space-y-3">
+							{MVC_LAYERS.map((layer) => (
+								<MvcCard key={layer.title} layer={layer} />
+							))}
+						</div>
+					</CardContent>
+				</Card>
 			</div>
 		</div>
 	);
