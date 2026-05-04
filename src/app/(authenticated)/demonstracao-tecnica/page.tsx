@@ -26,17 +26,17 @@ const SERVICES: ServiceCheck[] = [
 	},
 	{
 		label: 'Tomcat (Servidor de Relatórios)',
-		url: 'http://localhost:8008/tomcat',
+		url: '/tomcat',
 		description: 'Apache Tomcat 9 — exigido pelo edital',
 		linkLabel: '/tomcat',
-		linkHref: 'http://localhost:8008/tomcat',
+		linkHref: '/tomcat',
 	},
 	{
-		label: 'Adminer (Oracle Database)',
-		url: 'http://localhost:8008/adminer',
-		description: 'Oracle Database 23 Free — interface de administração',
-		linkLabel: '/adminer',
-		linkHref: 'http://localhost:8008/adminer',
+		label: 'CloudBeaver (Oracle Database)',
+		url: '/:8978',
+		description: 'Oracle Database 23 Free — interface de administração (DBeaver Web)',
+		linkLabel: 'localhost:8978',
+		linkHref: '/:8978',
 	},
 ];
 
@@ -105,11 +105,13 @@ function DbCredentials() {
 	const [visible, setVisible] = useState(false);
 
 	const creds = [
-		{ label: 'Sistema', value: 'Oracle Database 23 Free' },
-		{ label: 'Servidor', value: '//oracle:1521/FREEPDB1' },
+		{ label: 'Interface', value: 'CloudBeaver — /cloudbeaver' },
+		{ label: 'Driver', value: 'Oracle' },
+		{ label: 'Host', value: 'oracle' },
+		{ label: 'Porta', value: '1521' },
+		{ label: 'Banco', value: 'FREEPDB1' },
 		{ label: 'Usuário', value: 'poc_user' },
 		{ label: 'Senha', value: 'poc_pass' },
-		{ label: 'Banco', value: '(deixar em branco)' },
 		{ label: 'Senha SYS', value: 'oraclepass' },
 	];
 
