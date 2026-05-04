@@ -21,6 +21,7 @@ import {
 	Minimize2,
 	Shield,
 	List,
+	CheckCircle2,
 } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import { useRouter } from 'next/navigation';
@@ -134,7 +135,8 @@ export default function AdminPage() {
 			{temDadosRestaurados && (
 				<div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
 					<p className="text-sm text-blue-900 dark:text-blue-100">
-						✓ Painel administrativo restaurado com os dados salvos
+						<CheckCircle2 className="w-4 h-4 inline mr-1" /> Painel administrativo restaurado com os dados
+						salvos
 					</p>
 				</div>
 			)}
@@ -649,21 +651,21 @@ function SolicitacoesTab() {
 								<SelectValue placeholder="Selecione o status" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="rascunho">📝 Rascunho</SelectItem>
-								<SelectItem value="aguardando_aprovacao">⏳ Aguardando Aprovação</SelectItem>
-								<SelectItem value="anexos">🔍 Análise de Anexos</SelectItem>
-								<SelectItem value="fiscal">📋 Análise Fiscal</SelectItem>
-								<SelectItem value="gestor">👔 Aprovação do Gestor</SelectItem>
-								<SelectItem value="liquidacao">💰 Liquidação</SelectItem>
-								<SelectItem value="secretario">📜 Aprovação do Secretário</SelectItem>
-								<SelectItem value="iss">🏛️ Verificação ISS</SelectItem>
-								<SelectItem value="ordem_pagamento">📄 Ordem de Pagamento</SelectItem>
-								<SelectItem value="autorizacao">✅ Autorização</SelectItem>
-								<SelectItem value="bordero">📊 Borderô</SelectItem>
-								<SelectItem value="remessa">📤 Remessa Bancária</SelectItem>
-								<SelectItem value="pagamento">💳 Em Pagamento</SelectItem>
-								<SelectItem value="pagamento_realizado">✔️ Pagamento Realizado</SelectItem>
-								<SelectItem value="cancelado">❌ Cancelado</SelectItem>
+								<SelectItem value="rascunho">Rascunho</SelectItem>
+								<SelectItem value="aguardando_aprovacao">Aguardando Aprovação</SelectItem>
+								<SelectItem value="anexos">Análise de Anexos</SelectItem>
+								<SelectItem value="fiscal">Análise Fiscal</SelectItem>
+								<SelectItem value="gestor">Aprovação do Gestor</SelectItem>
+								<SelectItem value="liquidacao">Liquidação</SelectItem>
+								<SelectItem value="secretario">Aprovação do Secretário</SelectItem>
+								<SelectItem value="iss">Verificação ISS</SelectItem>
+								<SelectItem value="ordem_pagamento">Ordem de Pagamento</SelectItem>
+								<SelectItem value="autorizacao">Autorização</SelectItem>
+								<SelectItem value="bordero">Borderô</SelectItem>
+								<SelectItem value="remessa">Remessa Bancária</SelectItem>
+								<SelectItem value="pagamento">Em Pagamento</SelectItem>
+								<SelectItem value="pagamento_realizado">Pagamento Realizado</SelectItem>
+								<SelectItem value="cancelado">Cancelado</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>

@@ -9,7 +9,7 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { useQuery } from '@tanstack/react-query';
 import { suporteApi } from '@/app/features/suporte/api/suporte-api';
 import { toast } from 'sonner';
-import { ArrowLeft, Clock, User, Monitor, Globe, Wifi } from 'lucide-react';
+import { ArrowLeft, Clock, User, Monitor, Globe, Wifi, Lock, ClipboardList } from 'lucide-react';
 
 export default function ChamadoInfoPage() {
 	const params = useParams();
@@ -40,7 +40,9 @@ export default function ChamadoInfoPage() {
 				<PageHeader title="Acesso Negado" description="Você não tem permissão para visualizar este chamado" />
 				<Card>
 					<div className="p-8 text-center text-red-500">
-						<p className="text-lg font-medium mb-2">🔒 Acesso Negado</p>
+						<p className="text-lg font-medium mb-2">
+							<Lock className="w-5 h-5 inline mr-1" /> Acesso Negado
+						</p>
 						<p className="text-sm">Você não tem permissão para visualizar este chamado.</p>
 					</div>
 				</Card>
@@ -116,7 +118,9 @@ export default function ChamadoInfoPage() {
 			{timeline.length > 0 && (
 				<Card>
 					<div className="p-6">
-						<h3 className="font-semibold text-lg mb-4">📋 Histórico de Atendimento</h3>
+						<h3 className="font-semibold text-lg mb-4">
+							<ClipboardList className="w-5 h-5 inline mr-1" /> Histórico de Atendimento
+						</h3>
 						<div className="space-y-4">
 							{timeline.map((item: any, index: number) => (
 								<div

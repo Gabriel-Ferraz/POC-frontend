@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
-import { ExternalLink, RefreshCw, Eye, EyeOff, ChevronDown, ChevronRight } from 'lucide-react';
+import { ExternalLink, RefreshCw, Eye, EyeOff, ChevronDown, ChevronRight, Check } from 'lucide-react';
 
 // ── Serviços verificáveis ────────────────────────────────────────────────────
 
@@ -35,7 +35,7 @@ const SERVICES: ServiceCheck[] = [
 		label: 'CloudBeaver (Oracle Database)',
 		url: ':8978',
 		description: 'Oracle Database 23 Free — interface de administração (DBeaver Web)',
-		linkLabel: 'localhost:8978',
+		linkLabel: ':8978',
 		linkHref: ':8978',
 	},
 ];
@@ -452,7 +452,7 @@ export default function DemonstracaoTecnicaPage() {
 													{item.detail}
 												</p>
 											</div>
-											<span className="shrink-0 text-green-600">✅</span>
+											<Check className="w-4 h-4 text-green-600 dark:text-green-400 shrink-0" />
 										</div>
 									))}
 								</div>
@@ -474,7 +474,7 @@ export default function DemonstracaoTecnicaPage() {
 													{item.detail}
 												</p>
 											</div>
-											<span className="shrink-0 text-green-600">✅</span>
+											<Check className="w-4 h-4 text-green-600 dark:text-green-400 shrink-0" />
 										</div>
 									))}
 								</div>
@@ -495,7 +495,7 @@ export default function DemonstracaoTecnicaPage() {
 						<div className="grid md:grid-cols-2 gap-x-8 gap-y-3">
 							{editalItems.map(({ req, impl }) => (
 								<div key={req} className="flex items-start gap-2 text-sm">
-									<span className="text-green-600 dark:text-green-400 shrink-0 mt-0.5">✅</span>
+									<Check className="w-4 h-4 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
 									<div>
 										<span className="font-medium">{req}</span>
 										<p className="text-muted-foreground text-xs mt-0.5">{impl}</p>
@@ -515,7 +515,7 @@ export default function DemonstracaoTecnicaPage() {
 						<div className="grid sm:grid-cols-2 gap-x-8 gap-y-2.5">
 							{modulos.map(({ label, detalhe }) => (
 								<div key={label} className="flex items-start gap-2">
-									<span className="text-green-600 dark:text-green-400 shrink-0 mt-0.5">✅</span>
+									<Check className="w-4 h-4 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
 									<div>
 										<span className="text-sm font-medium">{label}</span>
 										<p className="text-xs text-muted-foreground">{detalhe}</p>

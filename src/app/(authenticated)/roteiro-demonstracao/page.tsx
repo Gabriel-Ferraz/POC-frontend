@@ -72,7 +72,7 @@ const secoes: Secao[] = [
 					'No card "Stack Técnica": PHP 8.2, Laravel 12, Oracle 23 Free, Redis 7, Traefik, Tomcat, Docker',
 					'No card "Stack Técnica": Next.js 15, React 19, TypeScript 5, Tailwind CSS 4',
 					'No card "Conformidade com o Ambiente": mapear cada requisito do edital',
-					'No card "Módulos Implementados": todos marcados como ✅',
+					'No card "Módulos Implementados": todos marcados como conformes',
 				],
 			},
 			{
@@ -228,6 +228,28 @@ const secoes: Secao[] = [
 	},
 	{
 		id: 8,
+		titulo: 'Módulo de Exportador — Prestação de Contas',
+		icone: <Download className="w-5 h-5" />,
+		cor: 'bg-teal-50 dark:bg-teal-900/20 border-teal-200 dark:border-teal-800',
+		passos: [
+			{
+				titulo: 'Configurar e exportar layouts SIM-AM',
+				descricao: 'Logar como Operador PMSJP',
+				acoes: [
+					'Acessar "Prestação de Contas" no menu lateral',
+					'Selecionar: Ano, Módulo (Contabilidade), Tipo de Geração (Mensal) e Mês',
+					'Verificar os layouts disponíveis (PlanoContabil, MovimentoContabilMensal, etc.)',
+					'Reordenar layouts arrastando para demonstrar a flexibilidade de configuração',
+					'Selecionar os layouts desejados e clicar em "Exportar"',
+					'Aguardar o processamento e verificar os arquivos gerados com status e quantidade de registros',
+					'Fazer download do arquivo ZIP e demonstrar o conteúdo',
+				],
+				destaque: 'Os layouts seguem o padrão SIM-AM exigido pela administração municipal.',
+			},
+		],
+	},
+	{
+		id: 9,
 		titulo: 'Módulo Orçamentário — Leis e Atos',
 		icone: <Calculator className="w-5 h-5" />,
 		cor: 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800',
@@ -256,28 +278,6 @@ const secoes: Secao[] = [
 				],
 				destaque:
 					'As alterações são vinculadas a leis/atos previamente cadastrados, garantindo rastreabilidade legal.',
-			},
-		],
-	},
-	{
-		id: 9,
-		titulo: 'Módulo de Exportador — Prestação de Contas',
-		icone: <Download className="w-5 h-5" />,
-		cor: 'bg-teal-50 dark:bg-teal-900/20 border-teal-200 dark:border-teal-800',
-		passos: [
-			{
-				titulo: 'Configurar e exportar layouts SIM-AM',
-				descricao: 'Logar como Operador PMSJP',
-				acoes: [
-					'Acessar "Prestação de Contas" no menu lateral',
-					'Selecionar: Ano, Módulo (Contabilidade), Tipo de Geração (Mensal) e Mês',
-					'Verificar os layouts disponíveis (PlanoContabil, MovimentoContabilMensal, etc.)',
-					'Reordenar layouts arrastando para demonstrar a flexibilidade de configuração',
-					'Selecionar os layouts desejados e clicar em "Exportar"',
-					'Aguardar o processamento e verificar os arquivos gerados com status e quantidade de registros',
-					'Fazer download do arquivo ZIP e demonstrar o conteúdo',
-				],
-				destaque: 'Os layouts seguem o padrão SIM-AM exigido pela administração municipal.',
 			},
 		],
 	},

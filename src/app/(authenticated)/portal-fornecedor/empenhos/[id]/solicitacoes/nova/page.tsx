@@ -14,7 +14,7 @@ import { solicitacoesApi } from '@/app/features/solicitacoes/api/solicitacoes-ap
 import { FormaPagamento } from '@/types/enums';
 import { toast } from 'sonner';
 import { useFormMinimize } from '@/hooks/useFormMinimize';
-import { FileText, Minimize2 } from 'lucide-react';
+import { FileText, Minimize2, CheckCircle2 } from 'lucide-react';
 
 const TIPOS_DOCUMENTO = ['Nota Fiscal', 'Nota Fiscal Eletrônica', 'Recibo', 'Fatura', 'Cupom Fiscal', 'Outro'];
 
@@ -180,7 +180,8 @@ export default function NovaSolicitacaoPage() {
 			{temDadosRestaurados && (
 				<div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
 					<p className="text-sm text-blue-900 dark:text-blue-100">
-						✓ Formulário restaurado com os dados salvos anteriormente
+						<CheckCircle2 className="w-4 h-4 inline mr-1" /> Formulário restaurado com os dados salvos
+						anteriormente
 					</p>
 				</div>
 			)}

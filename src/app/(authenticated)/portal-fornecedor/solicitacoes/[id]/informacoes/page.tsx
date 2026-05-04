@@ -9,7 +9,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { solicitacoesApi } from '@/app/features/solicitacoes/api/solicitacoes-api';
 import { formatCurrency } from '@/lib/formatters';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, CheckCircle2, Clock, Circle, Minimize2, Info } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Clock, Circle, Minimize2, Info, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AnexosTabContent } from '@/app/features/solicitacoes/components/AnexosTabContent';
 import { CancelarSolicitacaoModal } from '@/app/features/solicitacoes/components/CancelarSolicitacaoModal';
@@ -160,7 +160,8 @@ export default function InformacoesSolicitacaoPage() {
 			{temDadosRestaurados && (
 				<div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
 					<p className="text-sm text-blue-900 dark:text-blue-100">
-						✓ Informações restauradas com os dados salvos anteriormente
+						<CheckCircle2 className="w-4 h-4 inline mr-1" /> Informações restauradas com os dados salvos
+						anteriormente
 					</p>
 				</div>
 			)}
@@ -573,7 +574,7 @@ export default function InformacoesSolicitacaoPage() {
 							<div className="space-y-4">
 								<div className="p-4 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
 									<p className="font-semibold text-green-800 dark:text-green-300 text-lg mb-2">
-										✅ Pagamento Realizado com Sucesso
+										<Check className="w-4 h-4 inline mr-1" /> Pagamento Realizado com Sucesso
 									</p>
 									<div className="grid grid-cols-2 gap-3">
 										<div>

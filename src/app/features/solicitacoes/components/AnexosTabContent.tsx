@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Eye, X, AlertTriangle } from 'lucide-react';
+import { Eye, X, AlertTriangle, Lock, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -428,7 +428,7 @@ export function AnexosTabContent({ solicitacaoId, onSuccess, onCancelar }: Anexo
 												{!anexo.pode_reenviar && !temArquivo && (
 													<div className="p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-center">
 														<p className="text-sm text-gray-600 dark:text-gray-400">
-															🔒 Bloqueado
+															<Lock className="w-3.5 h-3.5 inline mr-1" /> Bloqueado
 														</p>
 													</div>
 												)}
@@ -437,7 +437,7 @@ export function AnexosTabContent({ solicitacaoId, onSuccess, onCancelar }: Anexo
 												{anexo.status === 'Aprovado' && (
 													<div className="p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded text-center">
 														<p className="text-sm text-green-700 dark:text-green-400 font-medium">
-															✅ Aprovado
+															<Check className="w-3.5 h-3.5 inline mr-1" /> Aprovado
 														</p>
 													</div>
 												)}
@@ -470,7 +470,7 @@ export function AnexosTabContent({ solicitacaoId, onSuccess, onCancelar }: Anexo
 										) : (
 											<div className="text-center py-8">
 												<p className="text-sm text-gray-600 dark:text-gray-400 font-medium mb-2">
-													🔒 Envio bloqueado
+													<Lock className="w-3.5 h-3.5 inline mr-1" /> Envio bloqueado
 												</p>
 												<p className="text-xs text-gray-500 dark:text-gray-500">
 													Este anexo está bloqueado para envio
@@ -499,7 +499,7 @@ export function AnexosTabContent({ solicitacaoId, onSuccess, onCancelar }: Anexo
 
 			{!podeEnviarAnexos && !documentoFiscalRecusado && anexos.length > 0 && (
 				<p className="text-xs text-orange-600 dark:text-orange-400 text-center pt-2">
-					⚠️ Anexos não podem ser enviados neste status
+					<AlertTriangle className="w-3.5 h-3.5 inline mr-1" /> Anexos não podem ser enviados neste status
 				</p>
 			)}
 		</div>

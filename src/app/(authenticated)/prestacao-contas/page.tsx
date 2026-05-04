@@ -19,6 +19,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import {
 	Download,
 	CheckCircle,
+	Check,
 	Minimize2,
 	FileArchive,
 	ArrowUp,
@@ -279,7 +280,9 @@ export default function PrestacaoContasPage() {
 								<h3 className="font-semibold text-sm sm:text-base text-green-900 dark:text-green-100 break-all overflow-hidden">
 									{resultadoExportacao.zipName}
 								</h3>
-								<p className="text-xs text-green-700 dark:text-green-300 mt-1">✓ Gerado com Sucesso</p>
+								<p className="text-xs text-green-700 dark:text-green-300 mt-1">
+									<Check className="w-4 h-4 inline mr-1" /> Gerado com Sucesso
+								</p>
 							</div>
 						</div>
 

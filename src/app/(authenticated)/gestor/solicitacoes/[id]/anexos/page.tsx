@@ -12,7 +12,16 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { gestorApi } from '@/app/features/gestor/api/gestor-api';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Download, CheckCircle, XCircle, FileText, AlertTriangle, Minimize2, ClipboardCheck } from 'lucide-react';
+import {
+	Download,
+	CheckCircle,
+	XCircle,
+	FileText,
+	AlertTriangle,
+	Minimize2,
+	ClipboardCheck,
+	CheckCircle2,
+} from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import { useFormMinimize } from '@/hooks/useFormMinimize';
 
@@ -191,7 +200,8 @@ export default function AvaliarAnexosPage() {
 			{temDadosRestaurados && (
 				<div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
 					<p className="text-sm text-blue-900 dark:text-blue-100">
-						✓ Avaliação restaurada com os dados salvos anteriormente
+						<CheckCircle2 className="w-4 h-4 inline mr-1" /> Avaliação restaurada com os dados salvos
+						anteriormente
 					</p>
 				</div>
 			)}

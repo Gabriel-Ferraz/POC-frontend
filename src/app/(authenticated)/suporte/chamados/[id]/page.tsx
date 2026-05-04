@@ -12,7 +12,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { suporteApi } from '@/app/features/suporte/api/suporte-api';
 import { toast } from 'sonner';
 import { useState } from 'react';
-import { Upload, X, FileText, Eye, Send, MessageSquare, User, Clock, Paperclip } from 'lucide-react';
+import { Upload, X, FileText, Eye, Send, MessageSquare, User, Clock, Paperclip, Lock, Lightbulb } from 'lucide-react';
 
 export default function ChamadoDetalhePage() {
 	const params = useParams();
@@ -95,7 +95,9 @@ export default function ChamadoDetalhePage() {
 				<PageHeader title="Acesso Negado" description="Você não tem permissão para visualizar este chamado" />
 				<Card>
 					<div className="p-8 text-center text-red-500">
-						<p className="text-lg font-medium mb-2">🔒 Acesso Negado</p>
+						<p className="text-lg font-medium mb-2">
+							<Lock className="w-5 h-5 inline mr-1" /> Acesso Negado
+						</p>
 						<p className="text-sm">Você não tem permissão para visualizar este chamado.</p>
 						<p className="text-sm mt-2">
 							Apenas o criador do chamado ou gestores de suporte podem visualizá-lo.
@@ -347,7 +349,10 @@ export default function ChamadoDetalhePage() {
 
 					<div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
 						<p className="text-sm text-gray-500">
-							<span className="font-medium">💡 Dica:</span> Seja claro e objetivo em sua mensagem
+							<span className="font-medium">
+								<Lightbulb className="w-4 h-4 inline mr-1" /> Dica:
+							</span>{' '}
+							Seja claro e objetivo em sua mensagem
 						</p>
 						<Button
 							onClick={handleEnviarResposta}
