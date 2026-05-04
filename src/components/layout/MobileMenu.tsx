@@ -28,12 +28,13 @@ interface MenuSection {
 	items: MenuItem[];
 }
 
-export function Sidebar() {
+interface MobileMenuProps {
+	onNavigate?: () => void;
+}
+
+export function MobileMenu({ onNavigate }: MobileMenuProps) {
 	const { user } = useAuth();
 	const pathname = usePathname();
-
-	console.log('[Sidebar] Usuário:', user);
-	console.log('[Sidebar] Perfil:', user?.perfil);
 
 	const menuItems: MenuSection[] = [
 		{
@@ -109,20 +110,15 @@ export function Sidebar() {
 	];
 
 	const filteredMenu = menuItems.filter((section) => {
-		const included = user?.perfil && section.perfis.includes(user.perfil as PerfilUsuario);
-		console.log(`[Sidebar] Seção "${section.title}" incluída:`, included);
-		return included;
+		return user?.perfil && section.perfis.includes(user.perfil as PerfilUsuario);
 	});
 
-	console.log('[Sidebar] Menu filtrado:', filteredMenu);
-
 	if (!user) {
-		console.log('[Sidebar] Sem usuário, não renderizando sidebar');
 		return null;
 	}
 
 	return (
-		<aside className="hidden md:flex md:w-64 bg-white dark:bg-card border-r dark:border-border min-h-screen flex-col">
+		<div className="flex flex-col h-full">
 			<div className="p-4 border-b">
 				<div className="flex items-center gap-3">
 					<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-900 text-white font-bold">
@@ -135,7 +131,7 @@ export function Sidebar() {
 				</div>
 			</div>
 
-			<nav className="p-4 space-y-6 overflow-y-auto flex-1">
+			<nav className="p-4 space-y-6 flex-1 overflow-y-auto">
 				{filteredMenu.map((section) => (
 					<div key={section.title}>
 						<h3 className="text-xs font-semibold text-gray-500 dark:text-muted-foreground uppercase mb-2 px-3">
@@ -149,6 +145,7 @@ export function Sidebar() {
 									<li key={item.href}>
 										<Link
 											href={item.href}
+											onClick={onNavigate}
 											className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
 												isActive
 													? 'bg-blue-100 text-blue-900 font-medium dark:bg-sidebar-accent dark:text-sidebar-accent-foreground'
@@ -164,6 +161,6 @@ export function Sidebar() {
 					</div>
 				))}
 			</nav>
-		</aside>
+		</div>
 	);
 }

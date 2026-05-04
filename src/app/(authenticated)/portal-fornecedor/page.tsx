@@ -53,50 +53,113 @@ export default function EmpenhosPage() {
 					/>
 				</Card>
 			) : (
-				<Card>
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead>Número</TableHead>
-								<TableHead>Contrato</TableHead>
-								<TableHead>Data Emissão</TableHead>
-								<TableHead>Valor Empenhado</TableHead>
-								<TableHead>Saldo Disponível</TableHead>
-								<TableHead>Status</TableHead>
-								<TableHead className="text-right">Ações</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{empenhosList.map((empenho) => (
-								<TableRow key={empenho.id}>
-									<TableCell className="font-medium">{empenho.numero}</TableCell>
-									<TableCell>
-										{typeof empenho.contrato === 'string'
-											? empenho.contrato
-											: (empenho.contrato?.numero ?? '-')}
-									</TableCell>
-									<TableCell>{empenho.data_emissao}</TableCell>
-									<TableCell>{formatCurrency(parseFloat(String(empenho.valor)))}</TableCell>
-									<TableCell className="font-semibold">
-										{formatCurrency(parseFloat(String(empenho.saldo)))}
-									</TableCell>
-									<TableCell>
+				<>
+					{/* Tabela para desktop */}
+					<Card className="hidden md:block">
+						<div className="overflow-x-auto">
+							<Table>
+								<TableHeader>
+									<TableRow>
+										<TableHead>Número</TableHead>
+										<TableHead>Contrato</TableHead>
+										<TableHead>Data Emissão</TableHead>
+										<TableHead>Valor Empenhado</TableHead>
+										<TableHead>Saldo Disponível</TableHead>
+										<TableHead>Status</TableHead>
+										<TableHead className="text-right">Ações</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									{empenhosList.map((empenho) => (
+										<TableRow key={empenho.id}>
+											<TableCell className="font-medium">{empenho.numero}</TableCell>
+											<TableCell>
+												{typeof empenho.contrato === 'string'
+													? empenho.contrato
+													: (empenho.contrato?.numero ?? '-')}
+											</TableCell>
+											<TableCell>{empenho.data_emissao}</TableCell>
+											<TableCell>{formatCurrency(parseFloat(String(empenho.valor)))}</TableCell>
+											<TableCell className="font-semibold">
+												{formatCurrency(parseFloat(String(empenho.saldo)))}
+											</TableCell>
+											<TableCell>
+												<StatusBadge status={empenho.status} />
+											</TableCell>
+											<TableCell className="text-right">
+												<Button
+													size="sm"
+													onClick={() =>
+														router.push(
+															`/portal-fornecedor/empenhos/${empenho.id}/solicitacoes`
+														)
+													}>
+													Ver Solicitações
+												</Button>
+											</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							</Table>
+						</div>
+					</Card>
+
+					{/* Cards para mobile */}
+					<div className="md:hidden space-y-3">
+						{empenhosList.map((empenho) => (
+							<Card key={empenho.id} className="p-4">
+								<div className="space-y-3">
+									<div className="flex items-start justify-between">
+										<div>
+											<p className="text-xs text-muted-foreground">Número</p>
+											<p className="font-medium">{empenho.numero}</p>
+										</div>
 										<StatusBadge status={empenho.status} />
-									</TableCell>
-									<TableCell className="text-right">
-										<Button
-											size="sm"
-											onClick={() =>
-												router.push(`/portal-fornecedor/empenhos/${empenho.id}/solicitacoes`)
-											}>
-											Ver Solicitações
-										</Button>
-									</TableCell>
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-				</Card>
+									</div>
+
+									<div className="grid grid-cols-2 gap-3 text-sm">
+										<div>
+											<p className="text-xs text-muted-foreground">Contrato</p>
+											<p className="font-medium">
+												{typeof empenho.contrato === 'string'
+													? empenho.contrato
+													: (empenho.contrato?.numero ?? '-')}
+											</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Data Emissão</p>
+											<p>{empenho.data_emissao}</p>
+										</div>
+									</div>
+
+									<div className="grid grid-cols-2 gap-3 text-sm">
+										<div>
+											<p className="text-xs text-muted-foreground">Valor Empenhado</p>
+											<p className="font-medium">
+												{formatCurrency(parseFloat(String(empenho.valor)))}
+											</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Saldo Disponível</p>
+											<p className="font-semibold text-green-600">
+												{formatCurrency(parseFloat(String(empenho.saldo)))}
+											</p>
+										</div>
+									</div>
+
+									<Button
+										size="sm"
+										className="w-full"
+										onClick={() =>
+											router.push(`/portal-fornecedor/empenhos/${empenho.id}/solicitacoes`)
+										}>
+										Ver Solicitações
+									</Button>
+								</div>
+							</Card>
+						))}
+					</div>
+				</>
 			)}
 		</div>
 	);

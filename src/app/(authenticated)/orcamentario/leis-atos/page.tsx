@@ -171,7 +171,7 @@ export default function LeisAtosPage() {
 						<h3 className="font-semibold text-lg mb-4">{editandoId ? 'Editar Lei/Ato' : 'Nova Lei/Ato'}</h3>
 
 						<form onSubmit={handleSubmit} className="space-y-4">
-							<div className="grid grid-cols-2 gap-4">
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								<div>
 									<Label htmlFor="numero">Número *</Label>
 									<Input
@@ -272,50 +272,119 @@ export default function LeisAtosPage() {
 					/>
 				</Card>
 			) : (
-				<Card>
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead>Número</TableHead>
-								<TableHead>Tipo</TableHead>
-								<TableHead>Data do Ato</TableHead>
-								<TableHead>Data de Publicação</TableHead>
-								<TableHead>Descrição</TableHead>
-								<TableHead className="text-right">Ações</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{leisAtosList.map((leiAto) => (
-								<TableRow key={leiAto.id}>
-									<TableCell className="font-medium">{leiAto.numero}</TableCell>
-									<TableCell>{getTipoLabel(leiAto.tipo)}</TableCell>
-									<TableCell>{new Date(leiAto.data_ato).toLocaleDateString('pt-BR')}</TableCell>
-									<TableCell>
-										{new Date(leiAto.data_publicacao).toLocaleDateString('pt-BR')}
-									</TableCell>
-									<TableCell className="max-w-md truncate">{leiAto.descricao}</TableCell>
-									<TableCell className="text-right">
-										<div className="flex justify-end gap-2">
-											<Button size="sm" variant="ghost" onClick={() => handleEdit(leiAto)}>
-												<Edit2 className="w-4 h-4" />
-											</Button>
-											<Button
-												size="sm"
-												variant="ghost"
-												onClick={() => {
-													if (confirm('Deseja realmente excluir esta lei/ato?')) {
-														deletar(leiAto.id);
-													}
-												}}>
-												<Trash2 className="w-4 h-4" />
-											</Button>
+				<>
+					{/* Tabela para desktop */}
+					<Card className="hidden lg:block">
+						<div className="overflow-x-auto">
+							<Table>
+								<TableHeader>
+									<TableRow>
+										<TableHead>Número</TableHead>
+										<TableHead>Tipo</TableHead>
+										<TableHead>Data do Ato</TableHead>
+										<TableHead>Data de Publicação</TableHead>
+										<TableHead>Descrição</TableHead>
+										<TableHead className="text-right">Ações</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									{leisAtosList.map((leiAto) => (
+										<TableRow key={leiAto.id}>
+											<TableCell className="font-medium">{leiAto.numero}</TableCell>
+											<TableCell>{getTipoLabel(leiAto.tipo)}</TableCell>
+											<TableCell>
+												{new Date(leiAto.data_ato).toLocaleDateString('pt-BR')}
+											</TableCell>
+											<TableCell>
+												{new Date(leiAto.data_publicacao).toLocaleDateString('pt-BR')}
+											</TableCell>
+											<TableCell className="max-w-md truncate">{leiAto.descricao}</TableCell>
+											<TableCell className="text-right">
+												<div className="flex justify-end gap-2">
+													<Button
+														size="sm"
+														variant="ghost"
+														onClick={() => handleEdit(leiAto)}>
+														<Edit2 className="w-4 h-4" />
+													</Button>
+													<Button
+														size="sm"
+														variant="ghost"
+														onClick={() => {
+															if (confirm('Deseja realmente excluir esta lei/ato?')) {
+																deletar(leiAto.id);
+															}
+														}}>
+														<Trash2 className="w-4 h-4" />
+													</Button>
+												</div>
+											</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							</Table>
+						</div>
+					</Card>
+
+					{/* Cards para mobile e tablet */}
+					<div className="lg:hidden space-y-3">
+						{leisAtosList.map((leiAto) => (
+							<Card key={leiAto.id} className="p-4">
+								<div className="space-y-3">
+									<div className="flex items-start justify-between gap-2">
+										<div>
+											<p className="text-xs text-muted-foreground">Número</p>
+											<p className="font-medium">{leiAto.numero}</p>
 										</div>
-									</TableCell>
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-				</Card>
+										<div className="text-right">
+											<p className="text-xs text-muted-foreground">Tipo</p>
+											<p className="font-medium text-sm">{getTipoLabel(leiAto.tipo)}</p>
+										</div>
+									</div>
+
+									<div className="grid grid-cols-2 gap-3 text-sm">
+										<div>
+											<p className="text-xs text-muted-foreground">Data do Ato</p>
+											<p>{new Date(leiAto.data_ato).toLocaleDateString('pt-BR')}</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Data de Publicação</p>
+											<p>{new Date(leiAto.data_publicacao).toLocaleDateString('pt-BR')}</p>
+										</div>
+									</div>
+
+									<div>
+										<p className="text-xs text-muted-foreground mb-1">Descrição</p>
+										<p className="text-sm line-clamp-2">{leiAto.descricao}</p>
+									</div>
+
+									<div className="flex gap-2 pt-2 border-t">
+										<Button
+											size="sm"
+											variant="outline"
+											className="flex-1"
+											onClick={() => handleEdit(leiAto)}>
+											<Edit2 className="w-4 h-4 mr-2" />
+											Editar
+										</Button>
+										<Button
+											size="sm"
+											variant="outline"
+											className="flex-1"
+											onClick={() => {
+												if (confirm('Deseja realmente excluir esta lei/ato?')) {
+													deletar(leiAto.id);
+												}
+											}}>
+											<Trash2 className="w-4 h-4 mr-2" />
+											Excluir
+										</Button>
+									</div>
+								</div>
+							</Card>
+						))}
+					</div>
+				</>
 			)}
 		</div>
 	);

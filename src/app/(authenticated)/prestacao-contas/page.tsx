@@ -592,42 +592,44 @@ export default function PrestacaoContasPage() {
 									</AlertDescription>
 								</Alert>
 							) : (
-								<Table>
-									<TableHeader>
-										<TableRow>
-											<TableHead className="w-12">Selecionar</TableHead>
-											<TableHead>Arquivo</TableHead>
-											<TableHead>Última Geração</TableHead>
-											<TableHead className="text-center">Ordem</TableHead>
-										</TableRow>
-									</TableHeader>
-									<TableBody>
-										{layoutsFiltrados.map((layout) => (
-											<TableRow key={layout.id}>
-												<TableCell>
-													<Checkbox
-														checked={arquivosSelecionados.includes(layout.id)}
-														onCheckedChange={() => handleArquivoToggle(layout.id)}
-														disabled={exportando}
-													/>
-												</TableCell>
-												<TableCell className="font-medium">{layout.nome}</TableCell>
-												<TableCell>
-													{layout.ultimaGeracao ? (
-														<span className="text-sm text-gray-600 dark:text-gray-400">
-															{layout.ultimaGeracao}
-														</span>
-													) : (
-														<span className="text-sm text-gray-400">Nunca gerado</span>
-													)}
-												</TableCell>
-												<TableCell className="text-center">
-													<Badge variant="outline">{layout.ordem}</Badge>
-												</TableCell>
+								<div className="overflow-x-auto">
+									<Table>
+										<TableHeader>
+											<TableRow>
+												<TableHead className="w-12">Selecionar</TableHead>
+												<TableHead>Arquivo</TableHead>
+												<TableHead className="hidden sm:table-cell">Última Geração</TableHead>
+												<TableHead className="text-center">Ordem</TableHead>
 											</TableRow>
-										))}
-									</TableBody>
-								</Table>
+										</TableHeader>
+										<TableBody>
+											{layoutsFiltrados.map((layout) => (
+												<TableRow key={layout.id}>
+													<TableCell>
+														<Checkbox
+															checked={arquivosSelecionados.includes(layout.id)}
+															onCheckedChange={() => handleArquivoToggle(layout.id)}
+															disabled={exportando}
+														/>
+													</TableCell>
+													<TableCell className="font-medium">{layout.nome}</TableCell>
+													<TableCell className="hidden sm:table-cell">
+														{layout.ultimaGeracao ? (
+															<span className="text-sm text-gray-600 dark:text-gray-400">
+																{layout.ultimaGeracao}
+															</span>
+														) : (
+															<span className="text-sm text-gray-400">Nunca gerado</span>
+														)}
+													</TableCell>
+													<TableCell className="text-center">
+														<Badge variant="outline">{layout.ordem}</Badge>
+													</TableCell>
+												</TableRow>
+											))}
+										</TableBody>
+									</Table>
+								</div>
 							)}
 						</div>
 

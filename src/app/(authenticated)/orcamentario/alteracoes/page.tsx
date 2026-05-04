@@ -131,14 +131,15 @@ export default function AlteracoesOrcamentariasPage() {
 				title="Alterações Orçamentárias"
 				description="Gerencie as alterações orçamentárias e suas dotações"
 				action={
-					<div className="flex gap-2">
-						<Button variant="outline" onClick={handleMinimizar}>
-							<Minimize2 className="w-4 h-4 mr-2" />
-							Minimizar
+					<div className="flex flex-col sm:flex-row gap-2">
+						<Button variant="outline" onClick={handleMinimizar} className="w-full sm:w-auto">
+							<Minimize2 className="w-4 h-4 sm:mr-2" />
+							<span className="hidden sm:inline">Minimizar</span>
 						</Button>
-						<Button onClick={() => setDialogOpen(true)}>
-							<Plus className="w-4 h-4 mr-2" />
-							Nova Alteração
+						<Button onClick={() => setDialogOpen(true)} className="w-full sm:w-auto">
+							<Plus className="w-4 h-4 sm:mr-2" />
+							<span className="sm:hidden">Nova</span>
+							<span className="hidden sm:inline">Nova Alteração</span>
 						</Button>
 					</div>
 				}
@@ -287,58 +288,146 @@ export default function AlteracoesOrcamentariasPage() {
 					/>
 				</Card>
 			) : (
-				<Card>
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead>Decreto Autorizador</TableHead>
-								<TableHead>Lei/Ato</TableHead>
-								<TableHead>Tipo de Ato</TableHead>
-								<TableHead>Tipo de Crédito</TableHead>
-								<TableHead>Tipo de Recurso</TableHead>
-								<TableHead>Valor do Crédito</TableHead>
-								<TableHead>Data do Ato</TableHead>
-								<TableHead className="text-right">Ações</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{alteracoesList.map((alteracao) => (
-								<TableRow key={alteracao.id}>
-									<TableCell className="font-medium">{alteracao.decreto_autorizador}</TableCell>
-									<TableCell>{getLeiAtoDisplay(alteracao.lei_ato)}</TableCell>
-									<TableCell>{TIPO_ATO_LABELS[alteracao.tipo_ato] || alteracao.tipo_ato}</TableCell>
-									<TableCell>
-										{TIPO_CREDITO_LABELS[alteracao.tipo_credito] || alteracao.tipo_credito}
-									</TableCell>
-									<TableCell>
-										{TIPO_RECURSO_LABELS[alteracao.tipo_recurso] || alteracao.tipo_recurso}
-									</TableCell>
-									<TableCell>{formatCurrency(Number(alteracao.valor_credito || 0))}</TableCell>
-									<TableCell>{formatDate(alteracao.data_ato)}</TableCell>
-									<TableCell className="text-right">
-										<div className="flex justify-end gap-2">
-											<Button
-												size="sm"
-												variant="outline"
-												onClick={() =>
-													router.push(`/orcamentario/alteracoes/${alteracao.id}/dotacoes`)
-												}>
-												<Eye className="w-4 h-4 mr-1" />
-												Dotações
-											</Button>
-											<a href={getPdfUrl(alteracao.id)} target="_blank" rel="noopener noreferrer">
-												<Button size="sm" variant="outline">
-													<Download className="w-4 h-4 mr-1" />
-													PDF
-												</Button>
-											</a>
+				<>
+					{/* Tabela para desktop */}
+					<Card className="hidden lg:block">
+						<div className="overflow-x-auto">
+							<Table>
+								<TableHeader>
+									<TableRow>
+										<TableHead>Decreto Autorizador</TableHead>
+										<TableHead>Lei/Ato</TableHead>
+										<TableHead>Tipo de Ato</TableHead>
+										<TableHead>Tipo de Crédito</TableHead>
+										<TableHead>Tipo de Recurso</TableHead>
+										<TableHead>Valor do Crédito</TableHead>
+										<TableHead>Data do Ato</TableHead>
+										<TableHead className="text-right">Ações</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									{alteracoesList.map((alteracao) => (
+										<TableRow key={alteracao.id}>
+											<TableCell className="font-medium">
+												{alteracao.decreto_autorizador}
+											</TableCell>
+											<TableCell>{getLeiAtoDisplay(alteracao.lei_ato)}</TableCell>
+											<TableCell>
+												{TIPO_ATO_LABELS[alteracao.tipo_ato] || alteracao.tipo_ato}
+											</TableCell>
+											<TableCell>
+												{TIPO_CREDITO_LABELS[alteracao.tipo_credito] || alteracao.tipo_credito}
+											</TableCell>
+											<TableCell>
+												{TIPO_RECURSO_LABELS[alteracao.tipo_recurso] || alteracao.tipo_recurso}
+											</TableCell>
+											<TableCell>
+												{formatCurrency(Number(alteracao.valor_credito || 0))}
+											</TableCell>
+											<TableCell>{formatDate(alteracao.data_ato)}</TableCell>
+											<TableCell className="text-right">
+												<div className="flex justify-end gap-2">
+													<Button
+														size="sm"
+														variant="outline"
+														onClick={() =>
+															router.push(
+																`/orcamentario/alteracoes/${alteracao.id}/dotacoes`
+															)
+														}>
+														<Eye className="w-4 h-4 mr-1" />
+														Dotações
+													</Button>
+													<a
+														href={getPdfUrl(alteracao.id)}
+														target="_blank"
+														rel="noopener noreferrer">
+														<Button size="sm" variant="outline">
+															<Download className="w-4 h-4 mr-1" />
+															PDF
+														</Button>
+													</a>
+												</div>
+											</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							</Table>
+						</div>
+					</Card>
+
+					{/* Cards para mobile e tablet */}
+					<div className="lg:hidden space-y-3">
+						{alteracoesList.map((alteracao) => (
+							<Card key={alteracao.id} className="p-4">
+								<div className="space-y-3">
+									<div className="flex items-start justify-between gap-2">
+										<div>
+											<p className="text-xs text-muted-foreground">Decreto Autorizador</p>
+											<p className="font-medium">{alteracao.decreto_autorizador}</p>
 										</div>
-									</TableCell>
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-				</Card>
+										<div className="text-right">
+											<p className="text-xs text-muted-foreground">Data do Ato</p>
+											<p className="font-medium text-sm">{formatDate(alteracao.data_ato)}</p>
+										</div>
+									</div>
+
+									<div>
+										<p className="text-xs text-muted-foreground">Lei/Ato</p>
+										<p className="text-sm">{getLeiAtoDisplay(alteracao.lei_ato)}</p>
+									</div>
+
+									<div className="grid grid-cols-2 gap-3 text-sm">
+										<div>
+											<p className="text-xs text-muted-foreground">Tipo de Ato</p>
+											<p>{TIPO_ATO_LABELS[alteracao.tipo_ato] || alteracao.tipo_ato}</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Tipo de Crédito</p>
+											<p>
+												{TIPO_CREDITO_LABELS[alteracao.tipo_credito] || alteracao.tipo_credito}
+											</p>
+										</div>
+									</div>
+
+									<div className="grid grid-cols-2 gap-3 text-sm">
+										<div>
+											<p className="text-xs text-muted-foreground">Tipo de Recurso</p>
+											<p>
+												{TIPO_RECURSO_LABELS[alteracao.tipo_recurso] || alteracao.tipo_recurso}
+											</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Valor do Crédito</p>
+											<p className="font-semibold text-green-600">
+												{formatCurrency(Number(alteracao.valor_credito || 0))}
+											</p>
+										</div>
+									</div>
+
+									<div className="flex gap-2 pt-2 border-t">
+										<Button
+											size="sm"
+											variant="outline"
+											className="flex-1"
+											onClick={() =>
+												router.push(`/orcamentario/alteracoes/${alteracao.id}/dotacoes`)
+											}>
+											<Eye className="w-4 h-4 mr-2" />
+											Dotações
+										</Button>
+										<a href={getPdfUrl(alteracao.id)} target="_blank" rel="noopener noreferrer">
+											<Button size="sm" variant="outline" className="flex-1">
+												<Download className="w-4 h-4 mr-2" />
+												PDF
+											</Button>
+										</a>
+									</div>
+								</div>
+							</Card>
+						))}
+					</div>
+				</>
 			)}
 
 			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

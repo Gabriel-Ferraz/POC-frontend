@@ -213,7 +213,12 @@ export default function SuportePage() {
 				<PageHeader
 					title="Meus Chamados"
 					description="Lista de chamados de suporte"
-					action={<Button onClick={() => router.push('/suporte/novo')}>Novo Chamado</Button>}
+					action={
+						<Button onClick={() => router.push('/suporte/novo')} className="w-full sm:w-auto">
+							<span className="hidden sm:inline">Novo Chamado</span>
+							<span className="sm:hidden">Novo</span>
+						</Button>
+					}
 				/>
 				<Card>
 					<div className="p-8 text-center text-red-500">
@@ -544,47 +549,118 @@ export default function SuportePage() {
 					/>
 				</Card>
 			) : (
-				<Card>
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead>Protocolo</TableHead>
-								<TableHead>Módulo</TableHead>
-								<TableHead>Assunto</TableHead>
-								{isGestorSuporte && <TableHead>Solicitante</TableHead>}
-								{isGestorSuporte && <TableHead>Responsável</TableHead>}
-								<TableHead>Data Abertura</TableHead>
-								<TableHead>Status</TableHead>
-								<TableHead className="text-right">Ações</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{chamadosList.map((chamado) => (
-								<TableRow key={chamado.id}>
-									<TableCell className="font-medium whitespace-nowrap">{chamado.protocolo}</TableCell>
-									<TableCell>{chamado.modulo}</TableCell>
-									<TableCell className="max-w-[220px]">
-										<span className="block truncate" title={chamado.assunto}>
-											{chamado.assunto}
-										</span>
-									</TableCell>
-									{isGestorSuporte && (
-										<TableCell className="whitespace-nowrap">
-											{typeof chamado.usuario === 'string'
-												? chamado.usuario
-												: (chamado.usuario?.name ?? '—')}
-										</TableCell>
-									)}
-									{isGestorSuporte && (
-										<TableCell className="whitespace-nowrap text-muted-foreground">
-											{chamado.responsavel ?? '—'}
-										</TableCell>
-									)}
-									<TableCell className="whitespace-nowrap">{chamado.data_abertura}</TableCell>
-									<TableCell>
+				<>
+					{/* Tabela para desktop */}
+					<Card className="hidden md:block">
+						<div className="overflow-x-auto">
+							<Table>
+								<TableHeader>
+									<TableRow>
+										<TableHead>Protocolo</TableHead>
+										<TableHead>Módulo</TableHead>
+										<TableHead>Assunto</TableHead>
+										{isGestorSuporte && <TableHead>Solicitante</TableHead>}
+										{isGestorSuporte && <TableHead>Responsável</TableHead>}
+										<TableHead>Data Abertura</TableHead>
+										<TableHead>Status</TableHead>
+										<TableHead className="text-right">Ações</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									{chamadosList.map((chamado) => (
+										<TableRow key={chamado.id}>
+											<TableCell className="font-medium whitespace-nowrap">
+												{chamado.protocolo}
+											</TableCell>
+											<TableCell>{chamado.modulo}</TableCell>
+											<TableCell className="max-w-[220px]">
+												<span className="block truncate" title={chamado.assunto}>
+													{chamado.assunto}
+												</span>
+											</TableCell>
+											{isGestorSuporte && (
+												<TableCell className="whitespace-nowrap">
+													{typeof chamado.usuario === 'string'
+														? chamado.usuario
+														: (chamado.usuario?.name ?? '—')}
+												</TableCell>
+											)}
+											{isGestorSuporte && (
+												<TableCell className="whitespace-nowrap text-muted-foreground">
+													{chamado.responsavel ?? '—'}
+												</TableCell>
+											)}
+											<TableCell className="whitespace-nowrap">{chamado.data_abertura}</TableCell>
+											<TableCell>
+												<StatusBadge status={chamado.status} />
+											</TableCell>
+											<TableCell className="text-right">
+												<ChamadoActions
+													chamadoId={chamado.id}
+													status={chamado.status}
+													ultimaMensagemPor={chamado.ultima_mensagem_por}
+													onVerLog={(id) => router.push(`/suporte/chamados/${id}`)}
+													onVerInformacoes={(id) =>
+														router.push(`/suporte/chamados/${id}/info`)
+													}
+												/>
+											</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							</Table>
+						</div>
+					</Card>
+
+					{/* Cards para mobile */}
+					<div className="md:hidden space-y-3">
+						{chamadosList.map((chamado) => (
+							<Card key={chamado.id} className="p-4">
+								<div className="space-y-3">
+									<div className="flex items-start justify-between gap-2">
+										<div className="flex-1 min-w-0">
+											<p className="text-xs text-muted-foreground">Protocolo</p>
+											<p className="font-medium">{chamado.protocolo}</p>
+										</div>
 										<StatusBadge status={chamado.status} />
-									</TableCell>
-									<TableCell className="text-right">
+									</div>
+
+									<div>
+										<p className="text-xs text-muted-foreground">Assunto</p>
+										<p className="font-medium text-sm line-clamp-2">{chamado.assunto}</p>
+									</div>
+
+									<div className="grid grid-cols-2 gap-3 text-sm">
+										<div>
+											<p className="text-xs text-muted-foreground">Módulo</p>
+											<p className="text-sm">{chamado.modulo}</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Data Abertura</p>
+											<p className="text-sm">{chamado.data_abertura}</p>
+										</div>
+									</div>
+
+									{isGestorSuporte && (
+										<div className="grid grid-cols-2 gap-3 text-sm border-t pt-3">
+											<div>
+												<p className="text-xs text-muted-foreground">Solicitante</p>
+												<p className="text-sm">
+													{typeof chamado.usuario === 'string'
+														? chamado.usuario
+														: (chamado.usuario?.name ?? '—')}
+												</p>
+											</div>
+											<div>
+												<p className="text-xs text-muted-foreground">Responsável</p>
+												<p className="text-sm text-muted-foreground">
+													{chamado.responsavel ?? '—'}
+												</p>
+											</div>
+										</div>
+									)}
+
+									<div className="pt-2 border-t">
 										<ChamadoActions
 											chamadoId={chamado.id}
 											status={chamado.status}
@@ -592,12 +668,12 @@ export default function SuportePage() {
 											onVerLog={(id) => router.push(`/suporte/chamados/${id}`)}
 											onVerInformacoes={(id) => router.push(`/suporte/chamados/${id}/info`)}
 										/>
-									</TableCell>
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-				</Card>
+									</div>
+								</div>
+							</Card>
+						))}
+					</div>
+				</>
 			)}
 		</div>
 	);

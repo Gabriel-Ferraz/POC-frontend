@@ -40,32 +40,111 @@ export default function GestorSolicitacoesPage() {
 					/>
 				</Card>
 			) : (
-				<Card>
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead>Número</TableHead>
-								<TableHead>Solicitante</TableHead>
-								<TableHead>Fornecedor</TableHead>
-								<TableHead>Empenho</TableHead>
-								<TableHead>Valor</TableHead>
-								<TableHead>Data</TableHead>
-								<TableHead>Anexos</TableHead>
-								<TableHead>Status</TableHead>
-								<TableHead className="text-right">Ações</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{solicitacoesList.map((solicitacao) => (
-								<TableRow key={solicitacao.id}>
-									<TableCell className="font-medium">{solicitacao.numero}</TableCell>
-									<TableCell>{solicitacao.solicitante}</TableCell>
-									<TableCell>{solicitacao.fornecedor}</TableCell>
-									<TableCell>{solicitacao.empenho}</TableCell>
-									<TableCell>{formatCurrency(solicitacao.valor)}</TableCell>
-									<TableCell>{solicitacao.data}</TableCell>
-									<TableCell>
-										<div className="flex items-center gap-2 text-sm">
+				<>
+					{/* Tabela para desktop */}
+					<Card className="hidden lg:block">
+						<div className="overflow-x-auto">
+							<Table>
+								<TableHeader>
+									<TableRow>
+										<TableHead>Número</TableHead>
+										<TableHead>Solicitante</TableHead>
+										<TableHead>Fornecedor</TableHead>
+										<TableHead>Empenho</TableHead>
+										<TableHead>Valor</TableHead>
+										<TableHead>Data</TableHead>
+										<TableHead>Anexos</TableHead>
+										<TableHead>Status</TableHead>
+										<TableHead className="text-right">Ações</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									{solicitacoesList.map((solicitacao) => (
+										<TableRow key={solicitacao.id}>
+											<TableCell className="font-medium">{solicitacao.numero}</TableCell>
+											<TableCell>{solicitacao.solicitante}</TableCell>
+											<TableCell>{solicitacao.fornecedor}</TableCell>
+											<TableCell>{solicitacao.empenho}</TableCell>
+											<TableCell>{formatCurrency(solicitacao.valor)}</TableCell>
+											<TableCell>{solicitacao.data}</TableCell>
+											<TableCell>
+												<div className="flex items-center gap-2 text-sm">
+													<span className="flex items-center gap-1 text-green-600">
+														<CheckCircle className="w-4 h-4" />
+														{solicitacao.anexos_aprovados}
+													</span>
+													<span className="flex items-center gap-1 text-yellow-600">
+														<Clock className="w-4 h-4" />
+														{solicitacao.anexos_pendentes}
+													</span>
+													<span className="flex items-center gap-1 text-red-600">
+														<XCircle className="w-4 h-4" />
+														{solicitacao.anexos_recusados}
+													</span>
+												</div>
+											</TableCell>
+											<TableCell>
+												<StatusBadge status={solicitacao.status} />
+											</TableCell>
+											<TableCell className="text-right">
+												<Button
+													size="sm"
+													onClick={() =>
+														router.push(`/gestor/solicitacoes/${solicitacao.id}/anexos`)
+													}>
+													Avaliar Anexos
+												</Button>
+											</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							</Table>
+						</div>
+					</Card>
+
+					{/* Cards para mobile e tablet */}
+					<div className="lg:hidden space-y-3">
+						{solicitacoesList.map((solicitacao) => (
+							<Card key={solicitacao.id} className="p-4">
+								<div className="space-y-3">
+									<div className="flex items-start justify-between gap-2">
+										<div>
+											<p className="text-xs text-muted-foreground">Número</p>
+											<p className="font-medium">{solicitacao.numero}</p>
+										</div>
+										<StatusBadge status={solicitacao.status} />
+									</div>
+
+									<div className="grid grid-cols-2 gap-3 text-sm">
+										<div>
+											<p className="text-xs text-muted-foreground">Solicitante</p>
+											<p className="font-medium">{solicitacao.solicitante}</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Data</p>
+											<p>{solicitacao.data}</p>
+										</div>
+									</div>
+
+									<div className="grid grid-cols-2 gap-3 text-sm">
+										<div>
+											<p className="text-xs text-muted-foreground">Fornecedor</p>
+											<p className="truncate">{solicitacao.fornecedor}</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Empenho</p>
+											<p>{solicitacao.empenho}</p>
+										</div>
+									</div>
+
+									<div>
+										<p className="text-xs text-muted-foreground">Valor</p>
+										<p className="font-semibold text-lg">{formatCurrency(solicitacao.valor)}</p>
+									</div>
+
+									<div className="border-t pt-3">
+										<p className="text-xs text-muted-foreground mb-2">Anexos</p>
+										<div className="flex items-center gap-4 text-sm">
 											<span className="flex items-center gap-1 text-green-600">
 												<CheckCircle className="w-4 h-4" />
 												{solicitacao.anexos_aprovados}
@@ -79,24 +158,19 @@ export default function GestorSolicitacoesPage() {
 												{solicitacao.anexos_recusados}
 											</span>
 										</div>
-									</TableCell>
-									<TableCell>
-										<StatusBadge status={solicitacao.status} />
-									</TableCell>
-									<TableCell className="text-right">
-										<Button
-											size="sm"
-											onClick={() =>
-												router.push(`/gestor/solicitacoes/${solicitacao.id}/anexos`)
-											}>
-											Avaliar Anexos
-										</Button>
-									</TableCell>
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-				</Card>
+									</div>
+
+									<Button
+										size="sm"
+										className="w-full"
+										onClick={() => router.push(`/gestor/solicitacoes/${solicitacao.id}/anexos`)}>
+										Avaliar Anexos
+									</Button>
+								</div>
+							</Card>
+						))}
+					</div>
+				</>
 			)}
 		</div>
 	);
