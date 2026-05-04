@@ -80,7 +80,16 @@ export interface SolicitacaoPagamento {
 	fornecedor?: Fornecedor & { razao_social?: string };
 	contrato?: Contrato;
 	andamento?: { etapas?: Array<{ key: string; status: string }> };
-	pagamento_realizado?: { data_hora: string } | null;
+	pagamento_realizado?: {
+		data_hora: string;
+		valor_pago?: number | string;
+		registrado_por?: string;
+		forma_pagamento?: string;
+		banco?: string;
+		agencia?: string;
+		conta?: string;
+		observacao?: string;
+	} | null;
 	created_at: string;
 	updated_at: string;
 	anexos?: AnexoSolicitacao[];

@@ -571,48 +571,147 @@ export default function InformacoesSolicitacaoPage() {
 					<TabsContent value="pagamento_realizado" className="p-6">
 						<h4 className="font-semibold mb-4 dark:text-foreground">Pagamento Realizado</h4>
 						{solicitacao.pagamento_realizado ? (
-							<div className="space-y-4">
-								<div className="p-4 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
-									<p className="font-semibold text-green-800 dark:text-green-300 text-lg mb-2">
-										<Check className="w-4 h-4 inline mr-1" /> Pagamento Realizado com Sucesso
-									</p>
-									<div className="grid grid-cols-2 gap-3">
+							<div className="space-y-6">
+								{/* Banner de confirmação */}
+								<div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
+									<div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+										<Check className="w-5 h-5 text-white" />
+									</div>
+									<div>
+										<p className="font-semibold text-green-800 dark:text-green-300">
+											Pagamento Realizado com Sucesso
+										</p>
+										<p className="text-sm text-green-700 dark:text-green-400">
+											{solicitacao.pagamento_realizado.data_hora}
+										</p>
+									</div>
+								</div>
+
+								{/* Dados do registro de pagamento */}
+								<div>
+									<h5 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+										Registro de Pagamento
+									</h5>
+									<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
 										<div>
-											<p className="text-sm text-gray-600 dark:text-gray-400">
-												Data/Hora do Pagamento
+											<p className="text-sm text-gray-500 dark:text-muted-foreground">
+												Data/Hora
 											</p>
 											<p className="font-medium dark:text-foreground">
 												{solicitacao.pagamento_realizado.data_hora}
 											</p>
 										</div>
 										<div>
-											<p className="text-sm text-gray-600 dark:text-gray-400">Conta Destino</p>
-											<p className="font-medium dark:text-foreground">
-												{solicitacao.banco} - Ag: {solicitacao.agencia} - Conta:{' '}
-												{solicitacao.conta}
+											<p className="text-sm text-gray-500 dark:text-muted-foreground">
+												Valor Pago
+											</p>
+											<p className="font-bold text-green-600 text-lg">
+												{formatCurrency(
+													parseFloat(
+														String(
+															solicitacao.pagamento_realizado.valor_pago ??
+																solicitacao.valor
+														)
+													)
+												)}
 											</p>
 										</div>
+										{solicitacao.pagamento_realizado.registrado_por && (
+											<div>
+												<p className="text-sm text-gray-500 dark:text-muted-foreground">
+													Registrado por
+												</p>
+												<p className="font-medium dark:text-foreground">
+													{solicitacao.pagamento_realizado.registrado_por}
+												</p>
+											</div>
+										)}
+										{solicitacao.pagamento_realizado.forma_pagamento && (
+											<div>
+												<p className="text-sm text-gray-500 dark:text-muted-foreground">
+													Forma de Pagamento
+												</p>
+												<p className="font-medium dark:text-foreground">
+													{solicitacao.pagamento_realizado.forma_pagamento ===
+													'conta_bancaria'
+														? 'Conta Bancária'
+														: 'Documento'}
+												</p>
+											</div>
+										)}
+										{solicitacao.pagamento_realizado.banco && (
+											<div>
+												<p className="text-sm text-gray-500 dark:text-muted-foreground">
+													Banco
+												</p>
+												<p className="font-medium dark:text-foreground">
+													{solicitacao.pagamento_realizado.banco}
+												</p>
+											</div>
+										)}
+										{solicitacao.pagamento_realizado.agencia && (
+											<div>
+												<p className="text-sm text-gray-500 dark:text-muted-foreground">
+													Agência / Conta
+												</p>
+												<p className="font-medium dark:text-foreground">
+													Ag: {solicitacao.pagamento_realizado.agencia} — C:{' '}
+													{solicitacao.pagamento_realizado.conta}
+												</p>
+											</div>
+										)}
+										{solicitacao.pagamento_realizado.observacao && (
+											<div className="col-span-2 md:col-span-3">
+												<p className="text-sm text-gray-500 dark:text-muted-foreground">
+													Observação
+												</p>
+												<p className="font-medium dark:text-foreground">
+													{solicitacao.pagamento_realizado.observacao}
+												</p>
+											</div>
+										)}
 									</div>
 								</div>
 
-								<h5 className="font-semibold mt-6 dark:text-foreground">Histórico de Trâmites</h5>
-								<div className="space-y-2">
-									{solicitacao.tramites?.map((tramite: any) => (
-										<div
-											key={tramite.id}
-											className="border-l-2 border-green-500 dark:border-green-400 pl-3 py-2">
-											<p className="text-sm font-medium dark:text-foreground">{tramite.fase}</p>
-											<p className="text-xs text-gray-500 dark:text-gray-400">
-												{tramite.created_at} - {tramite.usuario?.name}
-											</p>
-										</div>
-									))}
+								{/* Histórico de trâmites */}
+								<div>
+									<h5 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+										Histórico de Trâmites
+									</h5>
+									<div className="space-y-2">
+										{solicitacao.tramites?.map((tramite: any) => (
+											<div
+												key={tramite.id}
+												className="border-l-2 border-green-500 dark:border-green-400 pl-3 py-2">
+												<p className="text-sm font-medium dark:text-foreground">
+													{tramite.fase}
+												</p>
+												<p className="text-xs text-gray-500 dark:text-gray-400">
+													{tramite.created_at}
+													{tramite.usuario?.name && ` — ${tramite.usuario.name}`}
+												</p>
+												{tramite.motivo && (
+													<p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">
+														{tramite.motivo}
+													</p>
+												)}
+											</div>
+										))}
+									</div>
 								</div>
 							</div>
 						) : (
-							<p className="text-center text-gray-500 dark:text-muted-foreground py-8">
-								Pagamento ainda não foi realizado
-							</p>
+							<div className="flex flex-col items-center justify-center py-12 text-center">
+								<div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+									<Clock className="w-7 h-7 text-gray-400" />
+								</div>
+								<p className="text-gray-500 dark:text-muted-foreground font-medium">
+									Pagamento ainda não foi realizado
+								</p>
+								<p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+									Esta aba será preenchida automaticamente quando o pagamento for registrado
+								</p>
+							</div>
 						)}
 					</TabsContent>
 				</Tabs>
