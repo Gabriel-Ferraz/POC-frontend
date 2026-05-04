@@ -81,6 +81,17 @@ export function MobileMenu({ onNavigate }: MobileMenuProps) {
 			],
 		},
 		{
+			title: 'Administração',
+			perfis: [PerfilUsuario.GESTOR_SUPORTE],
+			items: [
+				{
+					label: 'Painel Admin',
+					href: '/admin',
+					icon: Shield,
+				},
+			],
+		},
+		{
 			title: 'Demonstração',
 			perfis: [PerfilUsuario.GESTOR_SUPORTE],
 			items: [
@@ -93,17 +104,6 @@ export function MobileMenu({ onNavigate }: MobileMenuProps) {
 					label: 'Roteiro de Demonstração',
 					href: '/roteiro-demonstracao',
 					icon: BookOpen,
-				},
-			],
-		},
-		{
-			title: 'Administração',
-			perfis: [PerfilUsuario.GESTOR_SUPORTE],
-			items: [
-				{
-					label: 'Painel Admin',
-					href: '/admin',
-					icon: Shield,
 				},
 			],
 		},

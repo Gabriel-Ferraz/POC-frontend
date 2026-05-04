@@ -182,18 +182,21 @@ const modulos = [
 	{ label: 'Prestação de Contas', detalhe: 'Exportação de layouts SIM-AM (ZIP + download)' },
 	{ label: 'Orçamentário', detalhe: 'Leis/atos, alterações, dotações, geração de PDF' },
 	{ label: 'Painel Administrativo', detalhe: 'Gestão de usuários, fornecedores, empenhos e status' },
+	{ label: 'Independência de Browser', detalhe: 'Funcional em Chrome, Firefox e Safari sem plugins' },
 	{ label: 'Tema Dark / Light', detalhe: 'Alternância em todas as telas' },
 ];
 
 const editalItems = [
+	{ req: 'Servidor de Banco de Dados (Oracle)', impl: 'Oracle Database 23 Free em container Linux' },
 	{ req: 'SO Linux', impl: 'Docker Alpine/Slim Linux em todos os containers' },
 	{ req: 'PHP instalado e configurado', impl: 'PHP 8.2 + Laravel 12 — porta 3333' },
 	{ req: 'Tomcat instalado e configurado', impl: 'Apache Tomcat 9 — acessível em /tomcat' },
 	{ req: 'Servidor web', impl: 'Traefik v3 (proxy reverso) — porta 8008' },
 	{ req: 'GIT instalado', impl: 'Git disponível no container de desenvolvimento' },
-	{ req: 'Chrome e/ou Firefox', impl: 'Sem plugins adicionais — qualquer browser moderno' },
+	{ req: 'Chrome, Firefox e/ou Safari', impl: 'Sem plugins adicionais — qualquer browser moderno' },
 	{ req: 'Visualizador de PDF', impl: 'Nativo no navegador para relatórios exportados' },
 	{ req: 'Ferramentas Office', impl: 'Para arquivos XLSX exportados pela Prestação de Contas' },
+	{ req: 'Ferramentas de desenvolvimento', impl: 'IDE (VS Code) + CloudBeaver (acesso ao banco)' },
 	{ req: 'Impressora', impl: 'Via impressão do navegador a partir dos PDFs gerados' },
 ];
 

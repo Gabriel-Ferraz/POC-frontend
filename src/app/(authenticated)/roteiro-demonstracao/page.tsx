@@ -3,7 +3,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import { Badge } from '@/components/ui/badge';
-import { Monitor, Server, FileText, CheckCircle, Info, HeadphonesIcon, Bell, Download } from 'lucide-react';
+import { Monitor, Server, FileText, CheckCircle, Info, HeadphonesIcon, Bell, Download, Calculator } from 'lucide-react';
 
 interface Passo {
 	titulo: string;
@@ -30,7 +30,7 @@ const secoes: Secao[] = [
 			{
 				titulo: 'Infraestrutura em execução',
 				acoes: [
-					'Confirmar que os containers Docker estão ativos (app, db, redis, tomcat, adminer)',
+					'Confirmar que os containers Docker estão ativos (app, oracle, redis, tomcat, cloudbeaver, traefik)',
 					'Verificar acesso ao sistema pelo navegador (Chrome ou Firefox)',
 					'Confirmar que o banco está populado com dados de demonstração',
 				],
@@ -60,9 +60,8 @@ const secoes: Secao[] = [
 				acoes: [
 					'Verificar o card "Serviços em Execução" — todos devem aparecer como "online" (bolinhas verdes)',
 					'Clicar no link do Backend PHP para abrir /api/version no navegador',
-					'Clicar no link do Tomcat (localhost:8180) para demonstrar o servidor de relatórios em execução',
-					'Clicar no link do Adminer (localhost:8181) para demonstrar acesso visual ao Oracle Database 23 Free',
-					'Clicar no link do Traefik Dashboard (localhost:8080) para mostrar o proxy reverso ativo',
+					'Clicar no link do Tomcat (/tomcat) para demonstrar o servidor de relatórios em execução',
+					'Abrir o CloudBeaver (porta 8978) para demonstrar acesso visual ao Oracle Database 23 Free',
 				],
 				destaque:
 					'Os links abrem diretamente no navegador — sem necessidade de terminal ou acesso ao servidor.',
@@ -70,8 +69,8 @@ const secoes: Secao[] = [
 			{
 				titulo: 'Apresentar a stack técnica e conformidade',
 				acoes: [
-					'No card "Stack Técnica": PHP 8.2, Laravel 12, Octane/Swoole, Oracle 23 Free, Redis 7, Nginx, Tomcat, Docker',
-					'No card "Stack Técnica": Next.js 16, React 19, TypeScript 5, Tailwind CSS 4',
+					'No card "Stack Técnica": PHP 8.2, Laravel 12, Oracle 23 Free, Redis 7, Traefik, Tomcat, Docker',
+					'No card "Stack Técnica": Next.js 15, React 19, TypeScript 5, Tailwind CSS 4',
 					'No card "Conformidade com o Ambiente": mapear cada requisito do edital',
 					'No card "Módulos Implementados": todos marcados como ✅',
 				],
@@ -229,6 +228,39 @@ const secoes: Secao[] = [
 	},
 	{
 		id: 8,
+		titulo: 'Módulo Orçamentário — Leis e Atos',
+		icone: <Calculator className="w-5 h-5" />,
+		cor: 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800',
+		passos: [
+			{
+				titulo: 'Cadastro e consulta de Leis/Atos',
+				descricao: 'Logar como Operador Orçamentário (CPF correspondente)',
+				acoes: [
+					'Acessar "Orçamentário" → "Leis e Atos" no menu lateral',
+					'Visualizar a listagem de leis/atos cadastrados com número, tipo, data e descrição',
+					'Clicar em "Nova Lei/Ato" para demonstrar o formulário de cadastro',
+					'Preencher: número, tipo (Lei, Decreto, Portaria), data de publicação e descrição',
+					'Salvar e verificar que aparece na listagem',
+				],
+			},
+			{
+				titulo: 'Alterações Orçamentárias',
+				descricao: 'Demonstrar o registro de alterações vinculadas a leis/atos',
+				acoes: [
+					'Acessar "Orçamentário" → "Alterações Orçamentárias"',
+					'Visualizar a listagem com número, lei vinculada, tipo de crédito, valor e dotação',
+					'Clicar em "Nova Alteração" para demonstrar o formulário',
+					'Preencher: lei/ato vinculado, tipo de crédito (Suplementar, Especial, Extraordinário), valor e dotação',
+					'Salvar e verificar na listagem',
+					'Demonstrar a geração de PDF com o relatório da alteração',
+				],
+				destaque:
+					'As alterações são vinculadas a leis/atos previamente cadastrados, garantindo rastreabilidade legal.',
+			},
+		],
+	},
+	{
+		id: 9,
 		titulo: 'Módulo de Exportador — Prestação de Contas',
 		icone: <Download className="w-5 h-5" />,
 		cor: 'bg-teal-50 dark:bg-teal-900/20 border-teal-200 dark:border-teal-800',
