@@ -81,7 +81,7 @@ export function Sidebar() {
 		},
 		{
 			title: 'Demonstração',
-			perfis: Object.values(PerfilUsuario),
+			perfis: [PerfilUsuario.GESTOR_SUPORTE],
 			items: [
 				{
 					label: 'Demonstração Técnica',

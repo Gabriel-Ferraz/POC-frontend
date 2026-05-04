@@ -630,21 +630,34 @@ function SolicitacoesTab() {
 								<SelectValue placeholder="Selecione o status" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="pendente">📝 Pendente</SelectItem>
-								<SelectItem value="aguardando_aprovacao">⏳ Aguardando Aprovação dos Anexos</SelectItem>
-								<SelectItem value="anexos_recusados">❌ Anexos Recusados</SelectItem>
-								<SelectItem value="aguardando_gestor">👔 Aguardando Autorização do Gestor</SelectItem>
-								<SelectItem value="em_liquidacao">💰 Em Liquidação</SelectItem>
-								<SelectItem value="secretario">📜 Secretário(a)</SelectItem>
-								<SelectItem value="iss">🏛️ ISS</SelectItem>
-								<SelectItem value="em_ordem_pagamento">📄 Em Ordem de Pagamento</SelectItem>
+								<SelectItem value="rascunho">📝 Rascunho</SelectItem>
+								<SelectItem value="aguardando_aprovacao">⏳ Aguardando Aprovação</SelectItem>
+								<SelectItem value="anexos">🔍 Análise de Anexos</SelectItem>
+								<SelectItem value="fiscal">📋 Análise Fiscal</SelectItem>
+								<SelectItem value="gestor">👔 Aprovação do Gestor</SelectItem>
+								<SelectItem value="liquidacao">💰 Liquidação</SelectItem>
+								<SelectItem value="secretario">📜 Aprovação do Secretário</SelectItem>
+								<SelectItem value="iss">🏛️ Verificação ISS</SelectItem>
+								<SelectItem value="ordem_pagamento">📄 Ordem de Pagamento</SelectItem>
 								<SelectItem value="autorizacao">✅ Autorização</SelectItem>
 								<SelectItem value="bordero">📊 Borderô</SelectItem>
-								<SelectItem value="pagamento_remessa">📤 Pagamento em Remessa</SelectItem>
+								<SelectItem value="remessa">📤 Remessa Bancária</SelectItem>
+								<SelectItem value="pagamento">💳 Em Pagamento</SelectItem>
 								<SelectItem value="pagamento_realizado">✔️ Pagamento Realizado</SelectItem>
-								<SelectItem value="cancelada">❌ Cancelada</SelectItem>
+								<SelectItem value="cancelado">❌ Cancelado</SelectItem>
 							</SelectContent>
 						</Select>
+					</div>
+
+					<div className="text-xs text-muted-foreground bg-gray-50 dark:bg-gray-900 rounded p-3 space-y-1">
+						<p className="font-semibold mb-1">Fluxo de status:</p>
+						<p>
+							rascunho → aguardando_aprovacao → anexos → fiscal → gestor → liquidacao → secretario → iss →
+							ordem_pagamento → autorizacao → bordero → remessa → pagamento → pagamento_realizado
+						</p>
+						<p className="mt-1 text-orange-600 dark:text-orange-400">
+							cancelado pode ser definido em qualquer etapa anterior ao pagamento_realizado.
+						</p>
 					</div>
 
 					<div>
