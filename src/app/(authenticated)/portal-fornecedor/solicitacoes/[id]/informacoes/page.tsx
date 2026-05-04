@@ -130,7 +130,7 @@ export default function InformacoesSolicitacaoPage() {
 		return {
 			key: etapa.key,
 			label: etapa.label,
-			status: etapaInfo?.status || 'pendente',
+			status: (etapaInfo?.status || 'pendente') as StatusEtapa,
 		};
 	});
 
@@ -582,7 +582,7 @@ export default function InformacoesSolicitacaoPage() {
 			<CancelarSolicitacaoModal
 				open={modalCancelarAberto}
 				onClose={() => setModalCancelarAberto(false)}
-				onConfirm={cancelar}
+				onConfirm={(motivo, dataCancelamento) => cancelar(motivo)}
 				isPending={isCancelando}
 			/>
 		</div>

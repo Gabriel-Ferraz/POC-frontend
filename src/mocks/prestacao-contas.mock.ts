@@ -3,6 +3,7 @@ import type { LayoutArquivo, ExportacaoGerada } from '@/types/prestacao-contas.t
 export const mockLayouts: LayoutArquivo[] = [
 	{
 		id: '1',
+		key: 'plano_contabil',
 		nome: 'PlanoContabil',
 		modulo: 'contabilidade',
 		ordem: 1,
@@ -11,6 +12,7 @@ export const mockLayouts: LayoutArquivo[] = [
 	},
 	{
 		id: '2',
+		key: 'movimento_contabil_mensal',
 		nome: 'MovimentoContabilMensal',
 		modulo: 'contabilidade',
 		ordem: 2,
@@ -19,6 +21,7 @@ export const mockLayouts: LayoutArquivo[] = [
 	},
 	{
 		id: '3',
+		key: 'diario_contabil',
 		nome: 'DiarioContabil',
 		modulo: 'contabilidade',
 		ordem: 3,
@@ -27,6 +30,7 @@ export const mockLayouts: LayoutArquivo[] = [
 	},
 	{
 		id: '4',
+		key: 'movimento_realizavel',
 		nome: 'MovimentoRealizavel',
 		modulo: 'contabilidade',
 		ordem: 4,
@@ -35,6 +39,7 @@ export const mockLayouts: LayoutArquivo[] = [
 	},
 	{
 		id: '5',
+		key: 'balancete_verificacao',
 		nome: 'BalanceteVerificacao',
 		modulo: 'contabilidade',
 		ordem: 5,
@@ -43,6 +48,7 @@ export const mockLayouts: LayoutArquivo[] = [
 	},
 	{
 		id: '6',
+		key: 'despesa_orcamentaria',
 		nome: 'DespesaOrcamentaria',
 		modulo: 'contabilidade',
 		ordem: 6,

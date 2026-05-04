@@ -77,6 +77,10 @@ export interface SolicitacaoPagamento {
 	cidade_banco?: string;
 	observacao?: string;
 	solicitante?: User;
+	fornecedor?: Fornecedor & { razao_social?: string };
+	contrato?: Contrato;
+	andamento?: { etapas?: Array<{ key: string; status: string }> };
+	pagamento_realizado?: { data_hora: string } | null;
 	created_at: string;
 	updated_at: string;
 	anexos?: AnexoSolicitacao[];
@@ -169,7 +173,7 @@ export interface AlteracaoOrcamentaria {
 	decreto_autorizador: string;
 	tipo_ato: 'decreto' | 'resolucao' | 'ato_gestor';
 	tipo_credito: 'especial' | 'suplementar' | 'extraordinario';
-	tipo_recurso: 'superavit' | 'excesso_arrecadacao';
+	tipo_recurso: 'superavit' | 'excesso_arrecadacao' | 'valor_credito';
 	valor_credito: string | number;
 	data_ato: string;
 	data_publicacao: string;

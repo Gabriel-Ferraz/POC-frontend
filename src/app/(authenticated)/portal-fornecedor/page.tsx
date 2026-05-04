@@ -70,11 +70,15 @@ export default function EmpenhosPage() {
 							{empenhosList.map((empenho) => (
 								<TableRow key={empenho.id}>
 									<TableCell className="font-medium">{empenho.numero}</TableCell>
-									<TableCell>{empenho.contrato || '-'}</TableCell>
+									<TableCell>
+										{typeof empenho.contrato === 'string'
+											? empenho.contrato
+											: (empenho.contrato?.numero ?? '-')}
+									</TableCell>
 									<TableCell>{empenho.data_emissao}</TableCell>
-									<TableCell>{formatCurrency(parseFloat(empenho.valor))}</TableCell>
+									<TableCell>{formatCurrency(parseFloat(String(empenho.valor)))}</TableCell>
 									<TableCell className="font-semibold">
-										{formatCurrency(parseFloat(empenho.saldo))}
+										{formatCurrency(parseFloat(String(empenho.saldo)))}
 									</TableCell>
 									<TableCell>
 										<StatusBadge status={empenho.status} />

@@ -61,7 +61,7 @@ const secoes: Secao[] = [
 					'Verificar o card "Serviços em Execução" — todos devem aparecer como "online" (bolinhas verdes)',
 					'Clicar no link do Backend PHP para abrir /api/version no navegador',
 					'Clicar no link do Tomcat (localhost:8180) para demonstrar o servidor de relatórios em execução',
-					'Clicar no link do Adminer (localhost:8181) para demonstrar acesso visual ao PostgreSQL 15',
+					'Clicar no link do Adminer (localhost:8181) para demonstrar acesso visual ao Oracle Database 23 Free',
 					'Clicar no link do Traefik Dashboard (localhost:8080) para mostrar o proxy reverso ativo',
 				],
 				destaque:
@@ -70,7 +70,7 @@ const secoes: Secao[] = [
 			{
 				titulo: 'Apresentar a stack técnica e conformidade',
 				acoes: [
-					'No card "Stack Técnica": PHP 8.2, Laravel 12, Octane/Swoole, PostgreSQL 15, Redis 7, Nginx, Tomcat, Docker',
+					'No card "Stack Técnica": PHP 8.2, Laravel 12, Octane/Swoole, Oracle 23 Free, Redis 7, Nginx, Tomcat, Docker',
 					'No card "Stack Técnica": Next.js 16, React 19, TypeScript 5, Tailwind CSS 4',
 					'No card "Conformidade com o Ambiente": mapear cada requisito do edital',
 					'No card "Módulos Implementados": todos marcados como ✅',

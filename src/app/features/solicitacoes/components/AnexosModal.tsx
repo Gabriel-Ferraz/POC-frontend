@@ -548,7 +548,7 @@ export function AnexosModal({ open, onClose, solicitacao, onSuccess }: AnexosMod
 			<CancelarSolicitacaoModal
 				open={modalCancelarAberto}
 				onClose={() => setModalCancelarAberto(false)}
-				onConfirm={cancelar}
+				onConfirm={(motivo) => cancelar(motivo)}
 				isPending={isCancelando}
 			/>
 		</Dialog>

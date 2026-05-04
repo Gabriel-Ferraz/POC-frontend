@@ -15,13 +15,11 @@ interface ServiceCheck {
 	linkLabel: string;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api$/, '') ?? 'http://localhost:3333';
-
 const SERVICES: ServiceCheck[] = [
 	{
 		label: 'Backend PHP (Laravel Octane)',
-		url: `${API_BASE}/api/version`,
-		description: 'PHP 8.2 + Laravel 12 + Swoole',
+		url: '/api/version',
+		description: 'PHP 8.2 + Laravel 12 + Swoole — roteado via Traefik',
 		linkLabel: 'GET /api/version',
 	},
 	{
@@ -31,9 +29,9 @@ const SERVICES: ServiceCheck[] = [
 		linkLabel: 'localhost:8180',
 	},
 	{
-		label: 'Adminer (Banco de Dados)',
+		label: 'Adminer (Oracle Database)',
 		url: 'http://localhost:8181',
-		description: 'PostgreSQL 15 via Adminer — acesso direto ao banco',
+		description: 'Oracle Database 23 Free via Adminer — acesso direto ao banco',
 		linkLabel: 'localhost:8181',
 	},
 	{
@@ -119,7 +117,7 @@ const stack = {
 		{ label: 'PHP 8.2 + Laravel 12', detail: 'Framework principal' },
 		{ label: 'Laravel Octane + Swoole', detail: 'Alta performance assíncrona' },
 		{ label: 'Laravel Sanctum', detail: 'Bearer Token auth' },
-		{ label: 'PostgreSQL 15', detail: 'Banco de dados relacional' },
+		{ label: 'Oracle Database 23 Free', detail: 'Banco de dados relacional' },
 		{ label: 'Redis 7', detail: 'Cache e filas' },
 		{ label: 'Nginx', detail: 'Servidor web + proxy reverso' },
 		{ label: 'Apache Tomcat 10', detail: 'Servidor de relatórios (edital)' },
@@ -141,7 +139,7 @@ const modulos = [
 ];
 
 const editalItems = [
-	{ req: 'SO Linux', impl: 'Docker Alpine Linux em todos os containers' },
+	{ req: 'SO Linux', impl: 'Docker Alpine/Slim Linux em todos os containers' },
 	{ req: 'PHP instalado e configurado', impl: 'PHP 8.2 + Octane/Swoole — porta 3333' },
 	{ req: 'Tomcat instalado e configurado', impl: 'Apache Tomcat 10 — porta 8180' },
 	{ req: 'Servidor web', impl: 'Nginx + Traefik (proxy reverso) — porta 8008' },
