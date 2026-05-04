@@ -101,16 +101,13 @@ export default function SolicitacoesEmpenhoPage() {
 							<TableBody>
 								{solicitacoesList.map((solicitacao) => {
 									const isPendente =
-										solicitacao.status?.toLowerCase() === 'pendente' ||
-										solicitacao.status === StatusSolicitacao.PENDENTE;
+										solicitacao.status === StatusSolicitacao.RASCUNHO ||
+										solicitacao.status === StatusSolicitacao.AGUARDANDO_APROVACAO;
 
 									const podeEditarAnexos =
-										isPendente ||
-										solicitacao.status?.toLowerCase() === 'anexos_recusados' ||
-										solicitacao.status?.toLowerCase() === 'anexos recusados';
+										isPendente || solicitacao.status === StatusSolicitacao.ANEXOS;
 
-									const podeCancelar =
-										isPendente || solicitacao.status?.toLowerCase() === 'anexos_recusados';
+									const podeCancelar = isPendente || solicitacao.status === StatusSolicitacao.ANEXOS;
 
 									const docFiscal = [
 										(solicitacao as any).documento_fiscal_tipo,
