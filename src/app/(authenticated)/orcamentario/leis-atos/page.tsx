@@ -165,19 +165,13 @@ export default function LeisAtosPage() {
 				title="Leis e Atos"
 				description="Cadastro e gerenciamento de leis e atos normativos"
 				action={
-					<Button
-						onClick={() => {
-							if (showForm) {
-								resetForm();
-							} else {
-								setShowForm(true);
-							}
-						}}
-						className="w-full sm:w-auto">
-						<Plus className="w-4 h-4 sm:mr-2" />
-						<span className="hidden sm:inline">{showForm ? 'Cancelar' : 'Nova Lei/Ato'}</span>
-						<span className="sm:hidden">{showForm ? 'Cancelar' : 'Nova'}</span>
-					</Button>
+					!showForm ? (
+						<Button onClick={() => setShowForm(true)} className="w-full sm:w-auto">
+							<Plus className="w-4 h-4 sm:mr-2" />
+							<span className="hidden sm:inline">Nova Lei/Ato</span>
+							<span className="sm:hidden">Nova</span>
+						</Button>
+					) : undefined
 				}
 			/>
 

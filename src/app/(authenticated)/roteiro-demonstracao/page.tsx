@@ -44,6 +44,7 @@ const secoes: Secao[] = [
 					'Gestor de Contrato: CPF 987.654.321-00 / senha123',
 					'Gestor de Suporte: CPF 555.666.777-88 / senha123',
 					'Operador PMSJP: CPF 111.222.333-44 / senha123',
+					'Operador Orçamentário: CPF 999.888.777-66 / senha123',
 				],
 			},
 		],

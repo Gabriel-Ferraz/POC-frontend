@@ -159,6 +159,48 @@ function DbCredentials() {
 	);
 }
 
+// ── Credenciais de acesso ────────────────────────────────────────────────────
+
+function UserCredentials() {
+	const [visible, setVisible] = useState(false);
+
+	const users = [
+		{ perfil: 'Responsável Técnico', cpf: '123.456.789-00', senha: 'senha123' },
+		{ perfil: 'Gestor de Contrato', cpf: '987.654.321-00', senha: 'senha123' },
+		{ perfil: 'Gestor de Suporte', cpf: '555.666.777-88', senha: 'senha123' },
+		{ perfil: 'Operador PMSJP', cpf: '111.222.333-44', senha: 'senha123' },
+		{ perfil: 'Operador Orçamentário', cpf: '999.888.777-66', senha: 'senha123' },
+	];
+
+	return (
+		<div className="mt-4 border rounded-lg overflow-hidden">
+			<button
+				onClick={() => setVisible((v) => !v)}
+				className="w-full flex items-center justify-between px-3 sm:px-4 py-3 bg-muted/50 hover:bg-muted transition-colors text-xs sm:text-sm font-medium">
+				<span className="flex items-center gap-2">
+					{visible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+					<span className="truncate">Credenciais de Acesso (Usuários)</span>
+				</span>
+				<span className="text-[10px] sm:text-xs text-muted-foreground flex-shrink-0 ml-2">
+					{visible ? 'ocultar' : 'exibir'}
+				</span>
+			</button>
+			{visible && (
+				<div className="px-3 sm:px-4 py-3 space-y-2 text-xs sm:text-sm">
+					{users.map(({ perfil, cpf, senha }) => (
+						<div key={cpf} className="flex flex-col sm:flex-row sm:items-center sm:gap-3">
+							<span className="font-medium text-muted-foreground sm:w-48 shrink-0">{perfil}</span>
+							<code className="font-mono text-[10px] sm:text-xs bg-muted px-2 py-1 rounded">
+								CPF {cpf} / {senha}
+							</code>
+						</div>
+					))}
+				</div>
+			)}
+		</div>
+	);
+}
+
 // ── Stack técnica ────────────────────────────────────────────────────────────
 
 const stack = {
@@ -435,6 +477,7 @@ export default function DemonstracaoTecnicaPage() {
 							<ServiceCard key={svc.url} svc={svc} />
 						))}
 						<DbCredentials />
+						<UserCredentials />
 					</CardContent>
 				</Card>
 
