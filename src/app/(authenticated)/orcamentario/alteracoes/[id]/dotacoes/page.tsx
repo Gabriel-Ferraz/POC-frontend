@@ -127,21 +127,23 @@ export default function DotacoesPage() {
 			<div>
 				<Button variant="ghost" onClick={() => router.push('/orcamentario/alteracoes')} className="mb-4">
 					<ArrowLeft className="w-4 h-4 mr-2" />
-					Voltar para Alterações
+					<span className="hidden sm:inline">Voltar para Alterações</span>
+					<span className="sm:hidden">Voltar</span>
 				</Button>
 
 				<PageHeader
 					title={`Dotações - Ato ${alteracao.decreto_autorizador}`}
 					description={`Lei/Ato: ${getLeiAtoDisplay(alteracao.lei_ato)} | Tipo: ${TIPO_ATO_LABELS[alteracao.tipo_ato] || alteracao.tipo_ato} | Crédito: ${TIPO_CREDITO_LABELS[alteracao.tipo_credito] || alteracao.tipo_credito} | Recurso: ${TIPO_RECURSO_LABELS[alteracao.tipo_recurso] || alteracao.tipo_recurso} | Data: ${formatDate(alteracao.data_ato)}`}
 					action={
-						<div className="flex gap-2">
-							<Button variant="outline" onClick={handleMinimizar}>
-								<Minimize2 className="w-4 h-4 mr-2" />
-								Minimizar
+						<div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+							<Button variant="outline" onClick={handleMinimizar} className="w-full sm:w-auto">
+								<Minimize2 className="w-4 h-4 sm:mr-2" />
+								<span className="hidden sm:inline">Minimizar</span>
 							</Button>
-							<Button onClick={() => setDialogOpen(true)}>
-								<Plus className="w-4 h-4 mr-2" />
-								Adicionar Dotação
+							<Button onClick={() => setDialogOpen(true)} className="w-full sm:w-auto">
+								<Plus className="w-4 h-4 sm:mr-2" />
+								<span className="hidden sm:inline">Adicionar Dotação</span>
+								<span className="sm:hidden">Adicionar</span>
 							</Button>
 						</div>
 					}
@@ -155,24 +157,26 @@ export default function DotacoesPage() {
 				</Alert>
 			)}
 
-			<div className="grid grid-cols-3 gap-4">
-				<Card className="p-6">
-					<div className="space-y-2">
-						<p className="text-sm text-muted-foreground">Total Suprimido</p>
-						<p className="text-2xl font-bold text-red-600">{formatCurrency(totalSuprimido)}</p>
+			<div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+				<Card className="p-4 sm:p-6">
+					<div className="space-y-1 sm:space-y-2">
+						<p className="text-xs sm:text-sm text-muted-foreground">Total Suprimido</p>
+						<p className="text-xl sm:text-2xl font-bold text-red-600">{formatCurrency(totalSuprimido)}</p>
 					</div>
 				</Card>
-				<Card className="p-6">
-					<div className="space-y-2">
-						<p className="text-sm text-muted-foreground">Total Suplementado</p>
-						<p className="text-2xl font-bold text-green-600">{formatCurrency(totalSuplementado)}</p>
+				<Card className="p-4 sm:p-6">
+					<div className="space-y-1 sm:space-y-2">
+						<p className="text-xs sm:text-sm text-muted-foreground">Total Suplementado</p>
+						<p className="text-xl sm:text-2xl font-bold text-green-600">
+							{formatCurrency(totalSuplementado)}
+						</p>
 					</div>
 				</Card>
-				<Card className="p-6">
-					<div className="space-y-2">
-						<p className="text-sm text-muted-foreground">Diferença</p>
+				<Card className="p-4 sm:p-6">
+					<div className="space-y-1 sm:space-y-2">
+						<p className="text-xs sm:text-sm text-muted-foreground">Diferença</p>
 						<p
-							className={`text-2xl font-bold ${
+							className={`text-xl sm:text-2xl font-bold ${
 								diferenca === 0 ? 'text-blue-600' : diferenca > 0 ? 'text-green-600' : 'text-red-600'
 							}`}>
 							{formatCurrency(diferenca)}
@@ -190,53 +194,115 @@ export default function DotacoesPage() {
 					/>
 				</Card>
 			) : (
-				<Card>
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead>Dotação Orçamentária</TableHead>
-								<TableHead>Conta Receita</TableHead>
-								<TableHead>Saldo Atual</TableHead>
-								<TableHead>Valor Suprimido</TableHead>
-								<TableHead>Valor Suplementado</TableHead>
-								<TableHead>Novo Saldo</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{dotacoesList.map((dotacao) => (
-								<TableRow key={dotacao.id}>
-									<TableCell className="font-medium">{dotacao.dotacao_orcamentaria}</TableCell>
-									<TableCell>{dotacao.conta_receita || '-'}</TableCell>
-									<TableCell className="font-semibold">
-										{formatCurrency(Number(dotacao.saldo_atual))}
-									</TableCell>
-									<TableCell className="text-red-600">
-										{formatCurrency(Number(dotacao.valor_suprimido))}
-									</TableCell>
-									<TableCell className="text-green-600">
-										{formatCurrency(Number(dotacao.valor_suplementado))}
-									</TableCell>
-									<TableCell className="font-semibold">
-										{formatCurrency(Number(dotacao.novo_saldo))}
-									</TableCell>
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-				</Card>
+				<>
+					{/* Desktop */}
+					<Card className="hidden lg:block">
+						<div className="overflow-x-auto">
+							<Table>
+								<TableHeader>
+									<TableRow>
+										<TableHead>Dotação Orçamentária</TableHead>
+										<TableHead>Conta Receita</TableHead>
+										<TableHead>Saldo Atual</TableHead>
+										<TableHead>Valor Suprimido</TableHead>
+										<TableHead>Valor Suplementado</TableHead>
+										<TableHead>Novo Saldo</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									{dotacoesList.map((dotacao) => (
+										<TableRow key={dotacao.id}>
+											<TableCell className="font-medium">
+												{dotacao.dotacao_orcamentaria}
+											</TableCell>
+											<TableCell>{dotacao.conta_receita || '-'}</TableCell>
+											<TableCell className="font-semibold">
+												{formatCurrency(Number(dotacao.saldo_atual))}
+											</TableCell>
+											<TableCell className="text-red-600">
+												{formatCurrency(Number(dotacao.valor_suprimido))}
+											</TableCell>
+											<TableCell className="text-green-600">
+												{formatCurrency(Number(dotacao.valor_suplementado))}
+											</TableCell>
+											<TableCell className="font-semibold">
+												{formatCurrency(Number(dotacao.novo_saldo))}
+											</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							</Table>
+						</div>
+					</Card>
+
+					{/* Mobile */}
+					<div className="lg:hidden space-y-3">
+						{dotacoesList.map((dotacao) => (
+							<Card key={dotacao.id} className="p-4">
+								<div className="space-y-3">
+									<div>
+										<p className="text-xs text-muted-foreground">Dotação Orçamentária</p>
+										<p className="font-medium text-sm break-words">
+											{dotacao.dotacao_orcamentaria}
+										</p>
+									</div>
+
+									{dotacao.conta_receita && (
+										<div>
+											<p className="text-xs text-muted-foreground">Conta Receita</p>
+											<p className="text-sm break-words">{dotacao.conta_receita}</p>
+										</div>
+									)}
+
+									<div className="grid grid-cols-2 gap-3 pt-2 border-t">
+										<div>
+											<p className="text-xs text-muted-foreground">Saldo Atual</p>
+											<p className="font-semibold text-sm">
+												{formatCurrency(Number(dotacao.saldo_atual))}
+											</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Novo Saldo</p>
+											<p className="font-semibold text-sm">
+												{formatCurrency(Number(dotacao.novo_saldo))}
+											</p>
+										</div>
+									</div>
+
+									<div className="grid grid-cols-2 gap-3">
+										<div>
+											<p className="text-xs text-muted-foreground">Valor Suprimido</p>
+											<p className="text-red-600 font-medium text-sm">
+												{formatCurrency(Number(dotacao.valor_suprimido))}
+											</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Valor Suplementado</p>
+											<p className="text-green-600 font-medium text-sm">
+												{formatCurrency(Number(dotacao.valor_suplementado))}
+											</p>
+										</div>
+									</div>
+								</div>
+							</Card>
+						))}
+					</div>
+				</>
 			)}
 
 			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-				<DialogContent className="max-w-2xl">
+				<DialogContent className="w-[calc(100%-2rem)] sm:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
 					<DialogHeader>
-						<DialogTitle>Nova Dotação</DialogTitle>
+						<DialogTitle className="text-base sm:text-lg">Nova Dotação</DialogTitle>
 					</DialogHeader>
-					<DotacaoForm
-						alteracaoId={alteracaoId}
-						dotacao={null}
-						tipoRecurso={alteracao.tipo_recurso}
-						onClose={handleCloseDialog}
-					/>
+					<div className="overflow-y-auto flex-1">
+						<DotacaoForm
+							alteracaoId={alteracaoId}
+							dotacao={null}
+							tipoRecurso={alteracao.tipo_recurso}
+							onClose={handleCloseDialog}
+						/>
+					</div>
 				</DialogContent>
 			</Dialog>
 		</div>

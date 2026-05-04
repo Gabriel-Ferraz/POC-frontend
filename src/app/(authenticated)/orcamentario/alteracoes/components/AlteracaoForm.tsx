@@ -97,131 +97,156 @@ export function AlteracaoForm({ alteracao, onClose }: AlteracaoFormProps) {
 	const isLoading = createMutation.isPending;
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-4">
-			<div className="space-y-2">
-				<Label htmlFor="lei_ato_id">Lei/Ato *</Label>
-				<Select value={leiAtoId} onValueChange={setLeiAtoId} disabled={loadingLeis || isLoading}>
-					<SelectTrigger>
-						<SelectValue placeholder="Selecione uma lei ou ato" />
-					</SelectTrigger>
-					<SelectContent>
-						{leisAtos?.map((lei) => (
-							<SelectItem key={lei.id} value={String(lei.id)}>
-								{lei.numero} - {lei.tipo}
+		<form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+				<div className="space-y-1.5 sm:space-y-2 md:col-span-2">
+					<Label htmlFor="lei_ato_id" className="text-xs sm:text-sm">
+						Lei/Ato *
+					</Label>
+					<Select value={leiAtoId} onValueChange={setLeiAtoId} disabled={loadingLeis || isLoading}>
+						<SelectTrigger className="text-xs sm:text-sm">
+							<SelectValue placeholder="Selecione uma lei ou ato" />
+						</SelectTrigger>
+						<SelectContent>
+							{leisAtos?.map((lei) => (
+								<SelectItem key={lei.id} value={String(lei.id)}>
+									{lei.numero} - {lei.tipo}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
+
+				<div className="space-y-1.5 sm:space-y-2 md:col-span-2">
+					<Label htmlFor="decreto_autorizador" className="text-xs sm:text-sm">
+						Decreto Autorizador *
+					</Label>
+					<Input
+						id="decreto_autorizador"
+						value={decretoAutorizador}
+						onChange={(e) => setDecretoAutorizador(e.target.value)}
+						placeholder="Ex: 001/2024"
+						disabled={isLoading}
+						className="text-xs sm:text-sm"
+					/>
+				</div>
+
+				<div className="space-y-1.5 sm:space-y-2">
+					<Label htmlFor="tipo_ato" className="text-xs sm:text-sm">
+						Tipo de Ato *
+					</Label>
+					<Select value={tipoAto} onValueChange={setTipoAto} disabled={isLoading}>
+						<SelectTrigger className="text-xs sm:text-sm">
+							<SelectValue placeholder="Selecione o tipo de ato" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value={TipoAto.DECRETO}>{TIPO_ATO_LABELS[TipoAto.DECRETO]}</SelectItem>
+							<SelectItem value={TipoAto.RESOLUCAO}>{TIPO_ATO_LABELS[TipoAto.RESOLUCAO]}</SelectItem>
+							<SelectItem value={TipoAto.ATO_GESTOR}>{TIPO_ATO_LABELS[TipoAto.ATO_GESTOR]}</SelectItem>
+						</SelectContent>
+					</Select>
+				</div>
+
+				<div className="space-y-1.5 sm:space-y-2">
+					<Label htmlFor="tipo_credito" className="text-xs sm:text-sm">
+						Tipo de Crédito *
+					</Label>
+					<Select value={tipoCredito} onValueChange={setTipoCredito} disabled={isLoading}>
+						<SelectTrigger className="text-xs sm:text-sm">
+							<SelectValue placeholder="Selecione o tipo de crédito" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value={TipoCredito.ESPECIAL}>
+								{TIPO_CREDITO_LABELS[TipoCredito.ESPECIAL]}
 							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
-			</div>
+							<SelectItem value={TipoCredito.SUPLEMENTAR}>
+								{TIPO_CREDITO_LABELS[TipoCredito.SUPLEMENTAR]}
+							</SelectItem>
+							<SelectItem value={TipoCredito.EXTRAORDINARIO}>
+								{TIPO_CREDITO_LABELS[TipoCredito.EXTRAORDINARIO]}
+							</SelectItem>
+						</SelectContent>
+					</Select>
+				</div>
 
-			<div className="space-y-2">
-				<Label htmlFor="decreto_autorizador">Decreto Autorizador *</Label>
-				<Input
-					id="decreto_autorizador"
-					value={decretoAutorizador}
-					onChange={(e) => setDecretoAutorizador(e.target.value)}
-					placeholder="Ex: 001/2024"
-					disabled={isLoading}
-				/>
-			</div>
+				<div className="space-y-1.5 sm:space-y-2">
+					<Label htmlFor="tipo_recurso" className="text-xs sm:text-sm">
+						Tipo de Recurso *
+					</Label>
+					<Select value={tipoRecurso} onValueChange={setTipoRecurso} disabled={isLoading}>
+						<SelectTrigger className="text-xs sm:text-sm">
+							<SelectValue placeholder="Selecione o tipo de recurso" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value={TipoRecurso.SUPERAVIT}>
+								{TIPO_RECURSO_LABELS[TipoRecurso.SUPERAVIT]}
+							</SelectItem>
+							<SelectItem value={TipoRecurso.EXCESSO_ARRECADACAO}>
+								{TIPO_RECURSO_LABELS[TipoRecurso.EXCESSO_ARRECADACAO]}
+							</SelectItem>
+							<SelectItem value={TipoRecurso.VALOR_CREDITO}>
+								{TIPO_RECURSO_LABELS[TipoRecurso.VALOR_CREDITO]}
+							</SelectItem>
+						</SelectContent>
+					</Select>
+				</div>
 
-			<div className="space-y-2">
-				<Label htmlFor="tipo_ato">Tipo de Ato *</Label>
-				<Select value={tipoAto} onValueChange={setTipoAto} disabled={isLoading}>
-					<SelectTrigger>
-						<SelectValue placeholder="Selecione o tipo de ato" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value={TipoAto.DECRETO}>{TIPO_ATO_LABELS[TipoAto.DECRETO]}</SelectItem>
-						<SelectItem value={TipoAto.RESOLUCAO}>{TIPO_ATO_LABELS[TipoAto.RESOLUCAO]}</SelectItem>
-						<SelectItem value={TipoAto.ATO_GESTOR}>{TIPO_ATO_LABELS[TipoAto.ATO_GESTOR]}</SelectItem>
-					</SelectContent>
-				</Select>
-			</div>
+				<div className="space-y-1.5 sm:space-y-2">
+					<Label htmlFor="valor_credito" className="text-xs sm:text-sm">
+						Valor do Crédito *
+					</Label>
+					<Input
+						id="valor_credito"
+						type="number"
+						step="0.01"
+						min="0"
+						value={valorCredito}
+						onChange={(e) => setValorCredito(e.target.value)}
+						placeholder="0.00"
+						disabled={isLoading}
+						className="text-xs sm:text-sm"
+					/>
+				</div>
 
-			<div className="space-y-2">
-				<Label htmlFor="tipo_credito">Tipo de Crédito *</Label>
-				<Select value={tipoCredito} onValueChange={setTipoCredito} disabled={isLoading}>
-					<SelectTrigger>
-						<SelectValue placeholder="Selecione o tipo de crédito" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value={TipoCredito.ESPECIAL}>
-							{TIPO_CREDITO_LABELS[TipoCredito.ESPECIAL]}
-						</SelectItem>
-						<SelectItem value={TipoCredito.SUPLEMENTAR}>
-							{TIPO_CREDITO_LABELS[TipoCredito.SUPLEMENTAR]}
-						</SelectItem>
-						<SelectItem value={TipoCredito.EXTRAORDINARIO}>
-							{TIPO_CREDITO_LABELS[TipoCredito.EXTRAORDINARIO]}
-						</SelectItem>
-					</SelectContent>
-				</Select>
-			</div>
-
-			<div className="space-y-2">
-				<Label htmlFor="tipo_recurso">Tipo de Recurso *</Label>
-				<Select value={tipoRecurso} onValueChange={setTipoRecurso} disabled={isLoading}>
-					<SelectTrigger>
-						<SelectValue placeholder="Selecione o tipo de recurso" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value={TipoRecurso.SUPERAVIT}>
-							{TIPO_RECURSO_LABELS[TipoRecurso.SUPERAVIT]}
-						</SelectItem>
-						<SelectItem value={TipoRecurso.EXCESSO_ARRECADACAO}>
-							{TIPO_RECURSO_LABELS[TipoRecurso.EXCESSO_ARRECADACAO]}
-						</SelectItem>
-						<SelectItem value={TipoRecurso.VALOR_CREDITO}>
-							{TIPO_RECURSO_LABELS[TipoRecurso.VALOR_CREDITO]}
-						</SelectItem>
-					</SelectContent>
-				</Select>
-			</div>
-
-			<div className="space-y-2">
-				<Label htmlFor="valor_credito">Valor do Crédito *</Label>
-				<Input
-					id="valor_credito"
-					type="number"
-					step="0.01"
-					min="0"
-					value={valorCredito}
-					onChange={(e) => setValorCredito(e.target.value)}
-					placeholder="0.00"
-					disabled={isLoading}
-				/>
-			</div>
-
-			<div className="grid grid-cols-2 gap-4">
-				<div className="space-y-2">
-					<Label htmlFor="data_ato">Data do Ato *</Label>
+				<div className="space-y-1.5 sm:space-y-2">
+					<Label htmlFor="data_ato" className="text-xs sm:text-sm">
+						Data do Ato *
+					</Label>
 					<Input
 						id="data_ato"
 						type="date"
 						value={dataAto}
 						onChange={(e) => setDataAto(e.target.value)}
 						disabled={isLoading}
+						className="text-xs sm:text-sm"
 					/>
 				</div>
 
-				<div className="space-y-2">
-					<Label htmlFor="data_publicacao">Data da Publicação *</Label>
+				<div className="space-y-1.5 sm:space-y-2">
+					<Label htmlFor="data_publicacao" className="text-xs sm:text-sm">
+						Data da Publicação *
+					</Label>
 					<Input
 						id="data_publicacao"
 						type="date"
 						value={dataPublicacao}
 						onChange={(e) => setDataPublicacao(e.target.value)}
 						disabled={isLoading}
+						className="text-xs sm:text-sm"
 					/>
 				</div>
 			</div>
 
-			<div className="flex justify-end gap-2 pt-4">
-				<Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
+			<div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-3 sm:pt-4 border-t">
+				<Button
+					type="button"
+					variant="outline"
+					onClick={onClose}
+					disabled={isLoading}
+					className="w-full sm:w-auto">
 					Cancelar
 				</Button>
-				<Button type="submit" disabled={isLoading}>
+				<Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
 					{isLoading ? 'Salvando...' : 'Salvar'}
 				</Button>
 			</div>

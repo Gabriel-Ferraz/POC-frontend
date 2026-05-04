@@ -67,9 +67,9 @@ function ServiceCard({ svc }: { svc: ServiceCheck }) {
 	}, []);
 
 	return (
-		<div className="flex items-center justify-between gap-4 py-3 border-b last:border-0">
-			<div className="min-w-0">
-				<div className="flex items-center gap-2">
+		<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 py-3 border-b last:border-0">
+			<div className="min-w-0 flex-1">
+				<div className="flex items-center gap-2 flex-wrap">
 					<span
 						className={`w-2 h-2 rounded-full shrink-0 ${
 							status === 'online'
@@ -79,17 +79,17 @@ function ServiceCard({ svc }: { svc: ServiceCheck }) {
 									: 'bg-yellow-400 animate-pulse'
 						}`}
 					/>
-					<span className="text-sm font-medium">{svc.label}</span>
-					<Badge variant="outline" className="text-xs hidden sm:inline-flex">
+					<span className="text-xs sm:text-sm font-medium break-words">{svc.label}</span>
+					<Badge variant="outline" className="text-[10px] sm:text-xs">
 						{status === 'checking' ? 'verificando…' : status === 'online' ? 'online' : 'offline'}
 					</Badge>
 				</div>
-				<p className="text-xs text-muted-foreground mt-0.5 ml-4">{svc.description}</p>
+				<p className="text-[10px] sm:text-xs text-muted-foreground mt-1 ml-0 sm:ml-4">{svc.description}</p>
 			</div>
-			<div className="flex items-center gap-2 shrink-0">
+			<div className="flex items-center gap-2 shrink-0 ml-4 sm:ml-0">
 				<button
 					onClick={check}
-					className="text-muted-foreground hover:text-foreground"
+					className="text-muted-foreground hover:text-foreground p-1"
 					title="Verificar novamente">
 					<RefreshCw className="w-3.5 h-3.5" />
 				</button>
@@ -97,9 +97,9 @@ function ServiceCard({ svc }: { svc: ServiceCheck }) {
 					href={svc.linkHref}
 					target="_blank"
 					rel="noopener noreferrer"
-					className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline">
-					{svc.linkLabel}
-					<ExternalLink className="w-3 h-3" />
+					className="flex items-center gap-1 text-[10px] sm:text-xs text-blue-600 dark:text-blue-400 hover:underline break-all">
+					<span className="truncate max-w-[120px] sm:max-w-none">{svc.linkLabel}</span>
+					<ExternalLink className="w-3 h-3 flex-shrink-0" />
 				</a>
 			</div>
 		</div>
@@ -124,19 +124,25 @@ function DbCredentials() {
 		<div className="mt-4 border rounded-lg overflow-hidden">
 			<button
 				onClick={() => setVisible((v) => !v)}
-				className="w-full flex items-center justify-between px-4 py-3 bg-muted/50 hover:bg-muted transition-colors text-sm font-medium">
+				className="w-full flex items-center justify-between px-3 sm:px-4 py-3 bg-muted/50 hover:bg-muted transition-colors text-xs sm:text-sm font-medium">
 				<span className="flex items-center gap-2">
 					{visible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-					Credenciais do Banco de Dados
+					<span className="truncate">Credenciais do Banco de Dados</span>
 				</span>
-				<span className="text-xs text-muted-foreground">{visible ? 'ocultar' : 'clique para exibir'}</span>
+				<span className="text-[10px] sm:text-xs text-muted-foreground flex-shrink-0 ml-2">
+					{visible ? 'ocultar' : 'exibir'}
+				</span>
 			</button>
 			{visible && (
-				<div className="px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+				<div className="px-3 sm:px-4 py-3 grid grid-cols-1 gap-3 text-xs sm:text-sm">
 					{creds.map(({ label, value }) => (
-						<div key={label} className="flex gap-2">
-							<span className="text-muted-foreground shrink-0 w-24">{label}:</span>
-							<code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">{value}</code>
+						<div key={label} className="flex flex-col sm:flex-row sm:gap-2">
+							<span className="text-muted-foreground font-medium mb-1 sm:mb-0 sm:shrink-0 sm:w-24">
+								{label}:
+							</span>
+							<code className="font-mono text-[10px] sm:text-xs bg-muted px-2 py-1 rounded break-all">
+								{value}
+							</code>
 						</div>
 					))}
 				</div>
@@ -365,14 +371,18 @@ function MvcCard({ layer }: { layer: MvcLayer }) {
 		<div className={`rounded-lg border-l-4 ${layer.color} border border-border overflow-hidden`}>
 			<button
 				onClick={() => setOpen((v) => !v)}
-				className="w-full flex items-start justify-between gap-3 p-4 text-left hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-				<div className="min-w-0">
-					<div className="flex items-center gap-2 flex-wrap">
-						<span className="font-semibold text-sm">{layer.title}</span>
-						<span className="text-xs text-muted-foreground">— {layer.subtitle}</span>
+				className="w-full flex items-start justify-between gap-2 sm:gap-3 p-3 sm:p-4 text-left hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+				<div className="min-w-0 flex-1">
+					<div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-wrap">
+						<span className="font-semibold text-xs sm:text-sm">{layer.title}</span>
+						<span className="text-[10px] sm:text-xs text-muted-foreground">— {layer.subtitle}</span>
 					</div>
-					<p className="text-xs text-muted-foreground mt-1">{layer.description}</p>
-					<code className="text-xs text-blue-600 dark:text-blue-400 font-mono mt-1 block">{layer.path}</code>
+					<p className="text-[10px] sm:text-xs text-muted-foreground mt-1 leading-relaxed">
+						{layer.description}
+					</p>
+					<code className="text-[10px] sm:text-xs text-blue-600 dark:text-blue-400 font-mono mt-1 block break-all">
+						{layer.path}
+					</code>
 				</div>
 				{open ? (
 					<ChevronDown className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
@@ -381,7 +391,7 @@ function MvcCard({ layer }: { layer: MvcLayer }) {
 				)}
 			</button>
 			{open && (
-				<pre className="text-xs font-mono bg-gray-900 dark:bg-gray-950 text-gray-100 p-4 overflow-x-auto leading-5 border-t border-border">
+				<pre className="text-[10px] sm:text-xs font-mono bg-gray-900 dark:bg-gray-950 text-gray-100 p-3 sm:p-4 overflow-x-auto leading-relaxed border-t border-border">
 					{layer.snippet}
 				</pre>
 			)}
@@ -421,20 +431,26 @@ export default function DemonstracaoTecnicaPage() {
 				{/* Stack Técnica */}
 				<Card>
 					<CardHeader>
-						<CardTitle>Stack Técnica</CardTitle>
+						<CardTitle className="text-base sm:text-lg">Stack Técnica</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="grid md:grid-cols-2 gap-8">
+						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
 							<div>
-								<h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
+								<h4 className="text-xs sm:text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
 									Frontend
 								</h4>
 								<div className="space-y-2.5">
 									{stack.frontend.map((item) => (
-										<div key={item.label} className="flex items-start justify-between gap-4">
-											<div>
-												<span className="text-sm font-medium">{item.label}</span>
-												<p className="text-xs text-muted-foreground">{item.detail}</p>
+										<div
+											key={item.label}
+											className="flex items-start justify-between gap-3 sm:gap-4">
+											<div className="min-w-0 flex-1">
+												<span className="text-xs sm:text-sm font-medium break-words">
+													{item.label}
+												</span>
+												<p className="text-[10px] sm:text-xs text-muted-foreground">
+													{item.detail}
+												</p>
 											</div>
 											<span className="shrink-0 text-green-600">✅</span>
 										</div>
@@ -442,15 +458,21 @@ export default function DemonstracaoTecnicaPage() {
 								</div>
 							</div>
 							<div>
-								<h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
+								<h4 className="text-xs sm:text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
 									Backend e Infraestrutura
 								</h4>
 								<div className="space-y-2.5">
 									{stack.backend.map((item) => (
-										<div key={item.label} className="flex items-start justify-between gap-4">
-											<div>
-												<span className="text-sm font-medium">{item.label}</span>
-												<p className="text-xs text-muted-foreground">{item.detail}</p>
+										<div
+											key={item.label}
+											className="flex items-start justify-between gap-3 sm:gap-4">
+											<div className="min-w-0 flex-1">
+												<span className="text-xs sm:text-sm font-medium break-words">
+													{item.label}
+												</span>
+												<p className="text-[10px] sm:text-xs text-muted-foreground">
+													{item.detail}
+												</p>
 											</div>
 											<span className="shrink-0 text-green-600">✅</span>
 										</div>
@@ -464,19 +486,23 @@ export default function DemonstracaoTecnicaPage() {
 				{/* Conformidade com o Edital */}
 				<Card>
 					<CardHeader>
-						<CardTitle>Conformidade com o Ambiente de Demonstração</CardTitle>
+						<CardTitle className="text-base sm:text-lg">
+							Conformidade com o Ambiente de Demonstração
+						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<p className="text-sm text-muted-foreground mb-5">
+						<p className="text-xs sm:text-sm text-muted-foreground mb-4 sm:mb-5">
 							Mapeamento dos requisitos do edital para a arquitetura implantada.
 						</p>
-						<div className="grid md:grid-cols-2 gap-x-8 gap-y-3">
+						<div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 sm:gap-x-8 gap-y-3">
 							{editalItems.map(({ req, impl }) => (
-								<div key={req} className="flex items-start gap-2 text-sm">
+								<div key={req} className="flex items-start gap-2 text-xs sm:text-sm">
 									<span className="text-green-600 dark:text-green-400 shrink-0 mt-0.5">✅</span>
-									<div>
-										<span className="font-medium">{req}</span>
-										<p className="text-muted-foreground text-xs mt-0.5">{impl}</p>
+									<div className="min-w-0 flex-1">
+										<span className="font-medium break-words">{req}</span>
+										<p className="text-muted-foreground text-[10px] sm:text-xs mt-0.5 break-words">
+											{impl}
+										</p>
 									</div>
 								</div>
 							))}
@@ -487,16 +513,18 @@ export default function DemonstracaoTecnicaPage() {
 				{/* Módulos */}
 				<Card>
 					<CardHeader>
-						<CardTitle>Módulos Implementados</CardTitle>
+						<CardTitle className="text-base sm:text-lg">Módulos Implementados</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="grid sm:grid-cols-2 gap-x-8 gap-y-2.5">
+						<div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 sm:gap-x-8 gap-y-2.5">
 							{modulos.map(({ label, detalhe }) => (
 								<div key={label} className="flex items-start gap-2">
 									<span className="text-green-600 dark:text-green-400 shrink-0 mt-0.5">✅</span>
-									<div>
-										<span className="text-sm font-medium">{label}</span>
-										<p className="text-xs text-muted-foreground">{detalhe}</p>
+									<div className="min-w-0 flex-1">
+										<span className="text-xs sm:text-sm font-medium break-words">{label}</span>
+										<p className="text-[10px] sm:text-xs text-muted-foreground break-words">
+											{detalhe}
+										</p>
 									</div>
 								</div>
 							))}
@@ -507,10 +535,12 @@ export default function DemonstracaoTecnicaPage() {
 				{/* Arquitetura MVC */}
 				<Card>
 					<CardHeader>
-						<CardTitle>Arquitetura MVC — Código Real da Aplicação</CardTitle>
+						<CardTitle className="text-base sm:text-lg">
+							Arquitetura MVC — Código Real da Aplicação
+						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<p className="text-sm text-muted-foreground mb-4">
+						<p className="text-xs sm:text-sm text-muted-foreground mb-4">
 							Clique em cada camada para ver o trecho real do código fonte. O path indica onde encontrar o
 							arquivo no projeto.
 						</p>

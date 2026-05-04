@@ -10,6 +10,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Loading } from '@/components/ui/loading';
 import { EmptyState } from '@/components/ui/empty-state';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { orcamentarioApi } from '@/app/features/orcamentario/api/orcamentario-api';
@@ -27,6 +38,7 @@ export default function LeisAtosPage() {
 	const queryClient = useQueryClient();
 	const [showForm, setShowForm] = useState(false);
 	const [editandoId, setEditandoId] = useState<number | null>(null);
+	const [itemParaExcluir, setItemParaExcluir] = useState<number | null>(null);
 
 	const [numero, setNumero] = useState('');
 	const [tipo, setTipo] = useState('');
@@ -85,6 +97,7 @@ export default function LeisAtosPage() {
 		onSuccess: () => {
 			toast.success('Lei/Ato excluído com sucesso!');
 			queryClient.invalidateQueries({ queryKey: ['leis-atos'] });
+			setItemParaExcluir(null);
 		},
 		onError: (error: any) => {
 			const mensagem = error?.message || 'Erro ao excluir lei/ato';
@@ -93,6 +106,7 @@ export default function LeisAtosPage() {
 			} else {
 				toast.error(mensagem);
 			}
+			setItemParaExcluir(null);
 		},
 	});
 
@@ -158,17 +172,21 @@ export default function LeisAtosPage() {
 							} else {
 								setShowForm(true);
 							}
-						}}>
-						<Plus className="w-4 h-4 mr-2" />
-						{showForm ? 'Cancelar' : 'Nova Lei/Ato'}
+						}}
+						className="w-full sm:w-auto">
+						<Plus className="w-4 h-4 sm:mr-2" />
+						<span className="hidden sm:inline">{showForm ? 'Cancelar' : 'Nova Lei/Ato'}</span>
+						<span className="sm:hidden">{showForm ? 'Cancelar' : 'Nova'}</span>
 					</Button>
 				}
 			/>
 
 			{showForm && (
 				<Card>
-					<div className="p-6">
-						<h3 className="font-semibold text-lg mb-4">{editandoId ? 'Editar Lei/Ato' : 'Nova Lei/Ato'}</h3>
+					<div className="p-4 sm:p-6">
+						<h3 className="font-semibold text-base sm:text-lg mb-4">
+							{editandoId ? 'Editar Lei/Ato' : 'Nova Lei/Ato'}
+						</h3>
 
 						<form onSubmit={handleSubmit} className="space-y-4">
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -225,7 +243,7 @@ export default function LeisAtosPage() {
 									/>
 								</div>
 
-								<div className="col-span-2">
+								<div className="md:col-span-2">
 									<Label htmlFor="descricao">Descrição *</Label>
 									<Textarea
 										id="descricao"
@@ -238,7 +256,7 @@ export default function LeisAtosPage() {
 									/>
 								</div>
 
-								<div className="col-span-2">
+								<div className="md:col-span-2">
 									<Label htmlFor="arquivo">Arquivo (PDF)</Label>
 									<Input
 										id="arquivo"
@@ -250,11 +268,16 @@ export default function LeisAtosPage() {
 								</div>
 							</div>
 
-							<div className="flex justify-end gap-3 pt-4 border-t">
-								<Button type="button" variant="outline" onClick={resetForm} disabled={isProcessando}>
+							<div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-4 border-t">
+								<Button
+									type="button"
+									variant="outline"
+									onClick={resetForm}
+									disabled={isProcessando}
+									className="w-full sm:w-auto">
 									Cancelar
 								</Button>
-								<Button type="submit" disabled={isProcessando}>
+								<Button type="submit" disabled={isProcessando} className="w-full sm:w-auto">
 									{isProcessando ? 'Salvando...' : 'Salvar'}
 								</Button>
 							</div>
@@ -307,16 +330,35 @@ export default function LeisAtosPage() {
 														onClick={() => handleEdit(leiAto)}>
 														<Edit2 className="w-4 h-4" />
 													</Button>
-													<Button
-														size="sm"
-														variant="ghost"
-														onClick={() => {
-															if (confirm('Deseja realmente excluir esta lei/ato?')) {
-																deletar(leiAto.id);
-															}
-														}}>
-														<Trash2 className="w-4 h-4" />
-													</Button>
+													<AlertDialog
+														open={itemParaExcluir === leiAto.id}
+														onOpenChange={(open) => !open && setItemParaExcluir(null)}>
+														<AlertDialogTrigger asChild>
+															<Button
+																size="sm"
+																variant="ghost"
+																onClick={() => setItemParaExcluir(leiAto.id)}>
+																<Trash2 className="w-4 h-4" />
+															</Button>
+														</AlertDialogTrigger>
+														<AlertDialogContent className="max-w-[90vw] sm:max-w-lg">
+															<AlertDialogHeader>
+																<AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+																<AlertDialogDescription>
+																	Deseja realmente excluir esta lei/ato? Esta ação não
+																	pode ser desfeita.
+																</AlertDialogDescription>
+															</AlertDialogHeader>
+															<AlertDialogFooter>
+																<AlertDialogCancel>Cancelar</AlertDialogCancel>
+																<AlertDialogAction
+																	onClick={() => deletar(leiAto.id)}
+																	className="bg-red-600 hover:bg-red-700">
+																	Excluir
+																</AlertDialogAction>
+															</AlertDialogFooter>
+														</AlertDialogContent>
+													</AlertDialog>
 												</div>
 											</TableCell>
 										</TableRow>
@@ -367,18 +409,37 @@ export default function LeisAtosPage() {
 											<Edit2 className="w-4 h-4 mr-2" />
 											Editar
 										</Button>
-										<Button
-											size="sm"
-											variant="outline"
-											className="flex-1"
-											onClick={() => {
-												if (confirm('Deseja realmente excluir esta lei/ato?')) {
-													deletar(leiAto.id);
-												}
-											}}>
-											<Trash2 className="w-4 h-4 mr-2" />
-											Excluir
-										</Button>
+										<AlertDialog
+											open={itemParaExcluir === leiAto.id}
+											onOpenChange={(open) => !open && setItemParaExcluir(null)}>
+											<AlertDialogTrigger asChild>
+												<Button
+													size="sm"
+													variant="outline"
+													className="flex-1"
+													onClick={() => setItemParaExcluir(leiAto.id)}>
+													<Trash2 className="w-4 h-4 mr-2" />
+													Excluir
+												</Button>
+											</AlertDialogTrigger>
+											<AlertDialogContent className="max-w-[90vw] sm:max-w-lg">
+												<AlertDialogHeader>
+													<AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+													<AlertDialogDescription>
+														Deseja realmente excluir esta lei/ato? Esta ação não pode ser
+														desfeita.
+													</AlertDialogDescription>
+												</AlertDialogHeader>
+												<AlertDialogFooter>
+													<AlertDialogCancel>Cancelar</AlertDialogCancel>
+													<AlertDialogAction
+														onClick={() => deletar(leiAto.id)}
+														className="bg-red-600 hover:bg-red-700">
+														Excluir
+													</AlertDialogAction>
+												</AlertDialogFooter>
+											</AlertDialogContent>
+										</AlertDialog>
 									</div>
 								</div>
 							</Card>

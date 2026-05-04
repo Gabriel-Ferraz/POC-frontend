@@ -34,7 +34,7 @@ export function CancelarSolicitacaoModal({ open, onClose, onConfirm, isPending }
 
 	return (
 		<Dialog open={open} onOpenChange={handleClose}>
-			<DialogContent className="sm:max-w-[500px]">
+			<DialogContent className="w-[calc(100%-2rem)] sm:max-w-[500px]">
 				<DialogHeader>
 					<DialogTitle>Cancelar Solicitação de Pagamento</DialogTitle>
 				</DialogHeader>

@@ -125,21 +125,24 @@ export default function NovoChamadoPage() {
 	}
 
 	return (
-		<div>
-			<div className="flex items-center justify-between mb-6">
-				<PageHeader title="Novo Chamado" description="Abrir um novo chamado de suporte" />
-				<Button
-					variant="outline"
-					onClick={handleMinimizar}
-					disabled={isPending}
-					className="flex items-center gap-2">
-					<Minimize2 className="w-4 h-4" />
-					Minimizar
-				</Button>
-			</div>
+		<div className="space-y-6">
+			<PageHeader
+				title="Novo Chamado"
+				description="Abrir um novo chamado de suporte"
+				action={
+					<Button
+						variant="outline"
+						onClick={handleMinimizar}
+						disabled={isPending}
+						className="w-full sm:w-auto">
+						<Minimize2 className="w-4 h-4 sm:mr-2" />
+						<span className="hidden sm:inline">Minimizar</span>
+					</Button>
+				}
+			/>
 
 			{temDadosRestaurados && (
-				<div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+				<div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
 					<p className="text-sm text-blue-900 dark:text-blue-100">
 						✓ Formulário restaurado com os dados salvos anteriormente
 					</p>
@@ -147,11 +150,11 @@ export default function NovoChamadoPage() {
 			)}
 
 			<Card>
-				<div className="p-6">
-					<form className="space-y-6" onSubmit={handleSubmit}>
+				<div className="p-4 sm:p-6">
+					<form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
 						<div>
 							<Label htmlFor="de">De</Label>
-							<Input id="de" value={user?.name ?? ''} disabled />
+							<Input id="de" value={user?.name ?? ''} disabled className="mt-1.5" />
 						</div>
 
 						<div>
@@ -159,7 +162,7 @@ export default function NovoChamadoPage() {
 								Módulo <span className="text-red-500">*</span>
 							</Label>
 							<Select value={modulo} onValueChange={setModulo} disabled={isPending}>
-								<SelectTrigger id="modulo">
+								<SelectTrigger id="modulo" className="mt-1.5">
 									<SelectValue placeholder="Selecione o módulo" />
 								</SelectTrigger>
 								<SelectContent>
@@ -180,10 +183,11 @@ export default function NovoChamadoPage() {
 							<Textarea
 								id="assunto"
 								placeholder="Descreva detalhadamente o problema..."
-								rows={8}
+								rows={6}
 								value={assunto}
 								onChange={(e) => setAssunto(e.target.value)}
 								disabled={isPending}
+								className="mt-1.5 resize-none"
 							/>
 						</div>
 
@@ -207,67 +211,81 @@ export default function NovoChamadoPage() {
 										variant="outline"
 										onClick={() => document.getElementById('file-input')?.click()}
 										disabled={isPending}
-										className="w-full md:w-auto">
+										className="w-full sm:w-auto">
 										<Upload className="w-4 h-4 mr-2" />
 										Procurar Arquivos
 									</Button>
-									<p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+									<p className="text-xs text-muted-foreground mt-2">
 										Máximo 10MB por arquivo. Formatos: PDF, DOC, XLS, PNG, JPG
 									</p>
 								</div>
 
 								{/* Lista de anexos */}
 								{anexos.length > 0 && (
-									<div className="border border-gray-300 dark:border-gray-600 rounded-md p-4 space-y-2">
-										<p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-											Arquivos Anexados ({anexos.length})
-										</p>
-										{anexos.map((file, index) => (
-											<div
-												key={index}
-												className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-md">
-												<div className="flex items-center gap-2 flex-1 min-w-0">
-													<FileText className="w-4 h-4 text-gray-500 flex-shrink-0" />
-													<span className="text-sm text-gray-700 dark:text-gray-300 truncate">
-														{file.name}
-													</span>
-													<span className="text-xs text-gray-500 flex-shrink-0">
-														({(file.size / 1024).toFixed(1)} KB)
-													</span>
+									<div className="border rounded-md p-3 space-y-2">
+										<p className="text-sm font-medium">Arquivos Anexados ({anexos.length})</p>
+										<div className="space-y-2">
+											{anexos.map((file, index) => (
+												<div
+													key={index}
+													className="flex flex-col sm:flex-row sm:items-center gap-2 p-2 bg-muted rounded-md">
+													<div className="flex items-center gap-2 flex-1 min-w-0">
+														<FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+														<div className="flex-1 min-w-0">
+															<p className="text-sm truncate">{file.name}</p>
+															<p className="text-xs text-muted-foreground">
+																{(file.size / 1024).toFixed(1)} KB
+															</p>
+														</div>
+													</div>
+													<div className="flex items-center gap-2 sm:ml-2">
+														<Button
+															type="button"
+															variant="ghost"
+															size="sm"
+															onClick={() => handleVisualizarAnexo(file)}
+															disabled={isPending}
+															className="flex-1 sm:flex-none">
+															<Eye className="w-4 h-4 sm:mr-0" />
+															<span className="sm:hidden ml-2">Visualizar</span>
+														</Button>
+														<Button
+															type="button"
+															variant="ghost"
+															size="sm"
+															onClick={() => handleRemoverAnexo(index)}
+															disabled={isPending}
+															className="flex-1 sm:flex-none text-red-500 hover:text-red-600">
+															<X className="w-4 h-4 sm:mr-0" />
+															<span className="sm:hidden ml-2">Remover</span>
+														</Button>
+													</div>
 												</div>
-												<div className="flex items-center gap-2 ml-2">
-													<Button
-														type="button"
-														variant="ghost"
-														size="sm"
-														onClick={() => handleVisualizarAnexo(file)}
-														disabled={isPending}>
-														<Eye className="w-4 h-4" />
-													</Button>
-													<Button
-														type="button"
-														variant="ghost"
-														size="sm"
-														onClick={() => handleRemoverAnexo(index)}
-														disabled={isPending}>
-														<X className="w-4 h-4 text-red-500" />
-													</Button>
-												</div>
-											</div>
-										))}
+											))}
+										</div>
 									</div>
 								)}
 							</div>
 						</div>
 
-						<div className="flex gap-3 justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
-							<Button variant="outline" onClick={() => router.back()} type="button" disabled={isPending}>
+						<div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 sm:justify-end pt-4 border-t">
+							<Button
+								variant="outline"
+								onClick={() => router.back()}
+								type="button"
+								disabled={isPending}
+								className="w-full sm:w-auto">
 								Cancelar
 							</Button>
-							<Button variant="outline" onClick={handleLimpar} type="button" disabled={isPending}>
+							<Button
+								variant="outline"
+								onClick={handleLimpar}
+								type="button"
+								disabled={isPending}
+								className="w-full sm:w-auto">
 								Limpar
 							</Button>
-							<Button type="submit" disabled={isPending}>
+							<Button type="submit" disabled={isPending} className="w-full sm:w-auto">
 								{isPending ? 'Enviando...' : 'Enviar Chamado'}
 							</Button>
 						</div>

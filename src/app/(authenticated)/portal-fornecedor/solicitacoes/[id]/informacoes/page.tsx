@@ -136,20 +136,25 @@ export default function InformacoesSolicitacaoPage() {
 
 	return (
 		<div className="space-y-6">
-			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-4">
-					<Button variant="ghost" size="sm" onClick={() => router.back()}>
-						<ArrowLeft className="w-4 h-4" />
-					</Button>
+			<div className="flex items-start gap-2 sm:gap-4">
+				<Button variant="ghost" size="sm" onClick={() => router.back()} className="flex-shrink-0 mt-1">
+					<ArrowLeft className="w-4 h-4" />
+				</Button>
+				<div className="flex-1 min-w-0">
 					<PageHeader
 						title={`Informações - Solicitação ${solicitacao.numero}`}
 						description="Acompanhamento completo da tramitação"
+						action={
+							<Button
+								variant="outline"
+								onClick={handleMinimizar}
+								className="w-full sm:w-auto flex-shrink-0">
+								<Minimize2 className="w-4 h-4 sm:mr-2" />
+								<span className="hidden sm:inline">Minimizar</span>
+							</Button>
+						}
 					/>
 				</div>
-				<Button variant="outline" onClick={handleMinimizar} className="flex items-center gap-2">
-					<Minimize2 className="w-4 h-4" />
-					Minimizar
-				</Button>
 			</div>
 
 			{temDadosRestaurados && (
@@ -162,17 +167,17 @@ export default function InformacoesSolicitacaoPage() {
 
 			{/* BLOCO 1: ANDAMENTO - COMPACTO */}
 			<Card>
-				<div className="p-4">
+				<div className="p-3 sm:p-4">
 					<h3 className="font-semibold text-sm mb-3">Andamento</h3>
 
-					<div className="flex items-center gap-2 overflow-x-auto pb-2">
+					<div className="flex items-center gap-1 sm:gap-2 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0">
 						{etapas.map((etapa, index) => (
-							<div key={etapa.key} className="flex items-center gap-2 flex-shrink-0">
-								{/* Círculo da etapa - MENOR */}
-								<div className="flex flex-col items-center gap-1 min-w-[70px]">
+							<div key={etapa.key} className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+								{/* Círculo da etapa */}
+								<div className="flex flex-col items-center gap-1 min-w-[60px] sm:min-w-[70px]">
 									<div
 										className={cn(
-											'w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors',
+											'w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-colors',
 											{
 												'bg-green-500 border-green-500 text-white':
 													etapa.status === 'concluido',
@@ -182,24 +187,29 @@ export default function InformacoesSolicitacaoPage() {
 													etapa.status === 'pendente',
 											}
 										)}>
-										{etapa.status === 'concluido' && <CheckCircle2 className="w-5 h-5" />}
-										{etapa.status === 'em_andamento' && <Clock className="w-5 h-5" />}
-										{etapa.status === 'pendente' && <Circle className="w-5 h-5" />}
+										{etapa.status === 'concluido' && (
+											<CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
+										)}
+										{etapa.status === 'em_andamento' && <Clock className="w-4 h-4 sm:w-5 sm:h-5" />}
+										{etapa.status === 'pendente' && <Circle className="w-4 h-4 sm:w-5 sm:h-5" />}
 									</div>
 									<p
-										className={cn('text-[10px] text-center font-medium leading-tight', {
-											'text-green-700': etapa.status === 'concluido',
-											'text-yellow-600': etapa.status === 'em_andamento',
-											'text-gray-500': etapa.status === 'pendente',
-										})}>
+										className={cn(
+											'text-[9px] sm:text-[10px] text-center font-medium leading-tight px-1',
+											{
+												'text-green-700 dark:text-green-600': etapa.status === 'concluido',
+												'text-yellow-600 dark:text-yellow-500': etapa.status === 'em_andamento',
+												'text-gray-500 dark:text-gray-400': etapa.status === 'pendente',
+											}
+										)}>
 										{etapa.label}
 									</p>
 								</div>
 
-								{/* Linha conectora - MENOR */}
+								{/* Linha conectora */}
 								{index < etapas.length - 1 && (
 									<div
-										className={cn('h-0.5 w-8 flex-shrink-0', {
+										className={cn('h-0.5 w-4 sm:w-8 flex-shrink-0', {
 											'bg-green-500': etapa.status === 'concluido',
 											'bg-gray-300': etapa.status !== 'concluido',
 										})}
@@ -214,44 +224,72 @@ export default function InformacoesSolicitacaoPage() {
 			{/* BLOCO 2: ABAS */}
 			<Card className="flex-1">
 				<Tabs value={abaAtiva} onValueChange={setAbaAtiva} className="w-full h-full flex flex-col">
-					{/* TabsList com scroll horizontal - MAIS FINO */}
-					<div className="relative border-b">
-						<TabsList className="w-full justify-start overflow-x-auto flex-nowrap h-auto bg-transparent p-0">
-							<TabsTrigger value="geral" className="whitespace-nowrap text-xs py-2 px-3">
+					{/* TabsList com scroll horizontal */}
+					<div className="relative border-b overflow-x-auto">
+						<TabsList className="w-full justify-start flex-nowrap h-auto bg-transparent p-0 inline-flex min-w-full">
+							<TabsTrigger
+								value="geral"
+								className="whitespace-nowrap text-xs sm:text-sm py-2 px-2 sm:px-3">
 								Geral
 							</TabsTrigger>
-							<TabsTrigger value="tramites" className="whitespace-nowrap text-xs py-2 px-3">
-								Trâmites da Solicitação de Pagamento
+							<TabsTrigger
+								value="tramites"
+								className="whitespace-nowrap text-xs sm:text-sm py-2 px-2 sm:px-3">
+								<span className="hidden sm:inline">Trâmites da Solicitação de Pagamento</span>
+								<span className="sm:hidden">Trâmites</span>
 							</TabsTrigger>
-							<TabsTrigger value="anexos" className="whitespace-nowrap text-xs py-2 px-3">
-								Anexos Pagamento
+							<TabsTrigger
+								value="anexos"
+								className="whitespace-nowrap text-xs sm:text-sm py-2 px-2 sm:px-3">
+								<span className="hidden sm:inline">Anexos Pagamento</span>
+								<span className="sm:hidden">Anexos</span>
 							</TabsTrigger>
-							<TabsTrigger value="gestor" className="whitespace-nowrap text-xs py-2 px-3">
+							<TabsTrigger
+								value="gestor"
+								className="whitespace-nowrap text-xs sm:text-sm py-2 px-2 sm:px-3">
 								Gestor
 							</TabsTrigger>
-							<TabsTrigger value="liquidacao" className="whitespace-nowrap text-xs py-2 px-3">
-								Comissão de Liquidação
+							<TabsTrigger
+								value="liquidacao"
+								className="whitespace-nowrap text-xs sm:text-sm py-2 px-2 sm:px-3">
+								<span className="hidden sm:inline">Comissão de Liquidação</span>
+								<span className="sm:hidden">Liquidação</span>
 							</TabsTrigger>
-							<TabsTrigger value="processo" className="whitespace-nowrap text-xs py-2 px-3">
+							<TabsTrigger
+								value="processo"
+								className="whitespace-nowrap text-xs sm:text-sm py-2 px-2 sm:px-3">
 								Processo
 							</TabsTrigger>
-							<TabsTrigger value="ordem_pagamento" className="whitespace-nowrap text-xs py-2 px-3">
-								Ordem de Pagamento
+							<TabsTrigger
+								value="ordem_pagamento"
+								className="whitespace-nowrap text-xs sm:text-sm py-2 px-2 sm:px-3">
+								<span className="hidden sm:inline">Ordem de Pagamento</span>
+								<span className="sm:hidden">Ordem Pag.</span>
 							</TabsTrigger>
-							<TabsTrigger value="iss" className="whitespace-nowrap text-xs py-2 px-3">
+							<TabsTrigger value="iss" className="whitespace-nowrap text-xs sm:text-sm py-2 px-2 sm:px-3">
 								ISS
 							</TabsTrigger>
-							<TabsTrigger value="forma_pagamento" className="whitespace-nowrap text-xs py-2 px-3">
-								Forma de Pagamento
+							<TabsTrigger
+								value="forma_pagamento"
+								className="whitespace-nowrap text-xs sm:text-sm py-2 px-2 sm:px-3">
+								<span className="hidden sm:inline">Forma de Pagamento</span>
+								<span className="sm:hidden">Pagamento</span>
 							</TabsTrigger>
-							<TabsTrigger value="bordero" className="whitespace-nowrap text-xs py-2 px-3">
+							<TabsTrigger
+								value="bordero"
+								className="whitespace-nowrap text-xs sm:text-sm py-2 px-2 sm:px-3">
 								Borderô
 							</TabsTrigger>
-							<TabsTrigger value="remessa" className="whitespace-nowrap text-xs py-2 px-3">
+							<TabsTrigger
+								value="remessa"
+								className="whitespace-nowrap text-xs sm:text-sm py-2 px-2 sm:px-3">
 								Remessa
 							</TabsTrigger>
-							<TabsTrigger value="pagamento_realizado" className="whitespace-nowrap text-xs py-2 px-3">
-								Pagamento Realizado
+							<TabsTrigger
+								value="pagamento_realizado"
+								className="whitespace-nowrap text-xs sm:text-sm py-2 px-2 sm:px-3">
+								<span className="hidden sm:inline">Pagamento Realizado</span>
+								<span className="sm:hidden">Pag. Realizado</span>
 							</TabsTrigger>
 						</TabsList>
 					</div>
@@ -349,19 +387,19 @@ export default function InformacoesSolicitacaoPage() {
 								{solicitacao.tramites.map((tramite: any) => (
 									<div
 										key={tramite.id}
-										className="border-l-4 border-blue-500 dark:border-blue-400 pl-4 py-2.5 bg-blue-50 dark:bg-blue-950/30 rounded-r">
+										className="border-l-4 border-blue-500 dark:border-blue-400 pl-3 sm:pl-4 py-2.5 bg-blue-50 dark:bg-blue-950/30 rounded-r">
 										{/* Fase e Data/Hora */}
-										<div className="flex items-center justify-between mb-2">
+										<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 mb-2">
 											<h5 className="font-semibold text-blue-900 dark:text-blue-300 text-sm">
 												{tramite.fase}
 											</h5>
-											<span className="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap bg-white dark:bg-gray-900 px-2 py-1 rounded">
+											<span className="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap bg-white dark:bg-gray-900 px-2 py-1 rounded w-fit">
 												{tramite.created_at}
 											</span>
 										</div>
 
 										{/* Grid compacto: Responsável + Origem + Destino */}
-										<div className="grid grid-cols-3 gap-3 text-xs">
+										<div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 text-xs">
 											{tramite.usuario && (
 												<div>
 													<span className="text-gray-500 dark:text-gray-400">

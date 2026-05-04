@@ -120,13 +120,16 @@ export default function AdminPage() {
 
 	return (
 		<div className="space-y-6">
-			<div className="flex items-center justify-between">
-				<PageHeader title="Painel Administrativo" description="Preparar massa de dados para demonstração" />
-				<Button variant="outline" onClick={() => minimizar({ activeTab })} className="flex items-center gap-2">
-					<Minimize2 className="w-4 h-4" />
-					Minimizar
-				</Button>
-			</div>
+			<PageHeader
+				title="Painel Administrativo"
+				description="Preparar massa de dados para demonstração"
+				action={
+					<Button variant="outline" onClick={() => minimizar({ activeTab })} className="w-full sm:w-auto">
+						<Minimize2 className="w-4 h-4 sm:mr-2" />
+						<span className="hidden sm:inline">Minimizar</span>
+					</Button>
+				}
+			/>
 
 			{temDadosRestaurados && (
 				<div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
@@ -137,23 +140,23 @@ export default function AdminPage() {
 			)}
 
 			<Card>
-				<div className="flex flex-wrap border-b">
+				<div className="flex overflow-x-auto border-b -mx-4 sm:mx-0 px-4 sm:px-0">
 					{TABS.map((tab) => (
 						<button
 							key={tab.id}
 							onClick={() => setActiveTab(tab.id)}
-							className={`flex items-center gap-2 px-5 py-3 font-medium text-sm transition-colors ${
+							className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-3 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
 								activeTab === tab.id
 									? 'border-b-2 border-blue-600 text-blue-600'
 									: 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
 							}`}>
 							{tab.icon}
-							{tab.label}
+							<span className="hidden xs:inline">{tab.label}</span>
 						</button>
 					))}
 				</div>
 
-				<div className="p-6">
+				<div className="p-4 sm:p-6">
 					{activeTab === 'usuarios' && <UsuariosTab />}
 					{activeTab === 'fornecedores' && <FornecedoresTab />}
 					{activeTab === 'empenhos' && <EmpenhosTab />}
@@ -291,7 +294,7 @@ function UsuariosTab() {
 					</div>
 				)}
 			</div>
-			<Button type="submit" className="w-full">
+			<Button type="submit" className="w-full sm:w-auto">
 				<UserPlus className="w-4 h-4 mr-2" />
 				Criar Usuário
 			</Button>
@@ -395,7 +398,7 @@ function FornecedoresTab() {
 				</div>
 			</div>
 
-			<Button type="submit" className="w-full">
+			<Button type="submit" className="w-full sm:w-auto">
 				<Database className="w-4 h-4 mr-2" />
 				Criar Fornecedor + Responsável Técnico
 			</Button>
@@ -525,7 +528,7 @@ function EmpenhosTab() {
 				</div>
 			</div>
 
-			<Button type="submit" className="w-full">
+			<Button type="submit" className="w-full sm:w-auto">
 				<FileText className="w-4 h-4 mr-2" />
 				Criar Empenho
 			</Button>
@@ -592,10 +595,12 @@ function SolicitacoesTab() {
 	};
 
 	return (
-		<div className="space-y-6">
-			<div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-				<h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-3">1. Buscar Solicitação</h3>
-				<div className="flex gap-2">
+		<div className="space-y-4 sm:space-y-6">
+			<div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4">
+				<h3 className="font-semibold text-sm sm:text-base text-blue-900 dark:text-blue-100 mb-3">
+					1. Buscar Solicitação
+				</h3>
+				<div className="flex flex-col sm:flex-row gap-2">
 					<Input
 						type="number"
 						value={solicitacaoId}
@@ -603,7 +608,11 @@ function SolicitacoesTab() {
 						placeholder="ID da solicitação"
 						className="flex-1"
 					/>
-					<Button type="button" onClick={handleCarregar} disabled={loadingSolicitacao}>
+					<Button
+						type="button"
+						onClick={handleCarregar}
+						disabled={loadingSolicitacao}
+						className="w-full sm:w-auto">
 						{loadingSolicitacao ? 'Carregando...' : 'Buscar'}
 					</Button>
 				</div>
@@ -626,8 +635,8 @@ function SolicitacoesTab() {
 				)}
 			</div>
 
-			<div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-				<h3 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-3 flex items-center gap-2">
+			<div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 sm:p-4">
+				<h3 className="font-semibold text-sm sm:text-base text-yellow-900 dark:text-yellow-100 mb-3 flex items-center gap-2">
 					<RefreshCw className="w-4 h-4" />
 					2. Atualizar Status
 				</h3>
@@ -659,13 +668,13 @@ function SolicitacoesTab() {
 						</Select>
 					</div>
 
-					<div className="text-xs text-muted-foreground bg-gray-50 dark:bg-gray-900 rounded p-3 space-y-1">
+					<div className="text-xs text-muted-foreground bg-gray-50 dark:bg-gray-900 rounded p-3 space-y-1 overflow-hidden">
 						<p className="font-semibold mb-1">Fluxo de status:</p>
-						<p>
+						<p className="break-words">
 							rascunho → aguardando_aprovacao → anexos → fiscal → gestor → liquidacao → secretario → iss →
 							ordem_pagamento → autorizacao → bordero → remessa → pagamento → pagamento_realizado
 						</p>
-						<p className="mt-1 text-orange-600 dark:text-orange-400">
+						<p className="mt-1 text-orange-600 dark:text-orange-400 break-words">
 							cancelado pode ser definido em qualquer etapa anterior ao pagamento_realizado.
 						</p>
 					</div>
@@ -709,7 +718,7 @@ function SolicitacoesTab() {
 						)}
 					</div>
 
-					<Button type="submit" className="w-full" disabled={!podeEnviar}>
+					<Button type="submit" className="w-full sm:w-auto" disabled={!podeEnviar}>
 						<RefreshCw className="w-4 h-4 mr-2" />
 						Atualizar Status
 					</Button>
@@ -745,28 +754,35 @@ function ListarDadosTab() {
 
 	return (
 		<div className="space-y-4">
-			<div className="flex gap-2">
+			<div className="flex flex-col sm:flex-row gap-2">
 				<Button
 					size="sm"
 					variant={view === 'fornecedores' ? 'default' : 'outline'}
-					onClick={() => setView('fornecedores')}>
+					onClick={() => setView('fornecedores')}
+					className="w-full sm:w-auto">
 					Fornecedores
 				</Button>
 				<Button
 					size="sm"
 					variant={view === 'empenhos' ? 'default' : 'outline'}
-					onClick={() => setView('empenhos')}>
+					onClick={() => setView('empenhos')}
+					className="w-full sm:w-auto">
 					Empenhos (Portal Fornecedor)
 				</Button>
 			</div>
 
 			{view === 'fornecedores' && (
 				<div>
-					<div className="flex justify-between items-center mb-3">
-						<p className="text-sm text-muted-foreground">
+					<div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-3">
+						<p className="text-xs sm:text-sm text-muted-foreground">
 							{fornecedores.length} fornecedor(es) cadastrado(s)
 						</p>
-						<Button size="sm" variant="outline" onClick={reload} disabled={loading}>
+						<Button
+							size="sm"
+							variant="outline"
+							onClick={reload}
+							disabled={loading}
+							className="w-full sm:w-auto">
 							<RefreshCw className="w-3.5 h-3.5 mr-1" />
 							Atualizar
 						</Button>
@@ -776,50 +792,96 @@ function ListarDadosTab() {
 					) : fornecedores.length === 0 ? (
 						<p className="text-sm text-muted-foreground">Nenhum fornecedor cadastrado.</p>
 					) : (
-						<div className="overflow-x-auto">
-							<Table>
-								<TableHeader>
-									<TableRow>
-										<TableHead>ID</TableHead>
-										<TableHead>Nome</TableHead>
-										<TableHead>CNPJ</TableHead>
-										<TableHead>Responsável Técnico</TableHead>
-									</TableRow>
-								</TableHeader>
-								<TableBody>
-									{fornecedores.map((f) => (
-										<TableRow key={f.id}>
-											<TableCell className="font-mono text-xs">{f.id}</TableCell>
-											<TableCell className="font-medium">{f.nome}</TableCell>
-											<TableCell className="text-sm text-muted-foreground">{f.cnpj}</TableCell>
-											<TableCell className="text-sm">
-												{f.responsavel_tecnico ? (
-													<div>
-														<p>{f.responsavel_tecnico.name}</p>
-														<p className="text-xs text-muted-foreground">
-															{f.responsavel_tecnico.email}
-														</p>
-													</div>
-												) : (
-													<Badge variant="outline" className="text-xs">
-														Sem RT
-													</Badge>
-												)}
-											</TableCell>
+						<>
+							{/* Desktop */}
+							<div className="hidden md:block overflow-x-auto">
+								<Table>
+									<TableHeader>
+										<TableRow>
+											<TableHead>ID</TableHead>
+											<TableHead>Nome</TableHead>
+											<TableHead>CNPJ</TableHead>
+											<TableHead>Responsável Técnico</TableHead>
 										</TableRow>
-									))}
-								</TableBody>
-							</Table>
-						</div>
+									</TableHeader>
+									<TableBody>
+										{fornecedores.map((f) => (
+											<TableRow key={f.id}>
+												<TableCell className="font-mono text-xs">{f.id}</TableCell>
+												<TableCell className="font-medium">{f.nome}</TableCell>
+												<TableCell className="text-sm text-muted-foreground">
+													{f.cnpj}
+												</TableCell>
+												<TableCell className="text-sm">
+													{f.responsavel_tecnico ? (
+														<div>
+															<p>{f.responsavel_tecnico.name}</p>
+															<p className="text-xs text-muted-foreground">
+																{f.responsavel_tecnico.email}
+															</p>
+														</div>
+													) : (
+														<Badge variant="outline" className="text-xs">
+															Sem RT
+														</Badge>
+													)}
+												</TableCell>
+											</TableRow>
+										))}
+									</TableBody>
+								</Table>
+							</div>
+
+							{/* Mobile */}
+							<div className="md:hidden space-y-3">
+								{fornecedores.map((f) => (
+									<div key={f.id} className="border rounded-lg p-3 space-y-3">
+										<div className="flex items-start justify-between gap-2">
+											<div className="flex-1 min-w-0">
+												<p className="text-xs text-muted-foreground">Nome</p>
+												<p className="font-medium text-sm break-words">{f.nome}</p>
+											</div>
+											<Badge variant="outline" className="text-xs flex-shrink-0">
+												ID: {f.id}
+											</Badge>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">CNPJ</p>
+											<p className="text-sm break-all">{f.cnpj}</p>
+										</div>
+										{f.responsavel_tecnico ? (
+											<div>
+												<p className="text-xs text-muted-foreground">Responsável Técnico</p>
+												<p className="text-sm font-medium">{f.responsavel_tecnico.name}</p>
+												<p className="text-xs text-muted-foreground break-all">
+													{f.responsavel_tecnico.email}
+												</p>
+											</div>
+										) : (
+											<div>
+												<Badge variant="outline" className="text-xs">
+													Sem RT
+												</Badge>
+											</div>
+										)}
+									</div>
+								))}
+							</div>
+						</>
 					)}
 				</div>
 			)}
 
 			{view === 'empenhos' && (
 				<div>
-					<div className="flex justify-between items-center mb-3">
-						<p className="text-sm text-muted-foreground">{empenhos.length} empenho(s)</p>
-						<Button size="sm" variant="outline" onClick={loadEmpenhos} disabled={loadingEmpenhos}>
+					<div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-3">
+						<p className="text-xs sm:text-sm text-muted-foreground">{empenhos.length} empenho(s)</p>
+						<Button
+							size="sm"
+							variant="outline"
+							onClick={loadEmpenhos}
+							disabled={loadingEmpenhos}
+							className="w-full sm:w-auto">
 							<RefreshCw className="w-3.5 h-3.5 mr-1" />
 							Atualizar
 						</Button>
@@ -829,32 +891,62 @@ function ListarDadosTab() {
 					) : empenhos.length === 0 ? (
 						<p className="text-sm text-muted-foreground">Nenhum empenho encontrado para o usuário atual.</p>
 					) : (
-						<div className="overflow-x-auto">
-							<Table>
-								<TableHeader>
-									<TableRow>
-										<TableHead>ID</TableHead>
-										<TableHead>Número</TableHead>
-										<TableHead>Saldo</TableHead>
-										<TableHead>Status</TableHead>
-									</TableRow>
-								</TableHeader>
-								<TableBody>
-									{empenhos.map((e: any) => (
-										<TableRow key={e.id}>
-											<TableCell className="font-mono text-xs">{e.id}</TableCell>
-											<TableCell className="font-medium">{e.numero}</TableCell>
-											<TableCell>{formatCurrency(Number(e.saldo ?? 0))}</TableCell>
-											<TableCell>
-												<Badge variant="outline" className="text-xs">
-													{e.status}
-												</Badge>
-											</TableCell>
+						<>
+							{/* Desktop */}
+							<div className="hidden md:block overflow-x-auto">
+								<Table>
+									<TableHeader>
+										<TableRow>
+											<TableHead>ID</TableHead>
+											<TableHead>Número</TableHead>
+											<TableHead>Saldo</TableHead>
+											<TableHead>Status</TableHead>
 										</TableRow>
-									))}
-								</TableBody>
-							</Table>
-						</div>
+									</TableHeader>
+									<TableBody>
+										{empenhos.map((e: any) => (
+											<TableRow key={e.id}>
+												<TableCell className="font-mono text-xs">{e.id}</TableCell>
+												<TableCell className="font-medium">{e.numero}</TableCell>
+												<TableCell>{formatCurrency(Number(e.saldo ?? 0))}</TableCell>
+												<TableCell>
+													<Badge variant="outline" className="text-xs">
+														{e.status}
+													</Badge>
+												</TableCell>
+											</TableRow>
+										))}
+									</TableBody>
+								</Table>
+							</div>
+
+							{/* Mobile */}
+							<div className="md:hidden space-y-3">
+								{empenhos.map((e: any) => (
+									<div key={e.id} className="border rounded-lg p-3 space-y-3">
+										<div className="flex items-start justify-between gap-2">
+											<div className="flex-1 min-w-0">
+												<p className="text-xs text-muted-foreground">Número</p>
+												<p className="font-medium text-sm">{e.numero}</p>
+											</div>
+											<Badge variant="outline" className="text-xs flex-shrink-0">
+												{e.status}
+											</Badge>
+										</div>
+										<div className="grid grid-cols-2 gap-3 text-sm">
+											<div>
+												<p className="text-xs text-muted-foreground">ID</p>
+												<p className="font-mono text-xs">{e.id}</p>
+											</div>
+											<div>
+												<p className="text-xs text-muted-foreground">Saldo</p>
+												<p className="font-medium">{formatCurrency(Number(e.saldo ?? 0))}</p>
+											</div>
+										</div>
+									</div>
+								))}
+							</div>
+						</>
 					)}
 				</div>
 			)}

@@ -431,11 +431,13 @@ export default function AlteracoesOrcamentariasPage() {
 			)}
 
 			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-				<DialogContent className="max-w-2xl">
+				<DialogContent className="w-[calc(100%-2rem)] sm:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
 					<DialogHeader>
-						<DialogTitle>Nova Alteração Orçamentária</DialogTitle>
+						<DialogTitle className="text-base sm:text-lg">Nova Alteração Orçamentária</DialogTitle>
 					</DialogHeader>
-					<AlteracaoForm alteracao={null} onClose={handleCloseDialog} />
+					<div className="overflow-y-auto flex-1">
+						<AlteracaoForm alteracao={null} onClose={handleCloseDialog} />
+					</div>
 				</DialogContent>
 			</Dialog>
 		</div>

@@ -249,7 +249,7 @@ export function AnexosModal({ open, onClose, solicitacao, onSuccess }: AnexosMod
 
 	return (
 		<Dialog open={open} onOpenChange={onClose}>
-			<DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+			<DialogContent className="w-[calc(100%-2rem)] sm:max-w-3xl max-h-[85vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle>Anexos da Solicitação {solicitacao?.numero}</DialogTitle>
 				</DialogHeader>

@@ -254,89 +254,145 @@ export default function PrestacaoContasPage() {
 	if (resultadoExportacao) {
 		return (
 			<div className="space-y-6">
-				<div className="flex items-center justify-between">
-					<PageHeader title="Exportador SIM-AM" description="Geração de Arquivos Concluída" />
-					<Button variant="outline" onClick={handleMinimizar} className="flex items-center gap-2">
-						<Minimize2 className="w-4 h-4" />
-						Minimizar
-					</Button>
-				</div>
+				<PageHeader
+					title="Exportador SIM-AM"
+					description="Geração de Arquivos Concluída"
+					action={
+						<Button variant="outline" onClick={handleMinimizar} className="w-full sm:w-auto">
+							<Minimize2 className="w-4 h-4 sm:mr-2" />
+							<span className="hidden sm:inline">Minimizar</span>
+						</Button>
+					}
+				/>
 
 				{/* Card de Sucesso */}
 				<Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
-					<div className="p-6">
-						<div className="flex items-center gap-3 mb-4">
-							<div className="p-3 bg-green-500 rounded-full">
-								<CheckCircle className="w-6 h-6 text-white" />
+					<div className="p-4 sm:p-6">
+						<div className="flex items-start gap-3 mb-4">
+							<div className="p-2 sm:p-3 bg-green-500 rounded-full flex-shrink-0">
+								<CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
 							</div>
-							<div>
-								<h3 className="font-semibold text-lg text-green-900 dark:text-green-100">
-									Arquivo ZIP: {resultadoExportacao.zipName}
+							<div className="flex-1 min-w-0">
+								<p className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-300 mb-1">
+									Arquivo ZIP
+								</p>
+								<h3 className="font-semibold text-sm sm:text-base text-green-900 dark:text-green-100 break-all overflow-hidden">
+									{resultadoExportacao.zipName}
 								</h3>
-								<p className="text-sm text-green-700 dark:text-green-300">Gerado com Sucesso</p>
+								<p className="text-xs text-green-700 dark:text-green-300 mt-1">✓ Gerado com Sucesso</p>
 							</div>
 						</div>
 
 						<Button
 							onClick={() => prestacaoContasService.downloadZip(resultadoExportacao.id)}
-							className="w-full md:w-auto">
+							className="w-full sm:w-auto">
 							<Download className="w-4 h-4 mr-2" />
 							Baixar Arquivo ZIP Completo
 						</Button>
 					</div>
 				</Card>
 
-				{/* Tabela de Arquivos Gerados */}
+				{/* Arquivos Gerados */}
 				<Card>
-					<div className="p-6">
-						<h3 className="font-semibold text-lg mb-4">Arquivos Gerados</h3>
+					<div className="p-4 sm:p-6">
+						<h3 className="font-semibold text-base sm:text-lg mb-4">Arquivos Gerados</h3>
 
-						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead>Arquivo</TableHead>
-									<TableHead>Status</TableHead>
-									<TableHead className="text-right">Qtde Registros</TableHead>
-									<TableHead className="text-right">Ações</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{resultadoExportacao.arquivos.map((arquivo) => (
-									<TableRow key={arquivo.id}>
-										<TableCell className="font-medium">{arquivo.nome}</TableCell>
-										<TableCell>
-											<div className="flex flex-col">
-												<Badge
-													variant={arquivo.status === 'gerado' ? 'default' : 'destructive'}
-													className="w-fit">
-													{arquivo.status === 'gerado' ? 'Gerado com sucesso' : 'Erro'}
-												</Badge>
-												<span className="text-xs text-gray-500 mt-1">
-													Gerado em {arquivo.geradoEm}
-												</span>
-											</div>
-										</TableCell>
-										<TableCell className="text-right">{arquivo.quantidadeRegistros}</TableCell>
-										<TableCell className="text-right">
-											<Button
-												size="sm"
-												variant="outline"
-												onClick={() =>
-													prestacaoContasService.downloadArquivo(
-														resultadoExportacao.id,
-														arquivo.id
-													)
-												}>
-												Baixar
-											</Button>
-										</TableCell>
+						{/* Tabela para Desktop */}
+						<div className="hidden sm:block overflow-x-auto">
+							<Table>
+								<TableHeader>
+									<TableRow>
+										<TableHead>Arquivo</TableHead>
+										<TableHead>Status</TableHead>
+										<TableHead className="text-right">Qtde Registros</TableHead>
+										<TableHead className="text-right">Ações</TableHead>
 									</TableRow>
-								))}
-							</TableBody>
-						</Table>
+								</TableHeader>
+								<TableBody>
+									{resultadoExportacao.arquivos.map((arquivo) => (
+										<TableRow key={arquivo.id}>
+											<TableCell className="font-medium text-sm">{arquivo.nome}</TableCell>
+											<TableCell>
+												<div className="flex flex-col gap-1">
+													<Badge
+														variant={
+															arquivo.status === 'gerado' ? 'default' : 'destructive'
+														}
+														className="w-fit text-xs">
+														{arquivo.status === 'gerado' ? 'Gerado com sucesso' : 'Erro'}
+													</Badge>
+													<span className="text-xs text-muted-foreground">
+														Gerado em {arquivo.geradoEm}
+													</span>
+												</div>
+											</TableCell>
+											<TableCell className="text-right text-sm">
+												{arquivo.quantidadeRegistros}
+											</TableCell>
+											<TableCell className="text-right">
+												<Button
+													size="sm"
+													variant="outline"
+													onClick={() =>
+														prestacaoContasService.downloadArquivo(
+															resultadoExportacao.id,
+															arquivo.id
+														)
+													}>
+													Baixar
+												</Button>
+											</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							</Table>
+						</div>
+
+						{/* Cards para Mobile */}
+						<div className="sm:hidden space-y-3">
+							{resultadoExportacao.arquivos.map((arquivo) => (
+								<div key={arquivo.id} className="border rounded-lg p-3 space-y-3">
+									<div className="flex items-start justify-between gap-2">
+										<div className="flex-1 min-w-0">
+											<p className="text-xs text-muted-foreground">Arquivo</p>
+											<p className="font-medium text-sm break-all">{arquivo.nome}</p>
+										</div>
+										<Badge
+											variant={arquivo.status === 'gerado' ? 'default' : 'destructive'}
+											className="text-xs flex-shrink-0">
+											{arquivo.status === 'gerado' ? 'Gerado' : 'Erro'}
+										</Badge>
+									</div>
+
+									<div className="grid grid-cols-2 gap-3 text-sm">
+										<div>
+											<p className="text-xs text-muted-foreground">Gerado em</p>
+											<p className="text-xs">{arquivo.geradoEm}</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Registros</p>
+											<p className="text-xs font-medium">{arquivo.quantidadeRegistros}</p>
+										</div>
+									</div>
+
+									<Button
+										size="sm"
+										variant="outline"
+										onClick={() =>
+											prestacaoContasService.downloadArquivo(resultadoExportacao.id, arquivo.id)
+										}
+										className="w-full text-xs">
+										<Download className="w-3 h-3 mr-2" />
+										Baixar Arquivo
+									</Button>
+								</div>
+							))}
+						</div>
 
 						<div className="flex justify-end mt-6 pt-4 border-t">
-							<Button onClick={handleNovaExportacao}>Nova Exportação</Button>
+							<Button onClick={handleNovaExportacao} className="w-full sm:w-auto">
+								Nova Exportação
+							</Button>
 						</div>
 					</div>
 				</Card>
@@ -349,20 +405,20 @@ export default function PrestacaoContasPage() {
 	// Formulário de exportação
 	return (
 		<div className="space-y-6">
-			<div className="flex items-center justify-between">
-				<PageHeader
-					title="Exportador SIM-AM"
-					description="Exportação de dados para o sistema SIM-AM/SIMAM do Tribunal de Contas"
-				/>
-				<Button
-					variant="outline"
-					onClick={handleMinimizar}
-					disabled={exportando}
-					className="flex items-center gap-2">
-					<Minimize2 className="w-4 h-4" />
-					Minimizar
-				</Button>
-			</div>
+			<PageHeader
+				title="Exportador SIM-AM"
+				description="Exportação de dados para o sistema SIM-AM/SIMAM do Tribunal de Contas"
+				action={
+					<Button
+						variant="outline"
+						onClick={handleMinimizar}
+						disabled={exportando}
+						className="w-full sm:w-auto">
+						<Minimize2 className="w-4 h-4 sm:mr-2" />
+						<span className="hidden sm:inline">Minimizar</span>
+					</Button>
+				}
+			/>
 
 			{temDadosRestaurados && (
 				<Alert>
@@ -372,12 +428,12 @@ export default function PrestacaoContasPage() {
 			)}
 
 			<Card>
-				<div className="p-6">
-					<h3 className="font-semibold text-lg mb-4">Nova Exportação</h3>
+				<div className="p-4 sm:p-6">
+					<h3 className="font-semibold text-base sm:text-lg mb-4">Nova Exportação</h3>
 
-					<form onSubmit={handleSubmit} className="space-y-6">
+					<form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
 						{/* Linha 1: Filtros Principais */}
-						<div className="grid grid-cols-3 gap-4">
+						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 							<div>
 								<Label htmlFor="ano">
 									Ano <span className="text-red-500">*</span>
@@ -443,7 +499,7 @@ export default function PrestacaoContasPage() {
 						<Separator />
 
 						{/* Linha 2: Tipo de Geração e Somente Ativos */}
-						<div className="grid grid-cols-2 gap-6">
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
 							<div>
 								<Label className="mb-3 block">
 									Tipo de Geração <span className="text-red-500">*</span>
@@ -496,17 +552,18 @@ export default function PrestacaoContasPage() {
 
 						{/* Tabela de Arquivos */}
 						<div>
-							<div className="flex items-center justify-between mb-4">
-								<Label className="text-base">
+							<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+								<Label className="text-sm sm:text-base">
 									Arquivos Disponíveis <span className="text-red-500">*</span>
 								</Label>
-								<div className="flex gap-2">
+								<div className="flex flex-wrap gap-2">
 									<Button
 										type="button"
 										variant="outline"
 										size="sm"
 										onClick={handleSelecionarTodos}
-										disabled={exportando || layoutsFiltrados.length === 0}>
+										disabled={exportando || layoutsFiltrados.length === 0}
+										className="flex-1 sm:flex-none text-xs sm:text-sm">
 										Selecionar Todos
 									</Button>
 									<Button
@@ -514,41 +571,59 @@ export default function PrestacaoContasPage() {
 										variant="outline"
 										size="sm"
 										onClick={handleDesmarcarTodos}
-										disabled={exportando || arquivosSelecionados.length === 0}>
+										disabled={exportando || arquivosSelecionados.length === 0}
+										className="flex-1 sm:flex-none text-xs sm:text-sm">
 										Desmarcar Todos
 									</Button>
 
 									<Dialog open={dialogOrdenacaoAberto} onOpenChange={setDialogOrdenacaoAberto}>
 										<DialogTrigger asChild>
-											<Button type="button" variant="outline" size="sm" disabled={exportando}>
-												<ListOrdered className="w-4 h-4 mr-2" />
-												Ordenar Geração
+											<Button
+												type="button"
+												variant="outline"
+												size="sm"
+												disabled={exportando}
+												className="flex-1 sm:flex-none text-xs sm:text-sm">
+												<ListOrdered className="w-4 h-4 sm:mr-2" />
+												<span className="hidden sm:inline">Ordenar Geração</span>
+												<span className="sm:hidden">Ordenar</span>
 											</Button>
 										</DialogTrigger>
-										<DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+										<DialogContent className="max-w-full sm:max-w-2xl max-h-[90vh] w-[calc(100%-2rem)] overflow-hidden flex flex-col">
 											<DialogHeader>
-												<DialogTitle>Ordenar Geração de Arquivos</DialogTitle>
+												<DialogTitle className="text-base sm:text-lg">
+													Ordenar Geração de Arquivos
+												</DialogTitle>
 											</DialogHeader>
 
-											<div className="space-y-2">
+											<div className="space-y-2 overflow-y-auto flex-1 pr-2">
 												{layouts.map((layout, index) => (
 													<div
 														key={layout.id}
-														className="flex items-center justify-between p-3 border rounded-lg">
-														<div className="flex items-center gap-3">
-															<Badge variant="outline">{layout.ordem}</Badge>
-															<span className="font-medium">{layout.nome}</span>
+														className="flex items-center justify-between gap-2 p-3 border rounded-lg">
+														<div className="flex items-center gap-2 flex-1 min-w-0">
+															<Badge variant="outline" className="text-xs flex-shrink-0">
+																{layout.ordem}
+															</Badge>
+															<span className="font-medium text-xs sm:text-sm truncate">
+																{layout.nome}
+															</span>
 															{!layout.ativo && (
-																<Badge variant="secondary">Inativo</Badge>
+																<Badge
+																	variant="secondary"
+																	className="text-xs flex-shrink-0">
+																	Inativo
+																</Badge>
 															)}
 														</div>
-														<div className="flex gap-2">
+														<div className="flex gap-1 flex-shrink-0">
 															<Button
 																type="button"
 																variant="ghost"
 																size="sm"
 																onClick={() => handleMoverLayoutAcima(index)}
-																disabled={index === 0}>
+																disabled={index === 0}
+																className="h-8 w-8 p-0">
 																<ArrowUp className="w-4 h-4" />
 															</Button>
 															<Button
@@ -556,7 +631,8 @@ export default function PrestacaoContasPage() {
 																variant="ghost"
 																size="sm"
 																onClick={() => handleMoverLayoutAbaixo(index)}
-																disabled={index === layouts.length - 1}>
+																disabled={index === layouts.length - 1}
+																className="h-8 w-8 p-0">
 																<ArrowDown className="w-4 h-4" />
 															</Button>
 														</div>
@@ -564,14 +640,18 @@ export default function PrestacaoContasPage() {
 												))}
 											</div>
 
-											<DialogFooter>
+											<DialogFooter className="flex-col-reverse sm:flex-row gap-2 sm:gap-0">
 												<Button
 													type="button"
 													variant="outline"
-													onClick={() => setDialogOrdenacaoAberto(false)}>
+													onClick={() => setDialogOrdenacaoAberto(false)}
+													className="w-full sm:w-auto">
 													Cancelar
 												</Button>
-												<Button type="button" onClick={handleSalvarOrdenacao}>
+												<Button
+													type="button"
+													onClick={handleSalvarOrdenacao}
+													className="w-full sm:w-auto">
 													Salvar Ordem
 												</Button>
 											</DialogFooter>
@@ -592,38 +672,46 @@ export default function PrestacaoContasPage() {
 									</AlertDescription>
 								</Alert>
 							) : (
-								<div className="overflow-x-auto">
+								<div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
 									<Table>
 										<TableHeader>
 											<TableRow>
-												<TableHead className="w-12">Selecionar</TableHead>
-												<TableHead>Arquivo</TableHead>
-												<TableHead className="hidden sm:table-cell">Última Geração</TableHead>
-												<TableHead className="text-center">Ordem</TableHead>
+												<TableHead className="w-10 sm:w-12">
+													<span className="sr-only sm:not-sr-only">Selecionar</span>
+												</TableHead>
+												<TableHead className="min-w-[200px]">Arquivo</TableHead>
+												<TableHead className="hidden sm:table-cell min-w-[140px]">
+													Última Geração
+												</TableHead>
+												<TableHead className="text-center w-16 sm:w-20">Ordem</TableHead>
 											</TableRow>
 										</TableHeader>
 										<TableBody>
 											{layoutsFiltrados.map((layout) => (
 												<TableRow key={layout.id}>
-													<TableCell>
+													<TableCell className="w-10 sm:w-12">
 														<Checkbox
 															checked={arquivosSelecionados.includes(layout.id)}
 															onCheckedChange={() => handleArquivoToggle(layout.id)}
 															disabled={exportando}
 														/>
 													</TableCell>
-													<TableCell className="font-medium">{layout.nome}</TableCell>
-													<TableCell className="hidden sm:table-cell">
+													<TableCell className="font-medium text-xs sm:text-sm">
+														{layout.nome}
+													</TableCell>
+													<TableCell className="hidden sm:table-cell text-xs sm:text-sm">
 														{layout.ultimaGeracao ? (
-															<span className="text-sm text-gray-600 dark:text-gray-400">
+															<span className="text-gray-600 dark:text-gray-400">
 																{layout.ultimaGeracao}
 															</span>
 														) : (
-															<span className="text-sm text-gray-400">Nunca gerado</span>
+															<span className="text-gray-400">Nunca gerado</span>
 														)}
 													</TableCell>
-													<TableCell className="text-center">
-														<Badge variant="outline">{layout.ordem}</Badge>
+													<TableCell className="text-center w-16 sm:w-20">
+														<Badge variant="outline" className="text-xs">
+															{layout.ordem}
+														</Badge>
 													</TableCell>
 												</TableRow>
 											))}
@@ -634,11 +722,16 @@ export default function PrestacaoContasPage() {
 						</div>
 
 						{/* Rodapé com botões */}
-						<div className="flex gap-3 justify-end pt-4 border-t">
-							<Button type="button" variant="outline" onClick={handleLimpar} disabled={exportando}>
+						<div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 sm:justify-end pt-4 border-t">
+							<Button
+								type="button"
+								variant="outline"
+								onClick={handleLimpar}
+								disabled={exportando}
+								className="w-full sm:w-auto">
 								Limpar
 							</Button>
-							<Button type="submit" disabled={exportando}>
+							<Button type="submit" disabled={exportando} className="w-full sm:w-auto">
 								{exportando ? (
 									<>
 										<Loader2 className="w-4 h-4 mr-2 animate-spin" />

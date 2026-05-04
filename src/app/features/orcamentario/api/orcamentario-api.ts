@@ -53,8 +53,10 @@ export const orcamentarioApi = {
 		if (data.arquivo) {
 			formData.append('arquivo', data.arquivo);
 		}
+		// Laravel method spoofing para PUT com FormData
+		formData.append('_method', 'PUT');
 
-		return await put<LeiAto>(API_ENDPOINTS.orcamentario.leisAtos.update(id), formData);
+		return await post<LeiAto>(API_ENDPOINTS.orcamentario.leisAtos.update(id), formData);
 	},
 
 	async deletarLeiAto(id: number): Promise<void> {
