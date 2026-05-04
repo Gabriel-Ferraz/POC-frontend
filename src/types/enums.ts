@@ -16,6 +16,17 @@ export enum StatusEmpenho {
 }
 
 export enum StatusSolicitacao {
+	// Fluxo natural (backend)
+	PENDENTE = 'pendente',
+	AGUARDANDO_APROVACAO_ANEXOS = 'aguardando_aprovacao_anexos',
+	ANEXOS_RECUSADOS = 'anexos_recusados',
+	AGUARDANDO_AUTORIZACAO_GESTOR = 'aguardando_autorizacao_gestor',
+	EM_LIQUIDACAO = 'em_liquidacao',
+	EM_ORDEM_PAGAMENTO = 'em_ordem_pagamento',
+	PAGAMENTO_EM_REMESSA = 'pagamento_em_remessa',
+	PAGAMENTO_REALIZADO = 'pagamento_realizado',
+	CANCELADA = 'cancelada',
+	// Statuses do admin (simplificados)
 	RASCUNHO = 'rascunho',
 	AGUARDANDO_APROVACAO = 'aguardando_aprovacao',
 	ANEXOS = 'anexos',
@@ -29,7 +40,6 @@ export enum StatusSolicitacao {
 	BORDERO = 'bordero',
 	REMESSA = 'remessa',
 	PAGAMENTO = 'pagamento',
-	PAGAMENTO_REALIZADO = 'pagamento_realizado',
 	CANCELADO = 'cancelado',
 }
 

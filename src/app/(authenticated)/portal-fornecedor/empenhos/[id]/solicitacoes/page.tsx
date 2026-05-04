@@ -100,14 +100,11 @@ export default function SolicitacoesEmpenhoPage() {
 							</TableHeader>
 							<TableBody>
 								{solicitacoesList.map((solicitacao) => {
-									const isPendente =
-										solicitacao.status === StatusSolicitacao.RASCUNHO ||
-										solicitacao.status === StatusSolicitacao.AGUARDANDO_APROVACAO;
+									const isPendente = solicitacao.status === StatusSolicitacao.PENDENTE;
 
-									const podeEditarAnexos =
-										isPendente || solicitacao.status === StatusSolicitacao.ANEXOS;
+									const podeEditarAnexos = isPendente;
 
-									const podeCancelar = isPendente || solicitacao.status === StatusSolicitacao.ANEXOS;
+									const podeCancelar = isPendente;
 
 									const docFiscal = [
 										(solicitacao as any).documento_fiscal_tipo,

@@ -27,6 +27,30 @@ const STATUS_CONFIG: Record<string, { color: string; label: string }> = {
 		color: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-muted dark:text-muted-foreground dark:border-border',
 		label: 'Rascunho',
 	},
+	aguardando_aprovacao_anexos: {
+		color: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800',
+		label: 'Aguardando Aprovação dos Anexos',
+	},
+	anexos_recusados: {
+		color: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800',
+		label: 'Anexos Recusados',
+	},
+	aguardando_autorizacao_gestor: {
+		color: 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800',
+		label: 'Aguardando Autorização do Gestor',
+	},
+	em_liquidacao: {
+		color: 'bg-pink-100 text-pink-800 border-pink-200 dark:bg-pink-900/30 dark:text-pink-300 dark:border-pink-800',
+		label: 'Em Liquidação',
+	},
+	em_ordem_pagamento: {
+		color: 'bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-800',
+		label: 'Em Ordem de Pagamento',
+	},
+	pagamento_em_remessa: {
+		color: 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800',
+		label: 'Pagamento em Remessa',
+	},
 	aguardando_aprovacao: {
 		color: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800',
 		label: 'Aguardando Aprovação',
