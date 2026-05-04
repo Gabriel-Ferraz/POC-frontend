@@ -18,9 +18,9 @@ interface ServiceCheck {
 
 const SERVICES: ServiceCheck[] = [
 	{
-		label: 'Backend PHP (Laravel + Swoole)',
+		label: 'Backend PHP (Laravel)',
 		url: '/api/version',
-		description: 'PHP 8.2 + Laravel 12 + Octane/Swoole',
+		description: 'PHP 8.2 + Laravel 12 — porta 3333',
 		linkLabel: 'GET /api/version',
 		linkHref: '/api/version',
 	},
@@ -37,13 +37,6 @@ const SERVICES: ServiceCheck[] = [
 		description: 'Oracle Database 23 Free — interface de administração',
 		linkLabel: '/adminer',
 		linkHref: 'http://localhost:8008/adminer',
-	},
-	{
-		label: 'Traefik Dashboard',
-		url: 'http://localhost:8080',
-		description: 'Proxy reverso / roteamento de containers',
-		linkLabel: 'localhost:8080',
-		linkHref: 'http://localhost:8080',
 	},
 ];
 
@@ -113,10 +106,10 @@ function DbCredentials() {
 
 	const creds = [
 		{ label: 'Sistema', value: 'Oracle Database 23 Free' },
-		{ label: 'Host', value: 'oracle (interno) / localhost:8008/adminer (web)' },
-		{ label: 'Banco', value: 'FREEPDB1' },
+		{ label: 'Servidor', value: '//oracle:1521/FREEPDB1' },
 		{ label: 'Usuário', value: 'poc_user' },
 		{ label: 'Senha', value: 'poc_pass' },
+		{ label: 'Banco', value: '(deixar em branco)' },
 		{ label: 'Senha SYS', value: 'oraclepass' },
 	];
 
@@ -165,7 +158,6 @@ const stack = {
 	],
 	backend: [
 		{ label: 'PHP 8.2 + Laravel 12', detail: 'Framework principal' },
-		{ label: 'Laravel Octane + Swoole', detail: 'Alta performance assíncrona' },
 		{ label: 'Laravel Sanctum', detail: 'Bearer Token auth' },
 		{ label: 'Oracle Database 23 Free', detail: 'Banco de dados relacional' },
 		{ label: 'Redis 7', detail: 'Cache e filas' },
@@ -190,7 +182,7 @@ const modulos = [
 
 const editalItems = [
 	{ req: 'SO Linux', impl: 'Docker Alpine/Slim Linux em todos os containers' },
-	{ req: 'PHP instalado e configurado', impl: 'PHP 8.2 + Octane/Swoole — porta 3333' },
+	{ req: 'PHP instalado e configurado', impl: 'PHP 8.2 + Laravel 12 — porta 3333' },
 	{ req: 'Tomcat instalado e configurado', impl: 'Apache Tomcat 9 — acessível em /tomcat' },
 	{ req: 'Servidor web', impl: 'Traefik v3 (proxy reverso) — porta 8008' },
 	{ req: 'GIT instalado', impl: 'Git disponível no container de desenvolvimento' },
@@ -486,23 +478,19 @@ export default function DemonstracaoTecnicaPage() {
 				{/* Conformidade com o Edital */}
 				<Card>
 					<CardHeader>
-						<CardTitle className="text-base sm:text-lg">
-							Conformidade com o Ambiente de Demonstração
-						</CardTitle>
+						<CardTitle>Conformidade com o Ambiente de Demonstração</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<p className="text-xs sm:text-sm text-muted-foreground mb-4 sm:mb-5">
+						<p className="text-sm text-muted-foreground mb-5">
 							Mapeamento dos requisitos do edital para a arquitetura implantada.
 						</p>
-						<div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 sm:gap-x-8 gap-y-3">
+						<div className="grid md:grid-cols-2 gap-x-8 gap-y-3">
 							{editalItems.map(({ req, impl }) => (
-								<div key={req} className="flex items-start gap-2 text-xs sm:text-sm">
+								<div key={req} className="flex items-start gap-2 text-sm">
 									<span className="text-green-600 dark:text-green-400 shrink-0 mt-0.5">✅</span>
-									<div className="min-w-0 flex-1">
-										<span className="font-medium break-words">{req}</span>
-										<p className="text-muted-foreground text-[10px] sm:text-xs mt-0.5 break-words">
-											{impl}
-										</p>
+									<div>
+										<span className="font-medium">{req}</span>
+										<p className="text-muted-foreground text-xs mt-0.5">{impl}</p>
 									</div>
 								</div>
 							))}
@@ -513,18 +501,16 @@ export default function DemonstracaoTecnicaPage() {
 				{/* Módulos */}
 				<Card>
 					<CardHeader>
-						<CardTitle className="text-base sm:text-lg">Módulos Implementados</CardTitle>
+						<CardTitle>Módulos Implementados</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 sm:gap-x-8 gap-y-2.5">
+						<div className="grid sm:grid-cols-2 gap-x-8 gap-y-2.5">
 							{modulos.map(({ label, detalhe }) => (
 								<div key={label} className="flex items-start gap-2">
 									<span className="text-green-600 dark:text-green-400 shrink-0 mt-0.5">✅</span>
-									<div className="min-w-0 flex-1">
-										<span className="text-xs sm:text-sm font-medium break-words">{label}</span>
-										<p className="text-[10px] sm:text-xs text-muted-foreground break-words">
-											{detalhe}
-										</p>
+									<div>
+										<span className="text-sm font-medium">{label}</span>
+										<p className="text-xs text-muted-foreground">{detalhe}</p>
 									</div>
 								</div>
 							))}
@@ -535,12 +521,10 @@ export default function DemonstracaoTecnicaPage() {
 				{/* Arquitetura MVC */}
 				<Card>
 					<CardHeader>
-						<CardTitle className="text-base sm:text-lg">
-							Arquitetura MVC — Código Real da Aplicação
-						</CardTitle>
+						<CardTitle>Arquitetura MVC — Código Real da Aplicação</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<p className="text-xs sm:text-sm text-muted-foreground mb-4">
+						<p className="text-sm text-muted-foreground mb-4">
 							Clique em cada camada para ver o trecho real do código fonte. O path indica onde encontrar o
 							arquivo no projeto.
 						</p>
